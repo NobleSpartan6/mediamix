@@ -1,0 +1,122 @@
+# Project : Motif — Local-First ✕ Hybrid AI Video Editor
+
+## V0.1 North-Star  
+Import a 4 K H.264/265 file from an SD card → detect beats on one audio track → auto-slice video at beats → drag/trim clips ≥ 60 fps → export a 30 s 1080 p MP4 — all offline, no login.  
+Runs in Chrome 123 + as a PWA **and** (later) the same React bundle inside a Tauri desktop shell.
+
+### Outcome KPIs  
+* **Export** : 60 s 4 K → 1080 p MP4 ≤ 2 × realtime on Apple-Silicon, ≤ 3 × realtime on Intel i7.   
+* **Interaction** : 4-layer timeline drag ≥ 50 fps in Chrome FPS meter.   
+* **Memory** : peak RAM ≤ 1.2 GB during 30 s export (DevTools Allocation).  
+* **Accessibility** : all interactive controls ≥ 4.5 : 1 contrast.   
+
+---
+
+## Design Language (tokens in `tailwind.config` → `:root`)  
+
+| Token | Value | Source | Why |
+|-------|-------|--------|-----|
+| `--panel-bg` | `#101012` | Tailwind dark-UI guide  | Preferred creator dark canvas. |
+| `--accent` | `#4E8CFF` | CapCut colour study  | Energetic focus colour; 4.5 : 1 contrast. |
+| `--clip-video` | `rgba(30,144,255,.5)` | — | Distinct video-track tint. |
+| `--clip-audio` | `rgba(255,64,128,.5)` | — | Audio waveform tint. |
+| Typeface | Inter 14/400, 11/500 labels, 24/600 headings | Google UI spec  | Crisp on 4 K. |
+| Motion | 150 ms fade; vsync scrubs | react-moveable perf thread  | Keeps ≥ 60 fps. |
+
+Keyboard parity: `I/O`, `C`, `Space` (Premiere defaults) . Tooltips = CapCut minimal style .
+
+---
+
+## Tech Guard-Rails  
+
+| Layer | Choice | Evidence |
+|-------|--------|----------|
+| UI Runtime | React 18 LTS + Vite + TypeScript | Widest lib support, proven stable  |
+| Styling / Components | Tailwind + Radix + shadcn/ui (MIT) | Copy-owned, licence-safe  |
+| State | Zustand + `yjsStore` stub | CRDT-ready collab  |
+| Drag/Resize | react-moveable (120 Hz) | Community perf tests  |
+| Decode | WebCodecs H.264/265 (`isTypeSupported`) | HW decode API  |
+| Encode/Proxy | ffmpeg.wasm threads + SIMD | 2.3 × boost (Clipchamp)  |
+| File I/O | File-System-Access API | Streams multi-GB files  |
+| Hybrid Desktop | Tauri shell (~58 % less RAM) | Benchmarked vs Electron  |
+| GPU Path | WebGL baseline; WebGPU flag (2025 rollout) | Roadmap guide  |
+| AI Segmentation | MediaPipe Selfie → SAM-2 flag | Docs & model sizes  |
+
+---
+
+## MVP v0.1 "Beat-Sync Alpha" — 6 weeks @ ≈ 12 h/w  
+
+1. **Import** 4 K video + audio.  
+2. **Beat Detect** (Web Audio FFT worker) → markers   
+3. **Auto-Slice** timeline; drag/trim ≥ 60 fps.  
+4. **Export** 30 s 1080 p MP4 (≤ KPIs).  
+5. **AI Macro** `cut this to the beat` triggers 1-4.
+
+**Acceptance demo:** 60 s 4 K clip → MP4 within KPI; FPS ≥ 50.
+
+---
+
+## Future-Flag Scaffolding (create stub files now)
+
+| Flag (env) | Stub Path | Unlocks | Source |
+|------------|-----------|---------|--------|
+| `ProxyWorker` | `workers/proxy.ts` | > 10 min export; ProRes fallback | WebCodecs gap  |
+| `SegmentEncoder` | `export/segment.ts` | Segment encode + concat | ffmpeg concat pattern  |
+| `GPUEffectPipeline` | `gpu/registerShader.ts` | LUTs / GL-Transitions  | WebGPU future  |
+| `SegmentationModule` | `ai/segment.ts` | BG removal (Selfie / SAM-2) | MediaPipe  |
+| `CollabProvider` | `state/yjsStore.ts` | Real-time editing | Yjs repo  |
+| `DesktopAdapter` | `lib/fs.ts` | Swap FS to Tauri Rust | Tauri bench  |
+| `CacheLayer` | `lib/cache.ts` | OPFS / IndexedDB cache | Quota caveat 2 GB/origin  |
+
+### CI Hooks  
+* `npm run ci:proxy` – flag ProxyWorker, assert proxy file exists.  
+* `npm run ci:gpu` – load GPUEffectPipeline, pixel hash snapshot.  
+* `npm run ci:desktop` – run Playwright smoke inside Tauri Runner.
+
+---
+
+## Development Roadmap (scope only)
+
+| Phase | Scope |
+|-------|-------|
+| **0 – Scaffolding** | Vite, ESLint, tokens, CI, all stub flags. |
+| **1 – Beat-Sync Alpha** | Import → Beat detect → Timeline → 30 s export → AI macro. |
+| **2 – Proxy + 10-min Export** | Enable ProxyWorker + SegmentEncoder; length slider; OPFS tuning. |
+| **3 – GPU Effects + Color** | GPUEffectPipeline, LUT shader, GL-Transitions; WebGPU flag. |
+| **4 – Desktop (Tauri)** | Switch DesktopAdapter; embed native FFmpeg CLI; RAM test. |
+| **5 – Real-Time Collaboration** | Replace Zustand slice with CollabProvider; WebRTC P2P provider. |
+
+---
+
+## Logical Dependency Chain  
+
+`Import → BeatDetect → Slice → TimelineUI → Export`  
+Future flags layer independently (e.g., ProxyWorker → Export; GPU → Preview).
+
+---
+
+## Risks & Mitigations  
+
+| Risk | Mitigation |
+|------|------------|
+| WebCodecs unsupported codec | ProxyWorker auto-transcode to H.264. |
+| ffmpeg.wasm encode > KPIs | SegmentEncoder + concat; desktop native FFmpeg. |
+| GPU perf variance | WebGL baseline; WebGPU behind feature flag. |
+| OPFS / IndexedDB quota | CacheLayer eviction once > 1 GB. |
+
+---
+
+## Deliverables for Task-Master Cycle  
+
+1. **Task graph** ≤ 1-day slices, each with acceptance test & est hours; critical-path flagged.  
+2. **CI**: ESLint, `tsc --noEmit`, Vitest, Playwright smoke (import → export).  
+3. **demo.sh**: ingest sample 4 K, auto-beat cut, export MP4.
+
+## Context for Claude  
+Act as staff-level frontend/video engineer mentoring a solo founder. Repo blank; Task-Master CLI installed; API keys via `.env`.
+
+<!-- Milestones for Task-Master -->
+<!-- M2 Proxy + 10min -->
+<!-- M3 GPU Shader + Color -->
+<!-- M4 Tauri Desktop -->
+<!-- M5 Collab --> 
