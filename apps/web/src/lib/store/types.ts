@@ -8,6 +8,16 @@ export type FileInfo = {
   videoCodec: string | null
   audioCodec: string | null
   fileHandle: FileSystemFileHandle | null
+  /** Frames per second. Use integer or fractional value when available. */
+  frameRate: number | null
+  /** Audio sample rate (Hz) when available */
+  sampleRate: number | null
+  /** Number of audio channels (1 = mono, 2 = stereo, etc.) */
+  channelCount: number | null
+  /** Browser support for the detected video codec (true=supported, false=unsupported, null=unknown) */
+  videoSupported: boolean | null
+  /** Browser support for the detected audio codec (true=supported, false=unsupported, null=unknown) */
+  audioSupported: boolean | null
 }
 
 export type BeatMarker = {
@@ -33,6 +43,16 @@ export type TimelineData = {
   duration: number // In seconds
 }
 
+// Possible stages for the beat-detection pipeline
+export type BeatDetectionStage = 'idle' | 'extractAudio' | 'detectBeats'
+
+export type BeatDetectionProgress = {
+  /** Current progress value from 0 to 1 */
+  beatDetectionProgress: number
+  /** Current stage of the beat-detection pipeline */
+  beatDetectionStage: BeatDetectionStage
+}
+
 // Main store state type
 export interface MotifState {
   // File section
@@ -44,6 +64,11 @@ export interface MotifState {
   beatMarkers: BeatMarker[]
   isBeatDetectionRunning: boolean
   beatDetectionError: string | null
+
+  /** Beat-detection progress (0-1) */
+  beatDetectionProgress: number
+  /** Pipeline stage */
+  beatDetectionStage: BeatDetectionStage
 
   // Timeline section
   timeline: TimelineData
@@ -64,4 +89,14 @@ export interface MotifState {
   setPlayheadPosition: (position: number) => void
   setZoom: (zoom: number) => void
   setExportStatus: (isExporting: boolean, progress?: number, error?: string | null) => void
+  setIsFileLoading: (loading: boolean) => void
+  setFileError: (error: string | null) => void
+  /** Toggle beat detection running flag */
+  setIsBeatDetectionRunning: (running: boolean) => void
+  /** Set error message (or clear) for beat detection */
+  setBeatDetectionError: (error: string | null) => void
+  /** Update beat-detection progress value (0-1) */
+  setBeatDetectionProgress: (progress: number) => void
+  /** Update beat-detection stage */
+  setBeatDetectionStage: (stage: BeatDetectionStage) => void
 } 

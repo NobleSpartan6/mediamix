@@ -1,91 +1,75 @@
 {
   "meta": {
-    "generatedAt": "2025-05-09T15:05:42.740Z",
-    "tasksAnalyzed": 10,
+    "generatedAt": "2025-05-11T10:47:00.813Z",
+    "tasksAnalyzed": 8,
     "thresholdScore": 5,
     "projectName": "Taskmaster",
-    "usedResearch": false
+    "usedResearch": true
   },
   "complexityAnalysis": [
-    {
-      "taskId": 1,
-      "taskTitle": "Project Setup: Vite, React, TypeScript, Tailwind, Radix, shadcn/ui",
-      "complexityScore": 6,
-      "recommendedSubtasks": 4,
-      "expansionPrompt": "The current subtasks are well-defined. For further granularity, consider if 'Global CSS (Inter typeface, fade motion)' needs to be a distinct step from 'Tailwind CSS with Design Tokens', or if the Tailwind configuration subtask can fully encompass these global style definitions. Also, ensure the test strategy for each subtask is clear.",
-      "reasoning": "The task involves integrating several core technologies with specific configurations (design tokens, fonts, UI libraries). The existing 4 subtasks effectively break down the setup process into manageable, distinct configuration areas."
-    },
-    {
-      "taskId": 2,
-      "taskTitle": "State Management (Zustand) & Future-Flag Scaffolding",
-      "complexityScore": 4,
-      "recommendedSubtasks": 3,
-      "expansionPrompt": "The current subtasks are appropriate. For the 'Install and Configure Zustand Store' subtask, ensure the initial schema for 'imported file info, beat markers, timeline data' is clearly defined. For 'Create Stub Files', ensure all listed files (`workers/proxy.ts`, `export/segment.ts`, etc.) are covered.",
-      "reasoning": "This task involves setting up a lightweight state management library (Zustand) and creating placeholder files, which are relatively low-complexity activities. The existing 3 subtasks adequately cover these aspects."
-    },
     {
       "taskId": 3,
       "taskTitle": "Implement Video File Import (4K H.264/265)",
       "complexityScore": 7,
-      "recommendedSubtasks": 5,
-      "expansionPrompt": "The existing 5 subtasks are comprehensive. For 'Implement H.264/H.265 Codec Support Check', ensure the subtask details include researching and listing the specific codec strings (e.g., 'avc1.42E01E') to be tested for both H.264 and H.265, and how to derive these from a file if possible, or common profiles to check. For 'Robust Error Handling', list specific error scenarios to cover (API unavailable, file type mismatch, codec unsupported, user cancellation).",
-      "reasoning": "This task involves modern browser APIs (File System Access, WebCodecs) which can have nuances in implementation and cross-browser behavior. The 5 existing subtasks thoroughly cover UI, data handling, codec checking, error management, and testing."
+      "recommendedSubtasks": 0,
+      "expansionPrompt": "No further expansion needed as existing subtasks are comprehensive and complete. If new import-related features arise (e.g., cloud import, advanced metadata), they would warrant new subtasks.",
+      "reasoning": "The task involves multiple modern browser APIs (File System Access, WebCodecs) and state management, requiring careful error handling and testing. The existing 5 subtasks thoroughly cover these aspects and are marked as complete, indicating the initial complexity was well-managed."
     },
     {
       "taskId": 4,
       "taskTitle": "Implement Beat Detection on Audio Track",
       "complexityScore": 9,
-      "recommendedSubtasks": 7,
-      "expansionPrompt": "The 7 subtasks are well-structured. For 'Implement Audio Track Extraction', detail the decision criteria for using WebCodecs vs. ffmpeg.wasm. For 'Design and Implement Beat Detection Algorithm', specify initial algorithm approaches to research (e.g., energy-based, spectral flux) and parameters for `AnalyserNode`. For 'Develop Comprehensive Beat Detection Tests', list types of audio samples to use (e.g., clear rhythm, complex rhythm, no rhythm, different genres).",
-      "reasoning": "This task is highly complex, involving audio demuxing (potentially with ffmpeg.wasm), Web Worker implementation, advanced Web Audio API usage, and the design of a non-trivial beat detection algorithm. The 7 existing subtasks provide a good breakdown of these challenging components."
+      "recommendedSubtasks": 2,
+      "expansionPrompt": "Further break down 'Design and Implement Beat Detection Algorithm' into: 1. Research and select beat detection techniques, 2. Implement prototype algorithm, 3. Tune algorithm parameters and evaluate accuracy. Detail 'Implement Audio Track Extraction' with sub-steps for `ffmpeg.wasm` integration if chosen, focusing on efficient demuxing and handling various audio formats.",
+      "reasoning": "Involves complex audio processing (demuxing, FFT, custom algorithm design), Web Workers for concurrency, and potentially `ffmpeg.wasm`. The core algorithm design and audio extraction are significant efforts that would benefit from more detailed sub-tasking for better tracking and management."
     },
     {
       "taskId": 5,
       "taskTitle": "Develop Timeline UI with Auto-Slicing at Beats",
       "complexityScore": 8,
-      "recommendedSubtasks": 7,
-      "expansionPrompt": "The 7 subtasks are well-defined. For 'Integrate `react-moveable`', detail the specific `react-moveable` props/events to be used (e.g., `draggable`, `resizable`, `onDrag`, `onResize`). For 'Implement Initial Keyboard Shortcuts', clarify if these are global or context-specific to the timeline. For 'Conduct Initial Performance Testing', specify metrics beyond FPS (e.g., rendering time for N clips).",
-      "reasoning": "Developing a performant and interactive timeline with `react-moveable`, auto-slicing, keyboard controls, and styling is a significant UI engineering challenge. The 7 existing subtasks effectively break this down."
+      "recommendedSubtasks": 2,
+      "expansionPrompt": "Detail the state management strategy for selected clips and playhead position to support keyboard shortcuts (I, O). Break down 'Conduct Initial Performance Testing and Optimization' into specific interaction profiling (e.g., drag, trim, zoom) and targeted optimization steps for `react-moveable` and React rendering to meet FPS goals.",
+      "reasoning": "Integrating `react-moveable` for complex interactions (drag, trim) while maintaining high performance (≥50-60fps) is challenging. State management for keyboard shortcuts, auto-slicing logic, and ensuring smooth UI responsiveness add significant complexity. Performance aspects and detailed shortcut interactions warrant further breakdown."
     },
     {
       "taskId": 6,
       "taskTitle": "Implement Video Export (30s 1080p MP4)",
-      "complexityScore": 9,
-      "recommendedSubtasks": 5,
-      "expansionPrompt": "Break this task into subtasks covering: 1. `ffmpeg.wasm` setup (threads, SIMD, worker). 2. Timeline-to-`ffmpeg`-command generation logic (handling clip concatenation, scaling, 30s limit). 3. `ffmpeg.wasm` execution, progress parsing, and output file handling. 4. Initial performance/memory testing. 5. Dedicated optimization phase for KPIs. For subtask 2, detail how to handle multiple clips (e.g., `concat` filter vs. protocol, temporary files).",
-      "reasoning": "This task is highly complex due to `ffmpeg.wasm` (with threads/SIMD), dynamic `ffmpeg` command generation from timeline data, off-main-thread processing, progress reporting, and stringent performance/memory KPIs. Breaking it down is crucial."
+      "complexityScore": 10,
+      "recommendedSubtasks": 3,
+      "expansionPrompt": "Elaborate on 'Develop Timeline-to-FFmpeg Command Generation Logic' by creating subtasks for: 1. Handling multi-clip concatenation (filter vs. protocol), 2. Dynamic scaling filter application, 3. Precise 30-second output trimming logic. Further detail 'Dedicated Optimization Phase for KPIs' with subtasks for specific KPI targets (speed, memory) and methods (e.g., command tuning, memory profiling, worker data transfer optimization).",
+      "reasoning": "`ffmpeg.wasm` integration with threads/SIMD, complex dynamic `ffmpeg` command generation (concatenation, scaling, trimming from timeline state), and meeting strict performance/memory KPIs make this task exceptionally complex. The command generation and optimization phases are substantial and require finer-grained subtasks."
     },
     {
       "taskId": 7,
       "taskTitle": "Implement \"Cut to the Beat\" AI Macro",
-      "complexityScore": 5,
-      "recommendedSubtasks": 5,
-      "expansionPrompt": "The 5 subtasks are appropriate. For 'Orchestrate Beat Detection Service Call', clarify if it should re-run detection if beats already exist or use existing ones. For 'Implement User Feedback System', specify the types of feedback (e.g., modal spinner, toast notifications for success/error) and at which stages of the macro they should appear.",
-      "reasoning": "This task involves orchestrating previously developed features (import, beat detection, auto-slicing). The complexity lies in the coordination and user feedback rather than new algorithmic development. The 5 existing subtasks cover these aspects well."
+      "complexityScore": 6,
+      "recommendedSubtasks": 1,
+      "expansionPrompt": "Define a comprehensive error handling strategy for each step of the macro (video check, beat detection initiation, auto-slicing trigger). Specify how errors are gracefully communicated to the user and how the system recovers or guides the user. Detail the UI/UX for prompting video import if none is loaded when the macro is triggered.",
+      "reasoning": "This task orchestrates several other complex features. While the individual steps are covered by existing subtasks, ensuring smooth end-to-end flow, robust error handling across the sequence, managing intermediate states, and providing clear user feedback for a multi-stage process adds moderate complexity. Focus on the orchestration and UX aspects."
     },
     {
       "taskId": 8,
       "taskTitle": "Setup Basic CI Pipeline and Accessibility Contrast Check",
       "complexityScore": 4,
-      "recommendedSubtasks": 5,
-      "expansionPrompt": "The 5 subtasks are well-defined. For 'Create CI Workflow File', specify the triggers (e.g., push to `main`, PRs to `main`). For 'Define & Document Manual Accessibility Contrast Check Process', list specific tools (e.g., Chrome DevTools, axe DevTools extension) to be used for the audit and the target WCAG level (AA 4.5:1).",
-      "reasoning": "Setting up a basic CI pipeline involves standard steps but requires familiarity with CI tooling. The manual accessibility check is procedural. The 5 existing subtasks provide a clear path for implementation."
+      "recommendedSubtasks": 0,
+      "expansionPrompt": "No further expansion needed as existing subtasks are specific and cover the scope well. Consider adding a future subtask for automating parts of the accessibility contrast check using tools like `axe-core` within the CI pipeline, if feasible.",
+      "reasoning": "Involves standard CI setup (lint, type check, tests) and defining/performing a manual accessibility audit. The existing subtasks are granular and cover these aspects well. The complexity is mainly in the initial setup, configuration, and documentation of the manual process."
     },
     {
       "taskId": 9,
-      "taskTitle": "Performance Profiling & Optimization for KPIs",
-      "complexityScore": 9,
-      "recommendedSubtasks": 7,
-      "expansionPrompt": "The 7 subtasks are comprehensive. For each 'Define ... Test Scenarios & Methodology' subtask (1, 3, 5), ensure it includes specifying target hardware/software configurations for testing. For each 'Profile & Optimize...' subtask (2, 4, 6), suggest initial areas or hypotheses to investigate based on the feature's implementation (e.g., for export: ffmpeg command efficiency, data copying; for timeline: React component memoization, event handling).",
-      "reasoning": "This task is inherently complex as it involves deep analysis, iterative optimization, and specialized tooling to meet stringent performance KPIs across different application aspects (export, UI interaction, memory). The 7 existing subtasks provide a structured approach to this demanding work."
+      "title": "Performance Profiling & Optimization for KPIs",
+      "complexityScore": 10,
+      "recommendedSubtasks": 3,
+      "expansionPrompt": "For each primary KPI (Export Time, Interaction FPS, Memory Usage), break down its respective 'Profile & Optimize' subtask. For Export Time: 1. Profile ffmpeg.wasm command execution, 2. Optimize data transfer to/from worker and FS. For Interaction FPS: 1. Profile React component rendering on complex timelines, 2. Optimize `react-moveable` event handling and updates. For Memory Usage: 1. Profile ArrayBuffer management during export, 2. Investigate and fix potential memory leaks in wasm/JS bridge.",
+      "reasoning": "This task is highly complex due to the stringent, multi-faceted performance KPIs requiring deep profiling and optimization across different parts of the application (ffmpeg.wasm, React UI, Web Workers). Each KPI optimization is a significant effort involving specialized tools and techniques, warranting more granular subtasks for focused work."
     },
     {
       "taskId": 10,
       "taskTitle": "Implement Keyboard Parity and Tooltips",
       "complexityScore": 5,
-      "recommendedSubtasks": 7,
-      "expansionPrompt": "The 7 subtasks are well-defined. For subtasks 1-4 (keyboard shortcuts), specify whether these shortcuts should be global or context-aware (e.g., active only when timeline has focus). For subtask 6 ('Apply and Style Tooltips'), list key UI elements that must have tooltips and provide a visual reference or more detailed description for 'CapCut minimal style'.",
-      "reasoning": "Implementing robust keyboard shortcuts requires careful event handling and state integration. Tooltip integration is simpler with a library but requires attention to styling and coverage. The 7 existing subtasks break this down effectively, especially by separating each shortcut."
+      "recommendedSubtasks": 1,
+      "expansionPrompt": "Detail the state management requirements for 'selected clip' and 'playhead position' to ensure robust interaction with I/O/C keyboard shortcuts. Specify fallback behavior or clear user feedback for conceptual shortcuts (C for cut, Space for play/pause) until their full functionality is implemented, ensuring users understand their current limitations.",
+      "reasoning": "Implementing robust keyboard shortcuts requires careful state management (selected items, playhead context) and event handling. While tooltip integration is simpler, ensuring consistency and the specified style across many elements takes effort. The 'conceptual' nature of some shortcuts requires clear planning for current stubs and future integration."
     }
   ]
 }

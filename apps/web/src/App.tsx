@@ -1,61 +1,64 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { Button } from './components/ui/Button'
+import VideoImportButton from './features/import/VideoImportButton'
+import FileInfoCard from './features/import/FileInfoCard'
+import BeatMarkerBar from './features/timeline/BeatMarkerBar'
+import { Timeline } from './features/timeline/components/Timeline'
 import './App.css'
+import { useTimelineStore } from './state/timelineStore'
 
 function App() {
-  const [isHovered, setIsHovered] = useState(false)
+  // Demo beats & clips for showcasing the timeline MVP
+  const clips = useTimelineStore((s) => s.clips)
+  const addClip = useTimelineStore((s) => s.addClip)
+  const beats = useTimelineStore((s) => s.beats)
+  const setBeats = useTimelineStore((s) => s.setBeats)
+
+  // Populate demo data once on mount if store is empty
+  useEffect(() => {
+    if (clips.length === 0) {
+      addClip({ start: 0, end: 5, lane: 0 })
+      addClip({ start: 6, end: 12, lane: 1 })
+    }
+
+    if (beats.length === 0) {
+      // simple 1-second beat grid for demo purposes
+      const demoBeats = Array.from({ length: 21 }, (_, i) => i) // 0s → 20s
+      setBeats(demoBeats)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
-    <div className="min-h-screen bg-panel-bg text-white flex flex-col items-center justify-center p-10 font-sans">
-      <header className="mb-12 text-center">
-        <h1 className="text-accent text-ui-heading font-ui-semibold mb-4">
-          Motif
-        </h1>
-        <p className="text-ui-body font-ui-normal text-gray-400">
-          Local-First ✕ Hybrid AI Video Editor
-        </p>
+    <div className="min-h-screen bg-panel-bg text-white flex flex-col p-6 font-sans">
+      {/* Header */}
+      <header className="mb-6 text-center">
+        <h1 className="text-accent text-ui-heading font-ui-semibold mb-1">Motif — Timeline MVP</h1>
+        <p className="text-ui-body font-ui-normal text-gray-400">Local-First ✕ Hybrid AI Video Editor</p>
       </header>
 
-      <main className="w-full max-w-2xl space-y-8">
-        <section>
-          <h2 className="text-ui-body font-ui-medium text-gray-300 mb-3">Design Token Showcase:</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 bg-gray-800 rounded-lg">
-              <p className="text-ui-label font-ui-medium text-accent mb-1">Label Text (11px, Medium)</p>
-              <p className="text-ui-body font-ui-normal">Body Text (14px, Normal)</p>
-              <p className="text-ui-heading font-ui-semibold mt-2">Heading Text (24px, Semibold)</p>
-            </div>
-            <div 
-              className={`p-4 bg-gray-800 rounded-lg transition-all duration-150 ${isHovered ? 'ring-2 ring-accent' : 'ring-transparent'}`}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-            >
-              <p className="text-ui-label font-ui-medium text-accent mb-1">Transition Test (150ms)</p>
-              <p className="text-ui-body font-ui-normal">Hover over this box to see the accent ring.</p>
-            </div>
+      {/* Main content */}
+      <main className="flex flex-col gap-6 w-full max-w-5xl mx-auto">
+        {/* Import / File details */}
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 space-y-4">
+            <VideoImportButton />
+            <FileInfoCard />
+            <BeatMarkerBar />
           </div>
-          <div className="mt-4">
-            <Button variant="default">Shadcn Sample Button</Button>
+          <div className="hidden md:block w-px bg-gray-700/40" />
+          <div className="md:w-64 lg:w-80 self-start">
+            <Button className="w-full" variant="default">
+              Export (stub)
+            </Button>
           </div>
-        </section>
+        </div>
 
-        <section>
-          <h2 className="text-ui-body font-ui-medium text-gray-300 mb-3">Clip Color Placeholders:</h2>
-          <div className="flex space-x-4">
-            <div className="w-1/2 h-20 bg-clip-video rounded-md flex items-center justify-center">
-              <span className="text-ui-label font-ui-medium text-white/80">Video Clip Area</span>
-            </div>
-            <div className="w-1/2 h-20 bg-clip-audio rounded-md flex items-center justify-center">
-              <span className="text-ui-label font-ui-medium text-white/80">Audio Clip Area</span>
-            </div>
-          </div>
+        {/* Timeline */}
+        <section className="bg-gray-800/40 rounded-lg p-4">
+          <h2 className="text-ui-body font-ui-medium text-gray-300 mb-2">Timeline</h2>
+          <Timeline pixelsPerSecond={120} />
         </section>
-
-        <footer className="mt-12 text-center">
-          <p className="text-ui-label font-ui-medium text-gray-500">
-            Testing Tailwind CSS granular tokens for Motif.
-          </p>
-        </footer>
       </main>
     </div>
   )

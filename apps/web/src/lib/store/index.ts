@@ -12,7 +12,12 @@ const useMotifStore = create<MotifState>((set) => ({
     height: null,
     videoCodec: null,
     audioCodec: null,
-    fileHandle: null
+    fileHandle: null,
+    frameRate: null,
+    sampleRate: null,
+    channelCount: null,
+    videoSupported: null,
+    audioSupported: null
   },
   isFileLoading: false,
   fileError: null,
@@ -20,6 +25,8 @@ const useMotifStore = create<MotifState>((set) => ({
   beatMarkers: [],
   isBeatDetectionRunning: false,
   beatDetectionError: null,
+  beatDetectionProgress: 0,
+  beatDetectionStage: 'idle',
 
   timeline: {
     clips: [],
@@ -44,7 +51,12 @@ const useMotifStore = create<MotifState>((set) => ({
       height: null,
       videoCodec: null,
       audioCodec: null,
-      fileHandle: null
+      fileHandle: null,
+      frameRate: null,
+      sampleRate: null,
+      channelCount: null,
+      videoSupported: null,
+      audioSupported: null
     },
     beatMarkers: [],
     timeline: {
@@ -61,6 +73,14 @@ const useMotifStore = create<MotifState>((set) => ({
 
   setFileInfo: (info: Partial<FileInfo>) => set((state) => ({
     fileInfo: { ...state.fileInfo, ...info }
+  })),
+
+  setIsFileLoading: (loading: boolean) => set(() => ({
+    isFileLoading: loading
+  })),
+
+  setFileError: (error: string | null) => set(() => ({
+    fileError: error
   })),
 
   setBeatMarkers: (markers: BeatMarker[]) => set(() => ({
@@ -115,7 +135,23 @@ const useMotifStore = create<MotifState>((set) => ({
     isExporting,
     exportProgress: progress,
     exportError: error
-  }))
+  })),
+
+  setIsBeatDetectionRunning: (running: boolean) => set(() => ({
+    isBeatDetectionRunning: running,
+  })),
+
+  setBeatDetectionError: (error: string | null) => set(() => ({
+    beatDetectionError: error,
+  })),
+
+  setBeatDetectionProgress: (progress: number) => set(() => ({
+    beatDetectionProgress: progress,
+  })),
+
+  setBeatDetectionStage: (stage: 'idle' | 'extractAudio' | 'detectBeats') => set(() => ({
+    beatDetectionStage: stage,
+  })),
 }))
 
 export default useMotifStore 

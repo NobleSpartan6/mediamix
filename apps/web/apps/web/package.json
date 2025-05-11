@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@ffmpeg/types": "^0.12.4"
+  }
+}
