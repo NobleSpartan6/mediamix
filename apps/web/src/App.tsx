@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Button } from './components/ui/Button'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
@@ -34,6 +35,9 @@ function App() {
               <p className="text-ui-label font-ui-medium text-accent mb-1">Transition Test (150ms)</p>
               <p className="text-ui-body font-ui-normal">Hover over this box to see the accent ring.</p>
             </div>
+          </div>
+          <div className="mt-4">
+            <Button variant="default">Shadcn Sample Button</Button>
           </div>
         </section>
 

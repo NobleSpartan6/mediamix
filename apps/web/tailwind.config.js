@@ -1,35 +1,33 @@
 /** @type {import('tailwindcss').Config} */
+import { colors, fonts, motion } from './src/styles/tokens.js'
+
 export default {
   content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
       colors: {
-        'panel-bg': '#101012',
-        'accent': '#4E8CFF',
-        'clip-video': 'rgba(30,144,255,.5)',
-        'clip-audio': 'rgba(255,64,128,.5)',
+        'panel-bg': colors.panelBg,
+        accent: colors.accent,
+        'clip-video': colors.clipVideo,
+        'clip-audio': colors.clipAudio,
       },
-      fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-      },
+      fontFamily: fonts.family,
       fontSize: {
-        'ui-label': '11px', // For labels: Inter 11/500
-        'ui-body': '14px',  // For body text: Inter 14/400
-        'ui-heading': '24px', // For headings: Inter 24/600
+        'ui-label': fonts.size.uiLabel,
+        'ui-body': fonts.size.uiBody,
+        'ui-heading': fonts.size.uiHeading,
       },
       fontWeight: {
-        'ui-normal': '400',   // For body text
-        'ui-medium': '500',   // For labels
-        'ui-semibold': '600', // For headings
+        'ui-normal': fonts.weight.uiNormal,
+        'ui-medium': fonts.weight.uiMedium,
+        'ui-semibold': fonts.weight.uiSemibold,
       },
       transitionDuration: {
-        '150': '150ms',
+        150: motion.duration150,
       },
-      // It's also common to define animation keyframes for fades if more complex fades are needed
-      // For simple opacity fades, Tailwind's built-in opacity and duration utilities are often sufficient.
     },
   },
   plugins: [],

@@ -1,0 +1,131 @@
+# UI Styling Test Strategy
+
+This document outlines the approach for validating design-token application, Tailwind utility usage, global styles, responsiveness and accessibility within Motif's web UI.
+
+## Goals
+1. **Visual consistency** — Components match Figma specs / PRD design tokens.
+2. **Regression safety** — Visual changes are intentional and reviewed.
+3. **Accessibility** — Zero critical Axe issues (Hard Accessibility Gate).
+4. **Cross-browser fidelity** — Chrome, Safari, Edge parity for core flows.
+5. **Performance** — Ensure styling doesn't impact performance KPIs (≥50fps for interaction).
+
+## Design Token Validation
+
+### Color Tokens
+| Token | Value | Validation Method |
+|-------|-------|-------------------|
+| `--panel-bg` | `#101012` | Visual inspection + CSS variables check |
+| `--accent` | `#4E8CFF` | Visual inspection + Contrast ratio test (≥4.5:1) |
+| `--clip-video` | `rgba(30,144,255,.5)` | Visual inspection on timeline |
+| `--clip-audio` | `rgba(255,64,128,.5)` | Visual inspection on timeline |
+
+### Typography Tokens
+| Element | Size/Weight | Validation Method |
+|---------|------------|-------------------|
+| Body text | Inter 14/400 | Visual inspection + computed style check |
+| Labels | Inter 11/500 | Visual inspection + computed style check |
+| Headings | Inter 24/600 | Visual inspection + computed style check |
+
+### Motion Tokens
+| Effect | Duration | Validation Method |
+|--------|----------|-------------------|
+| Fade | 150ms | Visual inspection + timing test |
+| Scrubbing | vsync | FPS counter during interaction (≥60fps) |
+
+## Tooling
+- **Storybook** (planned) for isolated component states.
+- **Chromatic** continuous visual regression snapshots.
+- **axe-core / @axe-core/react** for automated a11y checks.
+- **jest-dom + @testing-library/react** for unit/integration tests.
+- **Chrome DevTools Performance Panel** for FPS measurement.
+- **Contrast Checker** (WebAIM or similar) for accessibility validation.
+
+## Test Types
+| Layer | What we check | Tool |
+|-------|---------------|------|
+| Unit  | Token classes rendered correctly, proper variants, disabled etc. | RTL + jest-dom |
+| Visual | Pixel diffs on Storybook stories | Chromatic |
+| A11y  | Axe passes with zero critical issues | axe-core |
+| Performance | Animation smoothness, interaction responsiveness | Chrome DevTools |
+| E2E (future) | Responsive layout & keyboard nav | Cypress |
+
+## Global Styles Testing
+
+### Inter Font Face
+- **Test**: Render text in each weight (400, 500, 600) and verify correct font loading
+- **Method**: Visual inspection + computed style check via DevTools
+- **Expected**: Text renders in Inter, fallback to sans-serif if loading fails
+
+### Fade Motion Utility
+- **Test**: Apply `.fade-in` and `.fade-in.show` classes to elements and observe transition
+- **Method**: Visual inspection + transition duration measurement
+- **Expected**: Element opacity transitions over 150ms with ease-out timing function
+
+## Key Component Test Cases
+
+### Button Component
+- Renders background `bg-accent` (#4E8CFF) by default.
+- Hover state darkens accent (`hover:bg-accent/90`).
+- Focus ring visible with `focus-visible:ring-accent`.
+- Passes Axe: role=button, name present.
+- Contrast ratio ≥4.5:1 against dark backgrounds (panel-bg #101012).
+- Disabled state has visual indicator and correct aria-disabled attribute.
+- Click events fire correctly with keyboard and mouse interaction.
+
+### Timeline UI Components
+- Clip segments have correct background colors (video: `--clip-video`, audio: `--clip-audio`).
+- Interactive elements maintain ≥50fps during drag operations (test with Chrome FPS meter).
+- Clip segments resize smoothly with react-moveable integration.
+- Keyboard shortcuts (I/O, C, Space) function as expected.
+- Tooltips appear with minimal delay and correct styling.
+- All interactive controls maintain ≥4.5:1 contrast ratio.
+
+### Modal/Dialog Components
+- Focus is trapped within modal when open (test with keyboard navigation).
+- Proper animation on open/close with 150ms transition.
+- Backdrop has sufficient contrast and prevents interaction with elements behind.
+- ESC key closes the modal.
+- Meets accessibility requirements for modal dialogs.
+
+## Accessibility Testing
+1. **Contrast Verification**:
+   - All interactive controls must achieve ≥4.5:1 contrast ratio (per PRD KPI).
+   - Test each component against its background using WebAIM Contrast Checker.
+   - Document results in accessibility test report.
+
+2. **Keyboard Navigation**:
+   - Verify all interactive elements are reachable via keyboard.
+   - Tab order follows logical flow.
+   - Focus states are visually distinct.
+
+3. **Screen Reader Compatibility**:
+   - Test with VoiceOver (macOS) and NVDA (Windows).
+   - Verify all controls have appropriate ARIA attributes.
+   - Ensure dynamic content changes are announced.
+
+## Performance Testing
+1. **Animation Performance**:
+   - Measure FPS during fade transitions.
+   - Ensure transitions complete within 150ms.
+
+2. **Timeline Interaction**:
+   - Measure FPS during clip dragging and resizing.
+   - Verify ≥50fps maintained with 4-layer timeline (per PRD KPI).
+   - Test on both reference hardware configurations (Apple Silicon, Intel i7).
+
+## CI Integration
+1. `npm run test`    → RTL unit tests.
+2. `npm run test:a11y` → Axe against Storybook.
+3. `npm run test:visual` (Chromatic publish).
+4. `npm run test:perf` → Performance benchmarks (to be implemented).
+
+All steps must succeed before merging to `main`.
+
+## Manual Testing Checklist
+Before major releases, perform a manual verification of:
+1. All design tokens rendering correctly in each component.
+2. Smooth animations and transitions (150ms fade).
+3. Accessibility through keyboard-only navigation.
+4. Contrast ratios for all interactive elements (≥4.5:1).
+5. Performance during timeline interactions (maintain ≥50fps).
+6. Cross-browser compatibility (Chrome, Safari, Edge). 
