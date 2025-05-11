@@ -120,3 +120,5 @@ Act as staff-level frontend/video engineer mentoring a solo founder. Repo blank;
 <!-- M3 GPU Shader + Color -->
 <!-- M4 Tauri Desktop -->
 <!-- M5 Collab --> 
+
+*Refer to **docs/schema-stub-strategy.md** for the authoritative Zustand schema & full stub-file catalogue.* 

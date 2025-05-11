@@ -1,0 +1,237 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Visual Regression Testing Strategy
+
+This document outlines our approach to visual regression testing for the Motif video editor, ensuring that UI styling remains consistent and intentional across releases.
+
+## Goals
+
+1. **Detect unintended visual changes** in the UI during development
+2. **Validate design token application** across components
+3. **Ensure consistent styling** across browsers and viewports
+4. **Document expected visual appearance** for key UI states
+
+## Tooling
+
+### Primary Tools
+- **[Chromatic](https://www.chromatic.com/)** - For automated visual regression testing integrated with Storybook
+- **[Storybook](https://storybook.js.org/)** - For component development and documentation
+- **[Percy](https://percy.io/)** (alternative) - For full-page visual comparison
+
+### Supporting Tools
+- **[Storybook Accessibility Addon](https://storybook.js.org/addons/@storybook/addon-a11y)** - For accessibility checking within Storybook
+- **[Storybook Interactions](https://storybook.js.org/docs/react/essentials/interactions)** - For testing interactive states
+
+## Implementation Strategy
+
+### 1. Storybook Component Library Setup
+
+For each key UI component:
+1. Create a Storybook story with all possible variants
+2. Include stories for different states (default, hover, active, disabled)
+3. Document expected appearance and behavior
+4. Include design token usage notes
+
+Example for Button component:
+```jsx
+// Button.stories.jsx
+import { Button } from './Button';
+
+export default {
+  title: 'UI/Button',
+  component: Button,
+  argTypes: {
+    variant: { control: 'select', options: ['default', 'secondary'] },
+    disabled: { control: 'boolean' },
+  },
+  parameters: {
+    design: {
+      type: 'figma',
+      url: 'https://www.figma.com/file/...',
+    },
+    tokens: {
+      background: 'bg-accent (#4E8CFF)',
+      hover: 'hover:bg-accent/90',
+      focus: 'focus-visible:ring-accent',
+    },
+  },
+};
+
+export const Default = {
+  args: {
+    children: 'Button Text',
+    variant: 'default',
+    disabled: false,
+  },
+};
+
+export const Secondary = {
+  args: {
+    children: 'Button Text',
+    variant: 'secondary',
+    disabled: false,
+  },
+};
+
+export const Disabled = {
+  args: {
+    children: 'Button Text',
+    variant: 'default',
+    disabled: true,
+  },
+};
+```
+
+### 2. Design Token Visualization Stories
+
+Create dedicated stories to visualize all design tokens:
+
+```jsx
+// DesignTokens.stories.jsx
+export default {
+  title: 'Design System/Tokens',
+};
+
+export const Colors = () => (
+  <div className="space-y-4">
+    <div className="flex items-center space-x-2">
+      <div className="w-16 h-16 bg-panel-bg"></div>
+      <div>Panel Background (#101012)</div>
+    </div>
+    <div className="flex items-center space-x-2">
+      <div className="w-16 h-16 bg-accent"></div>
+      <div>Accent (#4E8CFF)</div>
+    </div>
+    <div className="flex items-center space-x-2">
+      <div className="w-16 h-16" style={{ backgroundColor: 'rgba(30,144,255,.5)' }}></div>
+      <div>Clip Video (rgba(30,144,255,.5))</div>
+    </div>
+    <div className="flex items-center space-x-2">
+      <div className="w-16 h-16" style={{ backgroundColor: 'rgba(255,64,128,.5)' }}></div>
+      <div>Clip Audio (rgba(255,64,128,.5))</div>
+    </div>
+  </div>
+);
+
+export const Typography = () => (
+  <div className="space-y-4">
+    <div>
+      <div className="text-ui-body font-ui-normal">Body Text (Inter 14/400)</div>
+      <div className="mt-1 text-gray-500">font-ui-normal text-ui-body</div>
+    </div>
+    <div>
+      <div className="text-ui-label font-ui-medium">Label Text (Inter 11/500)</div>
+      <div className="mt-1 text-gray-500">font-ui-medium text-ui-label</div>
+    </div>
+    <div>
+      <div className="text-ui-heading font-ui-semibold">Heading Text (Inter 24/600)</div>
+      <div className="mt-1 text-gray-500">font-ui-semibold text-ui-heading</div>
+    </div>
+  </div>
+);
+
+export const Motion = () => (
+  <div className="space-y-6">
+    <div>
+      <button 
+        className="px-4 py-2 bg-accent text-white rounded"
+        onClick={(e) => {
+          const demo = document.getElementById('fade-demo');
+          demo.classList.toggle('show');
+        }}
+      >
+        Toggle Fade
+      </button>
+      <div id="fade-demo" className="mt-2 p-6 bg-gray-800 fade-in">
+        This element uses the fade-in utility class (150ms)
+      </div>
+    </div>
+  </div>
+);
+```
+
+### 3. Chromatic Integration
+
+1. Set up Chromatic with the project repository
+2. Configure the CI pipeline to publish Storybook to Chromatic on pull requests
+3. Use Chromatic's baseline comparison to detect visual changes
+4. Require visual review approval before merging code changes
+
+Add script to package.json:
+```json
+{
+  "scripts": {
+    "chromatic": "npx chromatic --project-token=YOUR_TOKEN"
+  }
+}
+```
+
+### 4. Visual Test Matrix
+
+| Component | States to Test | Viewports | Browsers |
+|-----------|----------------|-----------|----------|
+| Button | Default, Hover, Active, Disabled | Desktop, Mobile | Chrome, Safari, Firefox |
+| Timeline | Empty, With Clips, Drag Operation | Desktop only | Chrome, Safari |
+| Tooltips | Hidden, Visible | Desktop, Mobile | Chrome, Safari |
+| Modal/Dialog | Closed, Opening, Open | Desktop, Mobile | Chrome, Safari |
+
+### 5. Snapshot Testing Workflow
+
+1. Developer creates/updates component
+2. Storybook stories are updated to reflect changes
+3. PR is submitted with changes
+4. CI runs Chromatic, generating snapshots
+5. Team reviews visual differences in Chromatic UI
+6. Approve or request changes based on visual diff
+7. Only merge when visual changes are approved
+
+## Visual Testing Best Practices
+
+1. **Keep backgrounds consistent** - Test components against the actual backgrounds they'll appear on
+2. **Test interactive states** - Capture hover, focus, and active states
+3. **Include responsive tests** - Verify appearance at different viewport sizes
+4. **Document expected changes** - When submitting intentional visual changes, document them clearly
+5. **Version your design tokens** - Track changes to design tokens alongside visual snapshots
+
+## Timeline Component Specific Testing
+
+For the timeline component, which is central to the application:
+
+1. Create specialized test stories that simulate:
+   - Different clip arrangements
+   - Beat marker visualization
+   - Dragging operations (using Storybook interactions)
+   - Multi-track layouts (showing 4-layer scenario from PRD)
+
+2. Test specifically for performance during interactions:
+   - Annotate expected FPS minimums (≥50fps per PRD)
+   - Include FPS counter in development mode
+
+## CI Integration
+
+```yaml
+# Example GitHub Actions workflow step
+- name: Visual Regression Testing
+  run: npm run chromatic -- --exit-zero-on-changes
+```
+
+Results are reported in PR comments, with links to visual diffs.
+
+## Periodic Manual Review Process
+
+Despite automated testing, schedule periodic manual reviews:
+
+1. Quarterly full visual review
+2. Pre-release design system audit
+3. Cross-browser verification sessions
+
+Document findings in the project wiki.
+
+## References
+
+- [Storybook Docs](https://storybook.js.org/docs/react/get-started/introduction)
+- [Chromatic Documentation](https://www.chromatic.com/docs/)
+- [Visual Testing Handbook](https://storybook.js.org/tutorials/visual-testing-handbook/) 

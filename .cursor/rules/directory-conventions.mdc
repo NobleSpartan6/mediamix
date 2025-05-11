@@ -1,7 +1,7 @@
 ---
-description:
-globs:
-alwaysApply: false
+description: 
+globs: 
+alwaysApply: true
 ---
 - **Frontend Application (`apps/web`)**
   - All terminal commands, build scripts, and development server tasks for the Vite/React frontend application located in `apps/web/` **must** be executed with `apps/web/` as the current working directory.
