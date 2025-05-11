@@ -6,12 +6,12 @@ import { configDefaults } from 'vitest/config'
 export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
-    // Prevent Vite from trying to pre-bundle FFmpeg which contains its own workers.
+    // Prevent Vite from trying to pre-bundle FFmpeg which contains its own workers
     exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/core'],
   },
   build: {
     rollupOptions: {
-      // Keep FFmpeg packages external so their internal worker URLs resolve at runtime.
+      // Keep FFmpeg packages external so their internal worker URLs resolve at runtime
       external: ['@ffmpeg/ffmpeg', '@ffmpeg/core'],
     },
   },
@@ -19,6 +19,16 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './vitest.setup.ts',
-    exclude: [...configDefaults.exclude, 'dist/**']
+    exclude: [...configDefaults.exclude, 'dist/**'],
+    // Add these options for better test behavior
+    mockReset: true,
+    clearMocks: true,
+    // Handle Vite-specific imports like ?worker
+    deps: {
+      inline: [
+        '@ffmpeg/ffmpeg',
+        '@ffmpeg/core'
+      ]
+    }
   },
-})
+});

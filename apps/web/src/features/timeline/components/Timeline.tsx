@@ -8,6 +8,8 @@ import { Playhead } from './Playhead'
 import { TrackRow } from './TrackRow'
 import { useBeatSlices } from '../hooks/useBeatSlices'
 import { useTimelineKeyboard } from '../hooks/useTimelineKeyboard'
+import { useZoomScroll } from '../hooks/useZoomScroll'
+import { ZoomSlider } from './ZoomSlider'
 
 interface TimelineProps {
   /** zoom factor – how many horizontal pixels represent one second */
@@ -20,8 +22,30 @@ interface TimelineProps {
  * added in later subtasks.
  */
 export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond = 100 }) => {
-  const clips = useTimelineStore((state) => state.clips)
+  // Zoom and scroll: initialize state and scroll container ref
+  const [zoom, setZoom] = React.useState(pixelsPerSecond)
+  const initialZoom = React.useRef(pixelsPerSecond)
+  const [showZoomIndicator, setShowZoomIndicator] = React.useState(false)
+  const indicatorTimeout = React.useRef<number | null>(null)
+  const scrollRef = React.useRef<HTMLDivElement>(null)
+  useZoomScroll(scrollRef, zoom, setZoom, { minZoom: 20, maxZoom: 500, zoomStep: 0.002 })
+  // Cache the raw clipsById object from store to avoid recreating array each render
+  const clipsById = useTimelineStore((state) => state.clipsById)
   const setClips = useTimelineStore((state) => state.setClips)
+  // Memoize conversion to array for render
+  const clips = React.useMemo(() => Object.values(clipsById), [clipsById])
+
+  // Show zoom change indicator briefly
+  React.useEffect(() => {
+    setShowZoomIndicator(true)
+    if (indicatorTimeout.current) {
+      clearTimeout(indicatorTimeout.current)
+    }
+    indicatorTimeout.current = window.setTimeout(() => {
+      setShowZoomIndicator(false)
+      indicatorTimeout.current = null
+    }, 800)
+  }, [zoom])
 
   // Auto generate clip slices if clips are empty but beats are available
   const beatSlices = useBeatSlices()
@@ -59,15 +83,12 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
           key={laneIndex}
           laneIndex={laneIndex}
           clips={laneClips}
-          pixelsPerSecond={pixelsPerSecond}
+          pixelsPerSecond={zoom}
           type={laneIndex === 0 ? 'video' : 'audio'}
         />
       )),
-    [lanes, pixelsPerSecond],
+    [lanes, zoom],
   )
-
-  // ref to horizontal scroll container so ruler can sync
-  const scrollRef = React.useRef<HTMLDivElement>(null)
 
   // Track area height (exclude ruler height)
   const trackAreaHeight = 48 // px – single track for MVP
@@ -75,22 +96,48 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
   useTimelineKeyboard()
 
   return (
-    <div className="w-full select-none">
-      {/* Time ruler aligned with scroll */}
-      <TimeRuler scrollContainerRef={scrollRef} pixelsPerSecond={pixelsPerSecond} duration={duration} />
-
-      {/* Scrollable track area */}
-      <div
-        ref={scrollRef}
-        className="relative overflow-x-auto bg-panel-bg"
-        style={{ height: trackAreaHeight }}
-      >
-        {/* content width spacer equal to timeline duration */}
-        <div className="relative h-full flex flex-col" style={{ width: duration * pixelsPerSecond }}>
-          {renderedTracks}
-          {/* Playhead overlay */}
-          <Playhead positionSeconds={playheadSeconds} pixelsPerSecond={pixelsPerSecond} height="100%" />
+    <div className="w-full select-none relative">
+      <div className="flex">
+        {/* Left gutter: spacer for ruler then track labels */}
+        <div className="flex flex-col">
+          {/* spacer matching ruler height */}
+          <div className="h-6" />
+          {lanes.map(([laneIndex]) => (
+            <div
+              key={laneIndex}
+              className="h-12 flex items-center justify-center border-b border-white/10 text-xs text-gray-300 font-ui-medium"
+            >
+              {laneIndex === 0 ? 'V1' : `A${laneIndex}`}
+            </div>
+          ))}
         </div>
+        {/* Ruler and tracks */}
+        <div className="flex-1 overflow-hidden">
+          {/* Numeric time ruler */}
+          <TimeRuler scrollContainerRef={scrollRef} pixelsPerSecond={zoom} duration={duration} />
+          {/* Scrollable track area */}
+          <div
+            ref={scrollRef}
+            className="relative overflow-hidden bg-panel-bg cursor-grab"
+            style={{ height: trackAreaHeight }}
+          >
+            <div className="relative h-full flex flex-col" style={{ width: duration * zoom }}>
+              {renderedTracks}
+              {/* Playhead overlay */}
+              <Playhead positionSeconds={playheadSeconds} pixelsPerSecond={zoom} height="100%" />
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Zoom level indicator */}
+      {showZoomIndicator && (
+        <div className="absolute top-2 right-2 bg-gray-800/80 px-2 py-1 rounded text-xs font-ui-medium">
+          {Math.round((zoom / initialZoom.current) * 100)}%
+        </div>
+      )}
+      {/* Zoom slider control */}
+      <div className="absolute top-8 right-2">
+        <ZoomSlider value={zoom} onChange={setZoom} />
       </div>
     </div>
   )

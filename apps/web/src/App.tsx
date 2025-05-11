@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useMemo } from 'react'
 import { Button } from './components/ui/Button'
 import VideoImportButton from './features/import/VideoImportButton'
 import FileInfoCard from './features/import/FileInfoCard'
@@ -6,13 +6,30 @@ import BeatMarkerBar from './features/timeline/BeatMarkerBar'
 import { Timeline } from './features/timeline/components/Timeline'
 import './App.css'
 import { useTimelineStore } from './state/timelineStore'
+import useMotifStore from './lib/store'
 
 function App() {
   // Demo beats & clips for showcasing the timeline MVP
-  const clips = useTimelineStore((s) => s.clips)
+  const clipsById = useTimelineStore((s) => s.clipsById)
+  const clips = useMemo(() => Object.values(clipsById), [clipsById])
   const addClip = useTimelineStore((s) => s.addClip)
   const beats = useTimelineStore((s) => s.beats)
   const setBeats = useTimelineStore((s) => s.setBeats)
+
+  // Demo: seed clips from imported media assets
+  const mediaAssets = useMotifStore((s) => s.mediaAssets)
+  const prevAssetCount = useRef(0)
+  useEffect(() => {
+    if (mediaAssets.length > prevAssetCount.current) {
+      const newAssets = mediaAssets.slice(prevAssetCount.current)
+      newAssets.forEach((asset, idx) => {
+        // demo: use first 5 seconds or asset duration
+        const end = asset.metadata.duration != null ? Math.min(5, asset.metadata.duration) : 5
+        addClip({ start: 0, end, lane: prevAssetCount.current + idx })
+      })
+      prevAssetCount.current = mediaAssets.length
+    }
+  }, [mediaAssets, addClip])
 
   // Populate demo data once on mount if store is empty
   useEffect(() => {

@@ -1,3 +1,5 @@
+import type { VideoMetadata } from '../file/extractVideoMetadata'
+
 // Define types for different state slices
 export type FileInfo = {
   fileName: string | null
@@ -60,6 +62,13 @@ export interface MotifState {
   isFileLoading: boolean
   fileError: string | null
 
+  /** Imported media assets */
+  mediaAssets: MediaAsset[]
+  /** Add a new media asset to the library */
+  addMediaAsset: (asset: Omit<MediaAsset, 'id'>) => void
+  /** Replace the entire media assets array */
+  setMediaAssets: (assets: MediaAsset[]) => void
+
   // Beat detection section
   beatMarkers: BeatMarker[]
   isBeatDetectionRunning: boolean
@@ -99,4 +108,11 @@ export interface MotifState {
   setBeatDetectionProgress: (progress: number) => void
   /** Update beat-detection stage */
   setBeatDetectionStage: (stage: BeatDetectionStage) => void
+}
+
+export type MediaAsset = {
+  id: string
+  fileName: string
+  fileHandle: FileSystemFileHandle | null
+  metadata: VideoMetadata
 } 

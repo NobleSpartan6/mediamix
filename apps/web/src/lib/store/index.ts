@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import type { MotifState, FileInfo, ClipSegment, BeatMarker } from './types'
+import type { MotifState, FileInfo, ClipSegment, BeatMarker, MediaAsset } from './types'
+import { nanoid } from 'nanoid'
 
 // Create the store
 const useMotifStore = create<MotifState>((set) => ({
@@ -21,6 +22,9 @@ const useMotifStore = create<MotifState>((set) => ({
   },
   isFileLoading: false,
   fileError: null,
+
+  // Media assets library
+  mediaAssets: [],
 
   beatMarkers: [],
   isBeatDetectionRunning: false,
@@ -82,6 +86,15 @@ const useMotifStore = create<MotifState>((set) => ({
   setFileError: (error: string | null) => set(() => ({
     fileError: error
   })),
+
+  /** Add a new media asset */
+  addMediaAsset: (assetInput) => {
+    const id = nanoid()
+    set((state) => ({ mediaAssets: [...state.mediaAssets, { id, ...assetInput }] }))
+  },
+
+  /** Replace all media assets */
+  setMediaAssets: (assets) => set(() => ({ mediaAssets: assets })),
 
   setBeatMarkers: (markers: BeatMarker[]) => set(() => ({
     beatMarkers: markers

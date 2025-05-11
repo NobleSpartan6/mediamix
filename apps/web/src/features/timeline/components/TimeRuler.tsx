@@ -1,4 +1,6 @@
 import * as React from 'react'
+import { useTimelineStore } from '../../../state/timelineStore'
+import type { TimelineState } from '../../../state/timelineStore'
 
 interface TimeRulerProps {
   /** Reference to the horizontal scroll container so we can sync tick offset */
@@ -7,6 +9,19 @@ interface TimeRulerProps {
   pixelsPerSecond: number
   /** Total timeline duration in seconds. Used to compute full ruler width. */
   duration: number
+}
+
+// Utility to format seconds into HH:MM:SS.FF (30fps) timecode
+const formatTimecode = (seconds: number) => {
+  const fps = 30
+  const totalFrames = Math.round(seconds * fps)
+  const frames = totalFrames % fps
+  const totalSeconds = Math.floor(totalFrames / fps)
+  const secs = totalSeconds % 60
+  const mins = Math.floor(totalSeconds / 60) % 60
+  const hrs = Math.floor(totalSeconds / 3600)
+  const pad = (n: number, l = 2) => n.toString().padStart(l, '0')
+  return `${pad(hrs)}:${pad(mins)}:${pad(secs)}.${pad(frames)}`
 }
 
 /**
@@ -64,6 +79,17 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({ scrollContainerRef, pixels
       />,
     )
 
+    // Second label (mono 10px) – place slightly above the major tick
+    ticks.push(
+      <span
+        key={`label-${s}`}
+        className="absolute -top-0.5 translate-x-1/2 font-mono text-[10px] text-gray-300 select-none pointer-events-none"
+        style={{ transform: `translateX(${xPos}px)` }}
+      >
+        {s}
+      </span>,
+    )
+
     // Minor ticks every 10 frames (approx 0.333s @ 30fps) only when zoomed in enough
     if (pixelsPerSecond >= 60) {
       for (let f = 1; f < 30; f += 10) {
@@ -79,13 +105,64 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({ scrollContainerRef, pixels
     }
   }
 
+  // --- Beat tick lines ------------------------------------------------------
+  const beats = useTimelineStore((state: TimelineState) => state.beats)
+  const beatElements = React.useMemo(() => {
+    if (!beats || beats.length === 0) return []
+    return beats.map((b: number) => (
+      <div
+        key={`beat-${b}`}
+        className="absolute top-0 w-px bg-accent/20"
+        style={{ height: '100%', transform: `translateX(${b * pixelsPerSecond}px)` }}
+      />
+    ))
+  }, [beats, pixelsPerSecond])
+
+  // Tooltip state ------------------------------------------------------------
+  const [tooltip, setTooltip] = React.useState<{ visible: boolean; x: number; time: number }>({
+    visible: false,
+    x: 0,
+    time: 0,
+  })
+
+  const containerRef = React.useRef<HTMLDivElement>(null)
+
+  // Mouse move handler to update tooltip position/time
+  const handleMouseMove = React.useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
+      const x = e.clientX - rect.left + scrollLeft
+      const time = x / pixelsPerSecond
+      setTooltip({ visible: true, x: e.clientX - rect.left, time })
+    },
+    [pixelsPerSecond, scrollLeft],
+  )
+  const handleMouseLeave = () => setTooltip((t) => ({ ...t, visible: false }))
+
   return (
-    <div className="relative h-6 select-none border-b border-white/10 bg-panel-bg">
+    <div
+      ref={containerRef}
+      className="relative h-6 select-none border-b border-white/10 bg-panel-bg"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
       {/* total width spacer to make ruler scrollable */}
       <div style={{ width: duration * pixelsPerSecond }}>
-        {/* tick container absolutely positioned to avoid extra layout cost */}
-        <div className="relative h-full w-full">{ticks}</div>
+        {/* tick container */}
+        <div className="relative h-full w-full">
+          {ticks}
+          {beatElements}
+        </div>
       </div>
+      {/* Hover tooltip */}
+      {tooltip.visible && (
+        <div
+          className="pointer-events-none absolute -top-6 bg-gray-800/90 text-[10px] font-mono text-white px-1 py-0.5 rounded"
+          style={{ left: tooltip.x }}
+        >
+          {formatTimecode(tooltip.time)}
+        </div>
+      )}
     </div>
   )
 }

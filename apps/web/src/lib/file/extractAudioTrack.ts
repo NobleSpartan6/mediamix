@@ -3,6 +3,7 @@
 // Import the worker. The `?worker` suffix is a Vite-specific feature
 // that handles the worker bundling.
 import AudioExtractionWorker from '../../workers/audio-extraction.worker.ts?worker';
+import { WorkerWrapper } from '../../workers/WorkerWrapper';
 
 interface BaseWorkerMessage {
   type: string;
@@ -48,7 +49,8 @@ export function extractAudioTrack(
       return;
     }
 
-    const worker = new AudioExtractionWorker();
+    // Use the WorkerWrapper instead of direct Worker instantiation
+    const worker = new WorkerWrapper(AudioExtractionWorker);
 
     worker.onmessage = (
       event: MessageEvent<AudioWorkerMessage>
@@ -90,4 +92,4 @@ export function extractAudioTrack(
       payload: { videoFile, outputFormat }
     });
   });
-} 
+}

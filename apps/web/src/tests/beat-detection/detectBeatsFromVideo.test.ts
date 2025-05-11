@@ -1,79 +1,150 @@
-import { describe, it, expect, vi, afterEach } from 'vitest'
+// src/tests/beat-detection/detectBeatsFromVideo.test.ts
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Relative paths can be tricky with Vitest mocks when using Vite's ?worker suffix.
-// We compute absolute module specifiers to ensure the mocks match the ones used
-// inside detectBeatsFromVideo.ts.
+// Import the modules to be mocked before using vi.mocked()
+import { extractAudioTrack as actualExtractAudioTrack } from '../../lib/file/extractAudioTrack';
+import ActualBeatDetectionWorker from '../../workers/beat-detection.worker.ts?worker';
 
-// 1) Mock `extractAudioTrack` so we don't spawn the heavy audio-extraction worker.
-vi.mock('../../lib/file/extractAudioTrack', () => {
-  return {
-    // The mock resolves with a tiny 4-byte PCM ArrayBuffer (two int16 samples)
-    extractAudioTrack: vi.fn().mockResolvedValue({
-      audioData: new ArrayBuffer(4),
-      sampleRate: 44100,
-    }),
-  }
-})
+// Mock for extractAudioTrack
+vi.mock('../../lib/file/extractAudioTrack', () => ({
+  extractAudioTrack: vi.fn().mockResolvedValue({
+    audioData: new ArrayBuffer(1024),
+    format: 'raw',
+    sampleRate: 44100
+  })
+}));
 
-// 2) Mock the beat-detection worker module imported with `?worker` suffix.
-// The import path in `detectBeatsFromVideo.ts` resolves to:
-//   apps/web/src/workers/beat-detection.worker.ts?worker
-// Using the absolute path makes the mock unambiguous.
-vi.mock('../../workers/beat-detection.worker.ts?worker', () => {
-  // Simple mock Worker class that immediately echoes a BEATS_DETECTED message
-  class MockBeatWorker {
-    // Using `onmessage` and `onerror` properties for compatibility
-    public onmessage: ((ev: MessageEvent<any>) => void) | null = null
-    public onerror: ((ev: ErrorEvent) => void) | null = null
+// Mock the BeatDetectionWorker
+const mockWorkerInstance = {
+  onmessage: null as ((event: MessageEvent) => void) | null,
+  onerror: null as ((event: ErrorEvent) => void) | null,
+  postMessage: vi.fn(),
+  terminate: vi.fn(),
+};
+vi.mock('../../workers/beat-detection.worker.ts?worker', () => ({
+  default: vi.fn(() => mockWorkerInstance),
+}));
 
-    // `postMessage` responds async to simulate worker processing
-    postMessage() {
-      // Simulate a short async delay
-      setTimeout(() => {
-        this.onmessage?.({
-          data: {
-            type: 'BEATS_DETECTED',
-            beats: [0.1, 0.5, 1.0],
-          },
-        } as unknown as MessageEvent)
-      }, 0)
-    }
+// Cast the imported actual modules to their mocked versions for type safety and intellisense
+const extractAudioTrackMock = vi.mocked(actualExtractAudioTrack);
+const BeatDetectionWorkerMock = vi.mocked(ActualBeatDetectionWorker);
 
-    terminate() {
-      /* noop */
-    }
-  }
-
-  return {
-    default: MockBeatWorker,
-  }
-})
-
-// Import under test **after** mocks are in place
-import { detectBeatsFromVideo } from '../../lib/file/detectBeatsFromVideo'
-
-// Helper: tiny fake File instance
-const createFakeFile = () => new File([new ArrayBuffer(8)], 'sample.mp4', { type: 'video/mp4' })
+// Import the function under test AFTER mocking its dependencies
+import { detectBeatsFromVideo } from '../../lib/file/detectBeatsFromVideo';
 
 describe('detectBeatsFromVideo', () => {
-  afterEach(() => {
-    vi.clearAllMocks()
-  })
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockWorkerInstance.onmessage = null;
+    mockWorkerInstance.onerror = null;
+    // Mocks are reset via vi.clearAllMocks() if they are vi.fn()
+    // extractAudioTrackMock is already a vi.fn() due to the vi.mock above.
+    // BeatDetectionWorkerMock (the class mock) is also a vi.fn().
+
+    // Re-set default resolved value for extractAudioTrackMock if needed for each test, 
+    // though clearAllMocks also clears call history and specific mockImplementations.
+    extractAudioTrackMock.mockResolvedValue({
+      audioData: new ArrayBuffer(1024),
+      format: 'raw',
+      sampleRate: 44100
+    });
+  });
 
   it('resolves with beat timestamps and reports progress', async () => {
-    const progressCalls: Array<{ stage: string; value?: number }> = []
+    const mockVideoFile = new File(['test'], 'test.mp4', { type: 'video/mp4' });
+    const mockProgressCallback = vi.fn();
 
-    const beats = await detectBeatsFromVideo(createFakeFile(), (stage, value) => {
-      progressCalls.push({ stage, value })
-    })
+    // Simulate worker sending back a success message
+    // We need to do this after detectBeatsFromVideo is called and the worker instance is created
+    // and has its onmessage handler assigned.
+    const expectedBeats = [0.5, 1.0, 1.5, 2.0, 2.5];
+    mockWorkerInstance.postMessage.mockImplementation(() => {
+      // Check if onmessage is set before calling it
+      if (mockWorkerInstance.onmessage) {
+        // Simulate async worker behavior
+        setTimeout(() => {
+          if (mockWorkerInstance.onmessage) { // Check again inside timeout
+            mockWorkerInstance.onmessage({
+              data: { type: 'BEATS_DETECTED', beats: expectedBeats },
+            } as MessageEvent);
+          }
+        }, 0);
+      }
+    });
 
-    expect(beats).toEqual([0.1, 0.5, 1.0])
+    // Call the function with the progress callback in the correct position (second argument)
+    const resultPromise = detectBeatsFromVideo(mockVideoFile, mockProgressCallback);
+    
+    // Wait for the promise to resolve
+    const result = await resultPromise;
+    
+    expect(result).toEqual(expectedBeats);
+    
+    // Verify extractAudioTrack was called
+    expect(extractAudioTrackMock).toHaveBeenCalledWith(
+      mockVideoFile,
+      'raw',
+      expect.any(Function) // The internal progress callback for extractAudioTrack
+    );
 
-    // First call should mark start of audio extraction with 0 progress
-    expect(progressCalls[0]).toEqual({ stage: 'extractAudio', value: 0 })
-    // Next progress update should mark extraction completion (1)
-    const last = progressCalls[progressCalls.length - 1]
-    expect(last.stage).toBe('extractAudio')
-    expect(last.value).toBe(1)
-  })
-}) 
+    // Verify progress callback from the test was called for 'extractAudio' stages
+    expect(mockProgressCallback).toHaveBeenCalledWith('extractAudio', 0);
+    // expect(mockProgressCallback).toHaveBeenCalledWith('extractAudio', expect.any(Number)); // Could be more specific
+    expect(mockProgressCallback).toHaveBeenCalledWith('extractAudio', 1);
+    
+    // Verify worker was used
+    expect(BeatDetectionWorkerMock).toHaveBeenCalledTimes(1);
+    expect(mockWorkerInstance.postMessage).toHaveBeenCalledTimes(1);
+    expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'DETECT_BEATS' }),
+      [expect.any(ArrayBuffer)] // The transferable object
+    );
+    expect(mockWorkerInstance.terminate).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects if worker sends an error message', async () => {
+    const mockVideoFile = new File(['test'], 'error.mp4', { type: 'video/mp4' });
+    const mockProgressCallback = vi.fn();
+    const errorMessage = 'Worker failed';
+
+    // Ensure the default mock implementation is in place for BeatDetectionWorkerMock for this test
+    BeatDetectionWorkerMock.mockImplementation(() => mockWorkerInstance as any); 
+
+    mockWorkerInstance.postMessage.mockImplementation(() => {
+      if (mockWorkerInstance.onmessage) {
+        setTimeout(() => {
+          if (mockWorkerInstance.onmessage) {
+            mockWorkerInstance.onmessage({
+              data: { type: 'ERROR', error: errorMessage },
+            } as MessageEvent);
+          }
+        }, 0);
+      }
+    });
+
+    await expect(detectBeatsFromVideo(mockVideoFile, mockProgressCallback)).rejects.toThrow(errorMessage);
+    expect(mockWorkerInstance.terminate).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects if worker itself throws an error', async () => {
+    const mockVideoFile = new File(['test'], 'worker-error.mp4', { type: 'video/mp4' });
+    const mockProgressCallback = vi.fn();
+    const errorMessage = 'Critical worker failure';
+
+    // Ensure the default mock implementation is in place for BeatDetectionWorkerMock for this test
+    BeatDetectionWorkerMock.mockImplementation(() => mockWorkerInstance as any);
+
+    mockWorkerInstance.postMessage.mockImplementation(() => {
+      if (mockWorkerInstance.onerror) {
+        setTimeout(() => {
+          if (mockWorkerInstance.onerror) {
+            mockWorkerInstance.onerror({ message: errorMessage } as ErrorEvent);
+          }
+        }, 0);
+      }
+    });
+
+    await expect(detectBeatsFromVideo(mockVideoFile, mockProgressCallback)).rejects.toThrow(errorMessage);
+    expect(mockWorkerInstance.terminate).toHaveBeenCalledTimes(1);
+  });
+});
