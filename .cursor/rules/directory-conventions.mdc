@@ -1,0 +1,13 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+- **Frontend Application (`apps/web`)**
+  - All terminal commands, build scripts, and development server tasks for the Vite/React frontend application located in `apps/web/` **must** be executed with `apps/web/` as the current working directory.
+  - If an AI assistant's shell is at the project root (e.g., `/Users/ebenezereshetu/dev/mediamix`), commands targeting `apps/web` should be explicitly run within that context. This can be achieved by:
+    1.  Changing the directory first (e.g., `cd apps/web`), then running the command.
+    2.  Prefixing the command if it supports a path argument (e.g., `npm --prefix apps/web install some-package`).
+
+- **Packages (`packages/*`)**
+  - When working on individual packages within the `packages/` directory, commands specific to a package should be run from within that package's root directory (e.g., `cd packages/ui && npm run build`).
