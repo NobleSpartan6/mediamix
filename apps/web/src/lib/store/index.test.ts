@@ -18,4 +18,29 @@ describe('useMotifStore', () => {
     useMotifStore.getState().resetState()
     expect(useMotifStore.getState().fileInfo.fileName).toBeNull()
   })
-}) 
+
+  it('clears media assets on reset', () => {
+    const dummyMetadata = {
+      duration: 1,
+      width: 1,
+      height: 1,
+      videoCodec: null,
+      audioCodec: null,
+      frameRate: null,
+      sampleRate: null,
+      channelCount: null,
+    }
+
+    useMotifStore.getState().addMediaAsset({
+      fileName: 'asset.mp4',
+      fileHandle: null,
+      metadata: dummyMetadata,
+    })
+
+    expect(useMotifStore.getState().mediaAssets.length).toBe(1)
+
+    useMotifStore.getState().resetState()
+
+    expect(useMotifStore.getState().mediaAssets.length).toBe(0)
+  })
+})
