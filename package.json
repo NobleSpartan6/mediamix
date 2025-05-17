@@ -1,1 +1,9 @@
-{}
+{
+  "name": "mediamix",
+  "private": true,
+  "workspaces": ["apps/web"],
+  "scripts": {
+    "lint": "yarn workspace web lint",
+    "test": "yarn workspace web test"
+  }
+}
