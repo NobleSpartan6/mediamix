@@ -7,7 +7,15 @@ import { useTimelineStore } from '../../state/timelineStore'
 
 // Helper: reset Zustand store between tests for deterministic state
 const resetStore = () => {
-  useTimelineStore.setState({ clipsById: {}, durationSec: 0, beats: [] })
+  useTimelineStore.setState({
+    clipsById: {},
+    tracks: [],
+    durationSec: 0,
+    currentTime: 0,
+    inPoint: null,
+    outPoint: null,
+    beats: [],
+  })
 }
 
 // Provide deterministic IDs so assertions are stable
@@ -53,8 +61,8 @@ describe('Timeline auto-slice side-effect', () => {
 
     // Assert – wait for effect to commit to store
     await waitFor(() => {
-      const { clips } = useTimelineStore.getState()
-      expect(clips.length).toBeGreaterThan(0)
+      const { clipsById } = useTimelineStore.getState()
+      expect(Object.keys(clipsById).length).toBeGreaterThan(0)
     })
   })
-}) 
+})
