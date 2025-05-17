@@ -62,6 +62,7 @@ const useMotifStore = create<MotifState>((set) => ({
       videoSupported: null,
       audioSupported: null
     },
+    mediaAssets: [],
     beatMarkers: [],
     timeline: {
       clips: [],
