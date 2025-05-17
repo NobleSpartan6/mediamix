@@ -92,7 +92,7 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({ scrollContainerRef, pixels
 
     // Minor ticks every 10 frames (approx 0.333s @ 30fps) only when zoomed in enough
     if (pixelsPerSecond >= 60) {
-      for (let f = 1; f < 30; f += 10) {
+      for (let f = 10; f < 30; f += 10) {
         const subX = (s + f / 30) * pixelsPerSecond
         ticks.push(
           <div
