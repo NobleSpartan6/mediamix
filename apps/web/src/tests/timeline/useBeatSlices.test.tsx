@@ -7,7 +7,7 @@ import { useTimelineStore } from '../../state/timelineStore'
 
 // Helper: reset Zustand store between tests for deterministic state
 const resetStore = () => {
-  useTimelineStore.setState({ clips: [], beats: [] })
+  useTimelineStore.setState({ clipsById: {}, durationSec: 0, beats: [] })
 }
 
 // Provide deterministic IDs so assertions are stable
