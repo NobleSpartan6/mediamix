@@ -3,7 +3,7 @@ import { useTransportStore } from '../../../state/transportStore'
 
 /**
  * Hook that installs global key listeners for shuttle (J/K/L) and jog (←/→)
- * actions. The listeners are attached to `window`, so shortcuts work
+actions. The listeners are attached to `window`, so shortcuts work
  * regardless of focus. Attach by calling inside the Timeline component – it
  * automatically cleans up on unmount.
  */
