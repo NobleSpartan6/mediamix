@@ -3,8 +3,8 @@ import { useTransportStore } from '../../../state/transportStore'
 
 /**
  * Hook that installs global key listeners for shuttle (J/K/L) and jog (←/→)
- * behaviour while the timeline area has focus.  Attach by calling inside
- * Timeline component – it automatically cleans up on unmount.
+ * regardless of focus. Attach by calling inside the Timeline component – it
+ * automatically cleans up on unmount.
  */
 export function useTimelineKeyboard() {
   const stepShuttle = useTransportStore((s) => s.stepShuttle)
