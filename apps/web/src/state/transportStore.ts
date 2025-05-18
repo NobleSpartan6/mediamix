@@ -17,8 +17,13 @@ export const useTransportStore = create<TransportState>((set) => ({
   playRate: 0,
   playheadFrame: 0,
 
+  /** Set the absolute playback rate */
   setPlayRate: (rate) => set({ playRate: rate }),
 
+  /**
+   * Increment/decrement shuttle speed by a factor of two up to ±32.
+   * If the sign changes, reset to ±1.
+   */
   stepShuttle: (direction) =>
     set((state) => {
       // if currently paused start at 1 or -1.
@@ -30,6 +35,7 @@ export const useTransportStore = create<TransportState>((set) => ({
       return { playRate: next }
     }),
 
+  /** Move the playhead by the given number of frames */
   nudgeFrames: (delta) =>
     set((state) => ({ playheadFrame: Math.max(0, state.playheadFrame + delta) })),
 })) 
