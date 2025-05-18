@@ -10,6 +10,7 @@ const resetStore = () => {
     tracks: [],
     durationSec: 0,
     currentTime: 0,
+    followPlayhead: true,
     inPoint: null,
     outPoint: null,
     beats: [],

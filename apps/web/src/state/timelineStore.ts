@@ -26,6 +26,8 @@ export interface TimelineState {
   durationSec: number
   /** Current playhead time in seconds */
   currentTime: number
+  /** Auto-scroll timeline to keep playhead in view */
+  followPlayhead: boolean
   /** Optional in/out points in seconds */
   inPoint: number | null
   outPoint: number | null
@@ -41,6 +43,7 @@ export interface TimelineState {
   setCurrentTime: (time: number) => void
   setInPoint: (time: number | null) => void
   setOutPoint: (time: number | null) => void
+  setFollowPlayhead: (follow: boolean) => void
 }
 
 const toDict = (arr: Clip[]) => Object.fromEntries(arr.map((c) => [c.id, c]))
@@ -77,6 +80,7 @@ export const useTimelineStore = create<TimelineState>((set) => ({
   inPoint: null,
   outPoint: null,
   beats: [],
+  followPlayhead: true,
 
   /**
    * Replace the entire clip collection with a new set.
@@ -194,6 +198,8 @@ export const useTimelineStore = create<TimelineState>((set) => ({
   setInPoint: (time) => set({ inPoint: time }),
   /** Set the out point for playback or export */
   setOutPoint: (time) => set({ outPoint: time }),
+  /** Enable or disable auto-follow behavior */
+  setFollowPlayhead: (follow) => set({ followPlayhead: follow }),
 }))
 
 // ---- Selectors -----------------------------------------------------------

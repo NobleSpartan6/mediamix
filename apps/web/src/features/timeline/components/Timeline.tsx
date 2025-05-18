@@ -12,6 +12,7 @@ import { useClipsArray } from '../hooks/useClipsArray'
 import { useTimelineKeyboard } from '../hooks/useTimelineKeyboard'
 import { useZoomScroll } from '../hooks/useZoomScroll'
 import { ZoomSlider } from './ZoomSlider'
+import { Button } from '../../../components/ui/Button'
 
 interface TimelineProps {
   /** zoom factor – how many horizontal pixels represent one second */
@@ -58,7 +59,11 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
   }, [beatSlices, clips.length])
 
   const playheadFrame = useTransportStore((s) => s.playheadFrame)
+  const playRate = useTransportStore((s) => s.playRate)
   const setCurrentTime = useTimelineStore((s) => s.setCurrentTime)
+  const currentTime = useTimelineStore((s) => s.currentTime)
+  const followPlayhead = useTimelineStore((s) => s.followPlayhead)
+  const setFollowPlayhead = useTimelineStore((s) => s.setFollowPlayhead)
   const playheadSeconds = React.useMemo(() => playheadFrame / 30, [playheadFrame])
   React.useEffect(() => {
     setCurrentTime(playheadSeconds)
@@ -104,6 +109,21 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
       ),
     [lanes],
   )
+
+  // Auto-scroll when playback is active
+  React.useEffect(() => {
+    const el = scrollRef.current
+    if (!el || playRate === 0 || !followPlayhead) return
+    const x = currentTime * zoom
+    const start = el.scrollLeft
+    const end = start + el.clientWidth
+    const margin = 20
+    if (x < start + margin) {
+      el.scrollLeft = Math.max(0, x - margin)
+    } else if (x > end - margin) {
+      el.scrollLeft = x - el.clientWidth + margin
+    }
+  }, [currentTime, playRate, followPlayhead, zoom])
 
   useTimelineKeyboard()
 
@@ -152,9 +172,16 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
           {Math.round((zoom / initialZoom.current) * 100)}%
         </div>
       )}
-      {/* Zoom slider control */}
-      <div className="absolute top-8 right-2">
+      {/* Zoom slider and follow toggle */}
+      <div className="absolute top-8 right-2 flex items-center space-x-2">
         <ZoomSlider value={zoom} onChange={setZoom} />
+        <Button
+          variant="secondary"
+          className="px-2 py-1 text-xs"
+          onClick={() => setFollowPlayhead(!followPlayhead)}
+        >
+          {followPlayhead ? 'Unfollow' : 'Follow'}
+        </Button>
       </div>
     </div>
   )
