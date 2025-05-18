@@ -6,14 +6,16 @@ interface PlayheadProps {
   pixelsPerSecond: number
   /** Height of the timeline area to span */
   height: number | string
+  /** Scroll offset to subtract when overlaid */
+  offsetX?: number
 }
 
 /**
  * Playhead – simple vertical line representing the current playhead location.
  * For MVP it is purely presentational driven by parent state.
  */
-export const Playhead: React.FC<PlayheadProps> = React.memo(({ positionSeconds, pixelsPerSecond, height }) => {
-  const x = positionSeconds * pixelsPerSecond
+export const Playhead: React.FC<PlayheadProps> = React.memo(({ positionSeconds, pixelsPerSecond, height, offsetX = 0 }) => {
+  const x = positionSeconds * pixelsPerSecond - offsetX
   return (
     <div
       className="absolute top-0 w-0.5 bg-accent pointer-events-none"
