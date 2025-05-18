@@ -89,8 +89,15 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
     [lanes, zoom],
   )
 
-  // Track area height (exclude ruler height)
-  const trackAreaHeight = 48 // px – single track for MVP
+  // Track area height based on lane types (video lanes taller than audio)
+  const trackAreaHeight = React.useMemo(
+    () =>
+      lanes.reduce(
+        (sum, [laneIndex]) => sum + (laneIndex % 2 === 0 ? 48 : 32),
+        0,
+      ),
+    [lanes],
+  )
 
   useTimelineKeyboard()
 
@@ -101,14 +108,19 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
         <div className="flex flex-col">
           {/* spacer matching ruler height */}
           <div className="h-6" />
-          {lanes.map(([laneIndex]) => (
-            <div
-              key={laneIndex}
-              className="h-12 flex items-center justify-center border-b border-white/10 text-xs text-gray-300 font-ui-medium"
-            >
-              {laneIndex === 0 ? 'V1' : `A${laneIndex}`}
-            </div>
-          ))}
+          {lanes.map(([laneIndex]) => {
+            const isVideo = laneIndex % 2 === 0
+            const heightClass = isVideo ? 'h-12' : 'h-8'
+            const pair = Math.floor(laneIndex / 2) + 1
+            return (
+              <div
+                key={laneIndex}
+                className={`${heightClass} flex items-center justify-center border-b border-white/10 text-xs text-gray-300 font-ui-medium`}
+              >
+                {isVideo ? `V${pair}` : `A${pair}`}
+              </div>
+            )
+          })}
         </div>
         {/* Ruler and tracks */}
         <div className="flex-1 overflow-hidden">
@@ -117,7 +129,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
           {/* Scrollable track area */}
           <div
             ref={scrollRef}
-            className="relative overflow-hidden bg-panel-bg cursor-grab"
+            className="relative overflow-x-scroll scrollbar-none bg-panel-bg cursor-grab"
             style={{ height: trackAreaHeight }}
           >
             <div className="relative h-full flex flex-col" style={{ width: duration * zoom }}>
