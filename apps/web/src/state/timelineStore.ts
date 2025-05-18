@@ -148,6 +148,7 @@ export const useTimelineStore = create<TimelineState>((set) => ({
         0,
         ...Object.values(clipsById).map((c) => c.end),
       )
+
       const tracks = pruneTracks(state.tracks, clipsById)
       return { clipsById, durationSec, tracks }
     }),
@@ -163,3 +164,4 @@ export const selectClipsArray = (state: TimelineState): Clip[] =>
   Object.values(state.clipsById)
 
 export const selectTracks = (state: TimelineState): Track[] => state.tracks
+
