@@ -6,13 +6,21 @@ export async function detectBeatsFromVideo(
   videoFile: File,
   onProgress?: (stage: string, value?: number) => void,
 ): Promise<number[]> {
-  // 1. Extract raw PCM audio
   onProgress?.('extractAudio', 0);
-  const { audioData, sampleRate } = await extractAudioTrack(
-    videoFile,
-    'raw',
-    (p) => onProgress?.('extractAudio', p),
-  );
+  let audioData: Int16Array;
+  let sampleRate: number;
+  try {
+    const result = await extractAudioTrack(
+      videoFile,
+      'raw',
+      (p) => onProgress?.('extractAudio', p),
+    );
+    audioData = result.audioData;
+    sampleRate = result.sampleRate;
+  } catch (err) {
+    console.error('Failed to extract audio track:', err);
+    throw err instanceof Error ? err : new Error(String(err));
+  }
   onProgress?.('extractAudio', 1);
 
   // 2. Convert to Float32 PCM
