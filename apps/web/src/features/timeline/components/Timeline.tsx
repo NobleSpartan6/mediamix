@@ -6,6 +6,7 @@ import { InteractiveClip } from './InteractiveClip'
 import { TimeRuler } from './TimeRuler'
 import { Playhead } from './Playhead'
 import { TrackRow } from './TrackRow'
+import { GhostCuts } from './GhostCuts'
 import { useTransportStore } from '../../../state/transportStore'
 import { useBeatSlices } from '../hooks/useBeatSlices'
 import { useClipsArray } from '../hooks/useClipsArray'
@@ -140,6 +141,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
           >
             <div className="relative h-full flex flex-col" style={{ width: duration * zoom }}>
               {renderedTracks}
+              <GhostCuts pixelsPerSecond={zoom} height="100%" />
               {/* Playhead overlay */}
               <Playhead positionSeconds={playheadSeconds} pixelsPerSecond={zoom} height="100%" />
             </div>
