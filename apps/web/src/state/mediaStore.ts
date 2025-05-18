@@ -42,3 +42,4 @@ export const useMediaStore = create<MediaState>((set) => ({
 
 export const selectMediaArray = (state: MediaState): MediaAsset[] =>
   Object.values(state.assets)
+
