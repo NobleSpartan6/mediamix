@@ -28,3 +28,7 @@ node_modules/
 tasks.json
 tasks/ 
 mcp.json
+# Yarn PlugnPlay
+.pnp.*
+.yarn/
+yarn.lock
