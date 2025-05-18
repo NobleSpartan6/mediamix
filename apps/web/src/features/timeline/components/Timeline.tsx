@@ -6,6 +6,7 @@ import { InteractiveClip } from './InteractiveClip'
 import { TimeRuler } from './TimeRuler'
 import { Playhead } from './Playhead'
 import { TrackRow } from './TrackRow'
+import { useTransportStore } from '../../../state/transportStore'
 import { useBeatSlices } from '../hooks/useBeatSlices'
 import { useClipsArray } from '../hooks/useClipsArray'
 import { useTimelineKeyboard } from '../hooks/useTimelineKeyboard'
@@ -56,7 +57,12 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [beatSlices, clips.length])
 
-  const playheadSeconds = 0
+  const playheadFrame = useTransportStore((s) => s.playheadFrame)
+  const setCurrentTime = useTimelineStore((s) => s.setCurrentTime)
+  const playheadSeconds = React.useMemo(() => playheadFrame / 30, [playheadFrame])
+  React.useEffect(() => {
+    setCurrentTime(playheadSeconds)
+  }, [playheadSeconds, setCurrentTime])
 
   // Compute timeline duration as the furthest clip end (fallback 60s)
   const duration = React.useMemo(() => {
@@ -83,7 +89,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
           laneIndex={laneIndex}
           clips={laneClips}
           pixelsPerSecond={zoom}
-          type={laneIndex === 0 ? 'video' : 'audio'}
+          type={laneIndex % 2 === 0 ? 'video' : 'audio'}
         />
       )),
     [lanes, zoom],
@@ -154,4 +160,4 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
   )
 })
 
-Timeline.displayName = 'Timeline' 
+Timeline.displayName = 'Timeline'

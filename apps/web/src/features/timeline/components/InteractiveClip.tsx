@@ -13,7 +13,7 @@ interface InteractiveClipProps {
   type: 'video' | 'audio'
 }
 
-export const InteractiveClip: React.FC<InteractiveClipProps> = ({ clip, pixelsPerSecond, type }) => {
+export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ clip, pixelsPerSecond, type }) => {
   const updateClip = useTimelineStore((s) => s.updateClip)
   const ref = React.useRef<HTMLDivElement>(null)
 
@@ -119,4 +119,6 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = ({ clip, pixelsPe
       )}
     </>
   )
-} 
+})
+
+InteractiveClip.displayName = 'InteractiveClip'
