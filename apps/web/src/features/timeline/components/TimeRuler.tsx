@@ -86,7 +86,7 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({ scrollContainerRef, pixels
         className="absolute -top-0.5 translate-x-1/2 font-mono text-[10px] text-gray-300 select-none pointer-events-none"
         style={{ transform: `translateX(${xPos}px)` }}
       >
-        {s}
+        {formatTimecode(s)}
       </span>,
     )
 
