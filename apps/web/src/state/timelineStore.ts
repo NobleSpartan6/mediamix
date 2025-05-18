@@ -90,15 +90,16 @@ export const useTimelineStore = create<TimelineState>((set) => ({
    */
   setClips: (clips) =>
     set((state) => {
-      let tracks = state.tracks
-      clips.forEach((c) => {
-        tracks = ensureTracks(tracks, c.lane)
-      })
       const dict = toDict(clips)
+      const maxLane = clips.reduce((m, c) => Math.max(m, c.lane), -1)
+      const tracks = pruneTracks(
+        ensureTracks(state.tracks, maxLane),
+        dict,
+      )
       return {
         clipsById: dict,
         durationSec: clips.reduce((m, c) => Math.max(m, c.end), 0),
-        tracks: pruneTracks(tracks, dict),
+        tracks,
       }
     }),
 
