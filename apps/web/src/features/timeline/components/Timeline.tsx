@@ -7,6 +7,7 @@ import { TimeRuler } from './TimeRuler'
 import { Playhead } from './Playhead'
 import { TrackRow } from './TrackRow'
 import { useBeatSlices } from '../hooks/useBeatSlices'
+import { useClipsArray } from '../hooks/useClipsArray'
 import { useTimelineKeyboard } from '../hooks/useTimelineKeyboard'
 import { useZoomScroll } from '../hooks/useZoomScroll'
 import { ZoomSlider } from './ZoomSlider'
@@ -29,11 +30,9 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
   const indicatorTimeout = React.useRef<number | null>(null)
   const scrollRef = React.useRef<HTMLDivElement>(null)
   useZoomScroll(scrollRef, zoom, setZoom, { minZoom: 20, maxZoom: 500, zoomStep: 0.002 })
-  // Cache the raw clipsById object from store to avoid recreating array each render
-  const clipsById = useTimelineStore((state) => state.clipsById)
+  // Access clips via memoized selector hook
+  const clips = useClipsArray()
   const setClips = useTimelineStore((state) => state.setClips)
-  // Memoize conversion to array for render
-  const clips = React.useMemo(() => Object.values(clipsById), [clipsById])
 
   // Show zoom change indicator briefly
   React.useEffect(() => {

@@ -77,7 +77,10 @@ export const useTimelineStore = create<TimelineState>((set) => ({
   outPoint: null,
   beats: [],
 
-  // Replace entire clip collection
+  /**
+   * Replace the entire clip collection with a new set.
+   * Tracks and duration are updated accordingly.
+   */
   setClips: (clips) =>
     set((state) => {
       let tracks = state.tracks
@@ -92,8 +95,13 @@ export const useTimelineStore = create<TimelineState>((set) => ({
       }
     }),
 
+  /** Store beat timestamps in seconds */
   setBeats: (beats) => set({ beats }),
 
+  /**
+   * Add a new clip and return its generated id.
+   * Track metadata is expanded to fit the clip lane.
+   */
   addClip: (clipInput) => {
     const id = nanoid()
     const newClip: Clip = { id, ...clipInput }
@@ -109,6 +117,7 @@ export const useTimelineStore = create<TimelineState>((set) => ({
     return id
   },
 
+  /** Update an existing clip by id */
   updateClip: (id, delta) =>
     set((state) => {
       const existing = state.clipsById[id]
@@ -125,6 +134,10 @@ export const useTimelineStore = create<TimelineState>((set) => ({
       return { clipsById, durationSec, tracks }
     }),
 
+  /**
+   * Remove a clip. When `opts.ripple` is true, subsequent clips
+   * on the same lane shift left to fill the gap.
+   */
   removeClip: (id, opts) =>
     set((state) => {
       const clip = state.clipsById[id]
@@ -153,8 +166,11 @@ export const useTimelineStore = create<TimelineState>((set) => ({
       return { clipsById, durationSec, tracks }
     }),
 
+  /** Update the current playhead position (seconds) */
   setCurrentTime: (time) => set({ currentTime: time }),
+  /** Set the in point for playback or export */
   setInPoint: (time) => set({ inPoint: time }),
+  /** Set the out point for playback or export */
   setOutPoint: (time) => set({ outPoint: time }),
 }))
 

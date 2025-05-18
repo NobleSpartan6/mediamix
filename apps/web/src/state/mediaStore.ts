@@ -20,12 +20,16 @@ interface MediaState {
 export const useMediaStore = create<MediaState>((set) => ({
   assets: {},
 
+  /**
+   * Add a new media asset and return its generated id.
+   */
   addAsset: (assetInput) => {
     const id = nanoid()
     set((state) => ({ assets: { ...state.assets, [id]: { id, ...assetInput } } }))
     return id
   },
 
+  /** Update existing asset metadata */
   updateAsset: (id, delta) =>
     set((state) => {
       const asset = state.assets[id]
@@ -33,6 +37,7 @@ export const useMediaStore = create<MediaState>((set) => ({
       return { assets: { ...state.assets, [id]: { ...asset, ...delta } } }
     }),
 
+  /** Remove an asset by id */
   removeAsset: (id) =>
     set((state) => {
       const { [id]: _removed, ...rest } = state.assets
@@ -40,5 +45,7 @@ export const useMediaStore = create<MediaState>((set) => ({
     }),
 }))
 
+/** Retrieve assets as an array */
 export const selectMediaArray = (state: MediaState): MediaAsset[] =>
   Object.values(state.assets)
+
