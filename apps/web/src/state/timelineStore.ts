@@ -9,6 +9,8 @@ export interface Clip {
   end: number
   /** zero-based vertical lane index (0 = first video track) */
   lane: number
+  /** id of source media asset */
+  assetId?: string
 }
 
 export interface Track {

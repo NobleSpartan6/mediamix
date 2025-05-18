@@ -8,6 +8,8 @@ export interface MediaAsset {
   duration: number
   /** optional precomputed waveform peaks */
   waveform?: number[]
+  /** optional thumbnail image as data URL */
+  thumbnail?: string
 }
 
 interface MediaState {
