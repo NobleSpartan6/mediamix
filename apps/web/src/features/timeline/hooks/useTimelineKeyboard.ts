@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useTransportStore } from '../../../state/transportStore'
+import { useTimelineStore } from '../../../state/timelineStore'
 
 /**
  * Hook that installs global key listeners for shuttle (J/K/L) and jog (←/→)
@@ -11,14 +12,24 @@ export function useTimelineKeyboard() {
   const stepShuttle = useTransportStore((s) => s.stepShuttle)
   const setPlayRate = useTransportStore((s) => s.setPlayRate)
   const nudgeFrames = useTransportStore((s) => s.nudgeFrames)
+  const playheadFrame = useTransportStore((s) => s.playheadFrame)
+  const setInPoint = useTimelineStore((s) => s.setInPoint)
+  const setOutPoint = useTimelineStore((s) => s.setOutPoint)
+  const splitClipAt = useTimelineStore((s) => s.splitClipAt)
 
   // Using ref to prevent stale closures during rapid key repeat
   const stepRef = useRef(stepShuttle)
   const setRateRef = useRef(setPlayRate)
   const nudgeRef = useRef(nudgeFrames)
+  const inRef = useRef(setInPoint)
+  const outRef = useRef(setOutPoint)
+  const splitRef = useRef(splitClipAt)
   stepRef.current = stepShuttle
   setRateRef.current = setPlayRate
   nudgeRef.current = nudgeFrames
+  inRef.current = setInPoint
+  outRef.current = setOutPoint
+  splitRef.current = splitClipAt
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -44,6 +55,21 @@ export function useTimelineKeyboard() {
           break
         case 'ArrowLeft':
           nudgeRef.current(e.shiftKey ? -10 : -1)
+          e.preventDefault()
+          break
+        case 'i':
+        case 'I':
+          inRef.current(playheadFrame / 30)
+          e.preventDefault()
+          break
+        case 'o':
+        case 'O':
+          outRef.current(playheadFrame / 30)
+          e.preventDefault()
+          break
+        case 'c':
+        case 'C':
+          splitRef.current(playheadFrame / 30)
           e.preventDefault()
           break
         default:
