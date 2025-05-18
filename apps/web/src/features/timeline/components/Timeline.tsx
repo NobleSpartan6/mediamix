@@ -135,7 +135,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
           {/* Scrollable track area */}
           <div
             ref={scrollRef}
-            className="relative overflow-x-scroll scrollbar-none bg-panel-bg cursor-grab"
+            className="relative overflow-x-scroll overflow-y-auto bg-panel-bg cursor-grab"
             style={{ height: trackAreaHeight }}
           >
             <div className="relative h-full flex flex-col" style={{ width: duration * zoom }}>
