@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { MotifState, FileInfo, ClipSegment, BeatMarker, MediaAsset } from './types'
-import { nanoid } from 'nanoid'
+import { generateId } from '../../utils/id'
 
 // Create the store
 const useMotifStore = create<MotifState>((set) => ({
@@ -90,7 +90,7 @@ const useMotifStore = create<MotifState>((set) => ({
 
   /** Add a new media asset */
   addMediaAsset: (assetInput) => {
-    const id = nanoid()
+    const id = generateId()
     set((state) => ({ mediaAssets: [...state.mediaAssets, { id, ...assetInput }] }))
   },
 

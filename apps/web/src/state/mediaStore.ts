@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { nanoid } from 'nanoid'
+import { generateId } from '../utils/id'
 
 export interface MediaAsset {
   id: string
@@ -26,7 +26,7 @@ export const useMediaStore = create<MediaState>((set) => ({
    * Add a new media asset and return its generated id.
    */
   addAsset: (assetInput) => {
-    const id = nanoid()
+    const id = generateId()
     set((state) => ({ assets: { ...state.assets, [id]: { id, ...assetInput } } }))
     return id
   },
