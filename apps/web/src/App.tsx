@@ -4,6 +4,7 @@ import VideoImportButton from './features/import/VideoImportButton'
 import FileInfoCard from './features/import/FileInfoCard'
 import BeatMarkerBar from './features/timeline/BeatMarkerBar'
 import { Timeline } from './features/timeline/components/Timeline'
+import { CommandInput } from './features/timeline/components/CommandInput'
 import './App.css'
 import { useTimelineStore } from './state/timelineStore'
 import useMotifStore from './lib/store'
@@ -75,6 +76,7 @@ function App() {
         <section className="bg-gray-800/40 rounded-lg p-4">
           <h2 className="text-ui-body font-ui-medium text-gray-300 mb-2">Timeline</h2>
           <Timeline pixelsPerSecond={120} />
+          <CommandInput />
         </section>
       </main>
     </div>
