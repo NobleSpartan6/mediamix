@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { nanoid } from 'nanoid'
+import { nanoid } from '../utils/nanoid'
 
 export interface MediaAsset {
   id: string
