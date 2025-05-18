@@ -24,8 +24,13 @@ function App() {
       const newAssets = mediaAssets.slice(prevAssetCount.current)
       newAssets.forEach((asset, idx) => {
         // demo: use first 5 seconds or asset duration
-        const end = asset.metadata.duration != null ? Math.min(5, asset.metadata.duration) : 5
-        addClip({ start: 0, end, lane: prevAssetCount.current + idx })
+        const end =
+          asset.metadata.duration != null
+            ? Math.min(5, asset.metadata.duration)
+            : 5
+        const baseLane = (prevAssetCount.current + idx) * 2
+        addClip({ start: 0, end, lane: baseLane, assetId: asset.id })
+        addClip({ start: 0, end, lane: baseLane + 1, assetId: asset.id })
       })
       prevAssetCount.current = mediaAssets.length
     }
