@@ -20,15 +20,17 @@ export default function MediaIngest() {
 
   const handleFileHandles = useCallback(async (handles: FileSystemFileHandle[]) => {
     setLoading(true)
-    for (const handle of handles) {
-      try {
-        const file = await handle.getFile()
-        const metadata = (await extractVideoMetadata(file)) ?? defaultMetadata
-        addMediaAsset({ fileName: file.name, fileHandle: handle, metadata })
-      } catch (err) {
-        console.error('Error importing file:', err)
-      }
-    }
+    await Promise.all(
+      handles.map(async (handle) => {
+        try {
+          const file = await handle.getFile()
+          const metadata = (await extractVideoMetadata(file)) ?? defaultMetadata
+          addMediaAsset({ fileName: file.name, fileHandle: handle, metadata })
+        } catch (err) {
+          console.error('Error importing file:', err)
+        }
+      }),
+    )
     setLoading(false)
   }, [addMediaAsset])
 
@@ -47,8 +49,11 @@ export default function MediaIngest() {
         ]
       })
       await handleFileHandles(handles)
-    } catch {
-      // user canceled
+    } catch (err) {
+      // Swallow user cancellation but log unexpected errors
+      if (err && (err as DOMException).name !== 'AbortError') {
+        console.error('File picker error:', err)
+      }
     }
   }
 
