@@ -34,6 +34,7 @@ export interface TimelineState {
   addClip: (clip: Omit<Clip, 'id'>) => string
   updateClip: (id: string, delta: Partial<Omit<Clip, 'id'>>) => void
   removeClip: (id: string, opts?: { ripple?: boolean }) => void
+  splitClipAt: (time: number) => string | null
   /** array of beat timestamps in seconds (monotonically increasing) */
   beats: number[]
   setBeats: (beats: number[]) => void
@@ -165,6 +166,27 @@ export const useTimelineStore = create<TimelineState>((set) => ({
       const tracks = pruneTracks(state.tracks, clipsById)
       return { clipsById, durationSec, tracks }
     }),
+
+  /**
+   * Split the clip under `time` into two clips.
+   * Returns the id of the new right-hand clip or null if none found.
+   */
+  splitClipAt: (time) => {
+    let newId: string | null = null
+    set((state) => {
+      const entry = Object.entries(state.clipsById).find(([, c]) => c.start < time && c.end > time)
+      if (!entry) return {}
+      const [id, clip] = entry
+      newId = nanoid()
+      const first: Clip = { ...clip, end: time }
+      const second: Clip = { ...clip, id: newId, start: time }
+      const clipsById = { ...state.clipsById, [id]: first, [newId]: second }
+      const durationSec = Math.max(state.durationSec, second.end)
+      const tracks = pruneTracks(state.tracks, clipsById)
+      return { clipsById, durationSec, tracks }
+    })
+    return newId
+  },
 
   /** Update the current playhead position (seconds) */
   setCurrentTime: (time) => set({ currentTime: time }),
