@@ -34,6 +34,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
   // Access clips via memoized selector hook
   const clips = useClipsArray()
   const setClips = useTimelineStore((state) => state.setClips)
+  const tracks = useTimelineStore((s) => s.tracks)
 
   // Show zoom change indicator briefly
   React.useEffect(() => {
@@ -117,13 +118,13 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
           {lanes.map(([laneIndex]) => {
             const isVideo = laneIndex % 2 === 0
             const heightClass = isVideo ? 'h-12' : 'h-8'
-            const pair = Math.floor(laneIndex / 2) + 1
+            const label = tracks[laneIndex]?.label ?? ''
             return (
               <div
                 key={laneIndex}
                 className={`${heightClass} flex items-center justify-center border-b border-white/10 text-xs text-gray-300 font-ui-medium`}
               >
-                {isVideo ? `V${pair}` : `A${pair}`}
+                {label}
               </div>
             )
           })}
