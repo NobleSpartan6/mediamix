@@ -97,6 +97,7 @@ const mockSetBeatDetectionStage = vi.fn((stage) => {
   mockStoreData = { ...mockStoreData, beatDetectionStage: stage };
   // vi.advanceTimersByTime(0); // Temporarily commented out
 });
+const mockAddMediaAsset = vi.fn();
 const mockResetStore = vi.fn(() => {
   mockStoreData = {
     fileInfo: { ...initialFileInfo },
@@ -131,6 +132,7 @@ function mockUseMotifStore (selector?: (state: typeof mockStoreData & typeof moc
     setBeatDetectionError: mockSetBeatDetectionError,
     setBeatDetectionProgress: mockSetBeatDetectionProgress,
     setBeatDetectionStage: mockSetBeatDetectionStage,
+    addMediaAsset: mockAddMediaAsset,
     resetStore: mockResetStore,
   };
 
@@ -174,6 +176,7 @@ const mockActions = {
   setBeatDetectionError: mockSetBeatDetectionError,
   setBeatDetectionProgress: mockSetBeatDetectionProgress,
   setBeatDetectionStage: mockSetBeatDetectionStage,
+  addMediaAsset: mockAddMediaAsset,
   resetStore: mockResetStore,
 };
 
