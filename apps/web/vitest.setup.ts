@@ -72,6 +72,17 @@ if (typeof Worker === 'undefined') {
   (globalThis as any).Worker = MockWorker;
 }
 
+// Polyfill ResizeObserver for component libraries
+if (typeof global.ResizeObserver === 'undefined') {
+  class MockResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  // @ts-ignore
+  global.ResizeObserver = MockResizeObserver;
+}
+
 // Mock URL.createObjectURL for tests
 if (typeof window !== 'undefined') {
   if (!window.URL.createObjectURL) {

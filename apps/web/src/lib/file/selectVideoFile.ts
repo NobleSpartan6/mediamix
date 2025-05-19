@@ -8,13 +8,13 @@ export interface SelectedVideo {
  * Falls back to a hidden <input type="file"> when the API is unavailable.
  * Returns null if the user cancels.
  */
-export async function selectVideoFile(): Promise<SelectedVideo[] | null> {
+export async function selectVideoFile(): Promise<SelectedVideo | null> {
   // Prefer the newer File-System-Access API
   if ('showOpenFilePicker' in window) {
     try {
       // @ts-expect-error TS lib may not yet include the picker types
       const handles = await window.showOpenFilePicker({
-        multiple: true,
+        multiple: false,
         types: [
           {
             description: 'Video Files',
@@ -26,14 +26,10 @@ export async function selectVideoFile(): Promise<SelectedVideo[] | null> {
           },
         ],
       })
-      if (!handles || handles.length === 0) return null
-      const selections = await Promise.all(
-        handles.map(async (handle: any) => {
-          const file = await handle.getFile()
-          return { file, handle }
-        })
-      )
-      return selections
+      const handle = Array.isArray(handles) ? handles[0] : handles
+      if (!handle) return null
+      const file = await handle.getFile()
+      return { file, handle }
     } catch (err: any) {
       // AbortError when user cancels — just return null
       if (err?.name === 'AbortError') return null
@@ -42,20 +38,16 @@ export async function selectVideoFile(): Promise<SelectedVideo[] | null> {
   }
 
   // Fallback <input type="file">
-  return new Promise<SelectedVideo[] | null>((resolve, reject) => {
+  return new Promise<SelectedVideo | null>((resolve, reject) => {
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = 'video/*'
-    input.multiple = true
+    input.multiple = false
     input.style.display = 'none'
 
     input.onchange = () => {
-      const files = input.files ? Array.from(input.files) : []
-      if (files.length > 0) {
-        resolve(files.map((file) => ({ file })))
-      } else {
-        resolve(null)
-      }
+      const file = input.files && input.files[0]
+      resolve(file ? { file } : null)
       document.body.removeChild(input)
     }
 
