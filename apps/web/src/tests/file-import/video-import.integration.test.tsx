@@ -97,6 +97,7 @@ const mockSetBeatDetectionStage = vi.fn((stage) => {
   mockStoreData = { ...mockStoreData, beatDetectionStage: stage };
   // vi.advanceTimersByTime(0); // Temporarily commented out
 });
+const mockAddMediaAsset = vi.fn();
 const mockResetStore = vi.fn(() => {
   mockStoreData = {
     fileInfo: { ...initialFileInfo },
@@ -116,6 +117,8 @@ const mockResetStore = vi.fn(() => {
   // vi.advanceTimersByTime(0); // Temporarily commented out
 });
 
+const mockAddMediaAsset = vi.fn();
+
 
 // This function will act as our mock `useMotifStore`
 // CONVERTED TO FUNCTION DECLARATION FOR HOISTING
@@ -131,7 +134,9 @@ function mockUseMotifStore (selector?: (state: typeof mockStoreData & typeof moc
     setBeatDetectionError: mockSetBeatDetectionError,
     setBeatDetectionProgress: mockSetBeatDetectionProgress,
     setBeatDetectionStage: mockSetBeatDetectionStage,
+    addMediaAsset: mockAddMediaAsset,
     resetStore: mockResetStore,
+    addMediaAsset: mockAddMediaAsset,
   };
 
   if (typeof selector === 'function') {
@@ -174,7 +179,9 @@ const mockActions = {
   setBeatDetectionError: mockSetBeatDetectionError,
   setBeatDetectionProgress: mockSetBeatDetectionProgress,
   setBeatDetectionStage: mockSetBeatDetectionStage,
+  addMediaAsset: mockAddMediaAsset,
   resetStore: mockResetStore,
+  addMediaAsset: mockAddMediaAsset,
 };
 
 
@@ -227,10 +234,13 @@ vi.mock('../../lib/store/hooks', async (importOriginal) => {
 
 // Mock file operations
 vi.mock('../../lib/file/selectVideoFile', () => ({
-  selectVideoFile: () => Promise.resolve({
-    file: new File(['dummy'], 'demo.mp4', { type: 'video/mp4' }),
-    handle: undefined
-  })
+  selectVideoFile: () =>
+    Promise.resolve([
+      {
+        file: new File(['dummy'], 'demo.mp4', { type: 'video/mp4' }),
+        handle: undefined,
+      },
+    ])
 }));
 
 vi.mock('../../lib/file/extractVideoMetadata', () => ({

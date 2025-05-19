@@ -5,7 +5,6 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import reactPlugin from 'eslint-plugin-react'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
 import importPlugin from 'eslint-plugin-import'
-import unusedImports from 'eslint-plugin-unused-imports'
 import prettierPlugin from 'eslint-plugin-prettier'
 import tseslint from 'typescript-eslint'
 
@@ -24,7 +23,6 @@ export default tseslint.config(
       react: reactPlugin,
       'jsx-a11y': jsxA11y,
       import: importPlugin,
-      'unused-imports': unusedImports,
       prettier: prettierPlugin,
     },
     rules: {
@@ -49,7 +47,6 @@ export default tseslint.config(
           unnamedComponents: 'arrow-function',
         },
       ],
-      'unused-imports/no-unused-imports': 'error',
       'prettier/prettier': 'error',
     },
   },

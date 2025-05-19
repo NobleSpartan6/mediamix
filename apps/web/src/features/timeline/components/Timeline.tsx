@@ -33,6 +33,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
   const indicatorTimeout = React.useRef<number | null>(null)
   const scrollRef = React.useRef<HTMLDivElement>(null)
   useZoomScroll(scrollRef, zoom, setZoom, { minZoom: 20, maxZoom: 500, zoomStep: 0.002 })
+  const [scrollLeft, setScrollLeft] = React.useState(0)
   // Access clips via memoized selector hook
   const clips = useClipsArray()
   const setClips = useTimelineStore((state) => state.setClips)
@@ -70,6 +71,28 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
   React.useEffect(() => {
     setCurrentTime(playheadSeconds)
   }, [playheadSeconds, setCurrentTime])
+
+  // Track scroll position for playhead overlay
+  React.useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    let raf: number | undefined
+    const handleScroll = () => {
+      if (raf) return
+      raf = window.requestAnimationFrame(() => {
+        setScrollLeft(el.scrollLeft)
+        raf && window.cancelAnimationFrame(raf)
+        raf = undefined
+      })
+    }
+
+    setScrollLeft(el.scrollLeft)
+    el.addEventListener('scroll', handleScroll, { passive: true })
+    return () => {
+      el.removeEventListener('scroll', handleScroll)
+      raf && window.cancelAnimationFrame(raf)
+    }
+  }, [])
 
   // Compute timeline duration as the furthest clip end (fallback 60s)
   const duration = React.useMemo(() => {
@@ -154,18 +177,23 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
         <div className="flex-1 overflow-hidden">
           {/* Numeric time ruler */}
           <TimeRuler scrollContainerRef={scrollRef} pixelsPerSecond={zoom} duration={duration} />
-          {/* Scrollable track area */}
-          <div
-            ref={scrollRef}
-            className="relative overflow-x-scroll overflow-y-auto bg-panel-bg cursor-grab"
-            style={{ height: trackAreaHeight }}
-          >
-            <div className="relative h-full flex flex-col" style={{ width: duration * zoom }}>
-              {renderedTracks}
-              <GhostCuts pixelsPerSecond={zoom} height="100%" />
-              {/* Playhead overlay */}
-              <Playhead positionSeconds={playheadSeconds} pixelsPerSecond={zoom} height="100%" />
+          {/* Track area with overlay */}
+          <div className="relative" style={{ height: trackAreaHeight }}>
+            <div
+              ref={scrollRef}
+              className="relative h-full overflow-x-scroll overflow-y-auto bg-panel-bg cursor-grab"
+            >
+              <div className="relative h-full flex flex-col" style={{ width: duration * zoom }}>
+                {renderedTracks}
+                <GhostCuts pixelsPerSecond={zoom} height="100%" />
+              </div>
             </div>
+            <Playhead
+              positionSeconds={playheadSeconds}
+              pixelsPerSecond={zoom}
+              height="100%"
+              offsetX={scrollLeft}
+            />
           </div>
         </div>
       </div>

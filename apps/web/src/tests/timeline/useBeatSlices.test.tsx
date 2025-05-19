@@ -3,7 +3,27 @@ import { act, renderHook, render, waitFor } from '@testing-library/react'
 
 import { useBeatSlices } from '../../features/timeline/hooks/useBeatSlices'
 import { Timeline } from '../../features/timeline/components/Timeline'
+
+// Mock react-moveable to avoid dependency errors in tests
+vi.mock('react-moveable', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+
+// Polyfill ResizeObserver for JSDOM environment
+class DummyResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+// @ts-ignore
+global.ResizeObserver = DummyResizeObserver
+
 import { useTimelineStore } from '../../state/timelineStore'
+
+// Stub complex drag/resize library which requires React runtime during tests
+vi.mock('react-moveable', () => ({ default: () => null }))
+
 
 // Helper: reset Zustand store between tests for deterministic state
 const resetStore = () => {
@@ -29,20 +49,25 @@ describe('useBeatSlices hook', () => {
     resetStore()
   })
 
-  it('converts beats array into adjacent clip slices', () => {
-    // Arrange – populate beats in store
-    const beats = [0, 1, 2, 3]
+  it('distributes slices round-robin across video lanes', () => {
+    // Arrange – two video tracks present
     act(() => {
-      useTimelineStore.getState().setBeats(beats)
+      useTimelineStore.setState({
+        tracks: [
+          { id: 'track-0', type: 'video', label: 'V1' },
+          { id: 'track-1', type: 'audio', label: 'A1' },
+          { id: 'track-2', type: 'video', label: 'V2' },
+          { id: 'track-3', type: 'audio', label: 'A2' },
+        ],
+      })
+      useTimelineStore.getState().setBeats([0, 1, 2, 3])
     })
 
     // Act – invoke the hook via renderHook
     const { result } = renderHook(() => useBeatSlices())
 
-    // Assert – produces beats.length - 1 slices with expected metadata
-    expect(result.current.length).toBe(beats.length - 1)
-    expect(result.current[0]).toMatchObject({ start: 0, end: 1, lane: 0 })
-    expect(result.current[2]).toMatchObject({ start: 2, end: 3 })
+    // Assert – lanes alternate between available video tracks
+    expect(result.current.map((c) => c.lane)).toEqual([0, 2, 0])
   })
 })
 

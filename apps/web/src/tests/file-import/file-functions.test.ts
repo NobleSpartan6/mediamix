@@ -34,9 +34,9 @@ describe('selectVideoFile', () => {
     const result = await selectVideoFile()
 
     expect(result).not.toBeNull()
-    expect(result?.file).toBe(testFile)
+    expect(result?.[0]?.file).toBe(testFile)
     // Ensure we propagate the original handle reference (for FS access API)
-    expect(result?.handle).toBe(fakeHandle)
+    expect(result?.[0]?.handle).toBe(fakeHandle)
   })
 })
 
