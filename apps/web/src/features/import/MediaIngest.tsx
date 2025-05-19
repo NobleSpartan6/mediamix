@@ -2,6 +2,9 @@ import { useCallback, useState } from 'react'
 import useMotifStore from '../../lib/store'
 import { extractVideoMetadata } from '../../lib/file/extractVideoMetadata'
 import type { VideoMetadata } from '../../lib/file/extractVideoMetadata'
+import { useMediaStore } from '../../state/mediaStore'
+import { generateWaveform } from '../../lib/file/generateWaveform'
+import { captureThumbnail } from '../../lib/file/captureThumbnail'
 
 const defaultMetadata: VideoMetadata = {
   duration: null,
@@ -26,6 +29,30 @@ export default function MediaIngest() {
           const file = await handle.getFile()
           const metadata = (await extractVideoMetadata(file)) ?? defaultMetadata
           addMediaAsset({ fileName: file.name, fileHandle: handle, metadata })
+
+          const assets = useMotifStore.getState().mediaAssets
+          const assetId = assets[assets.length - 1]?.id
+          if (assetId) {
+            useMediaStore.getState().addAsset({
+              id: assetId,
+              fileName: file.name,
+              duration: metadata.duration ?? 0,
+            })
+            let waveform: number[] | undefined
+            let thumbnail: string | undefined
+            try {
+              ;[waveform, thumbnail] = await Promise.all([
+                generateWaveform(file),
+                captureThumbnail(file),
+              ])
+            } catch (err) {
+              console.warn('Media analysis failed', err)
+            }
+            useMediaStore.getState().updateAsset(assetId, {
+              waveform: waveform && waveform.length > 0 ? waveform : [0],
+              thumbnail: thumbnail ?? 'data:image/placeholder',
+            })
+          }
         } catch (err) {
           console.error('Error importing file:', err)
         }

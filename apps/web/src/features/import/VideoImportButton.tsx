@@ -9,6 +9,9 @@ import { detectBeatsFromVideo } from '../../lib/file/detectBeatsFromVideo'
 import { useBeatDetection } from '../../lib/store/hooks'
 import type { BeatMarker } from '../../lib/store/types'
 import { BeatDetectionProgress } from './BeatDetectionProgress'
+import { useMediaStore } from '../../state/mediaStore'
+import { generateWaveform } from '../../lib/file/generateWaveform'
+import { captureThumbnail } from '../../lib/file/captureThumbnail'
 
 export function VideoImportButton() {
   const { isFileLoading, fileError, setFileInfo } = useFileState()
@@ -52,8 +55,31 @@ export function VideoImportButton() {
 
       // Persist metadata in global state
       setFileInfo(metadata)
-      // Add asset to media library
+      // Add asset to legacy store (also creates timeline clips)
       addMediaAsset({ fileName: file.name, fileHandle: handle ?? null, metadata })
+
+      // Retrieve generated id and register with mediaStore
+      const assets = useMotifStore.getState().mediaAssets
+      const assetId = assets[assets.length - 1]?.id
+      if (assetId) {
+        useMediaStore.getState().addAsset({
+          id: assetId,
+          fileName: file.name,
+          duration: metadata.duration ?? 0,
+        })
+        try {
+          const [waveform, thumbnail] = await Promise.all([
+            generateWaveform(file),
+            captureThumbnail(file),
+          ])
+          useMediaStore.getState().updateAsset(assetId, {
+            waveform,
+            thumbnail,
+          })
+        } catch (analysisErr) {
+          console.warn('Media analysis failed', analysisErr)
+        }
+      }
 
       /*
        * === Beat Detection ===

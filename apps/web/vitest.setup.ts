@@ -146,6 +146,15 @@ vi.mock('../src/lib/file/extractAudioTrack', () => {
   };
 });
 
+// Mock waveform and thumbnail generation to keep tests fast
+vi.mock('../src/lib/file/generateWaveform', () => ({
+  generateWaveform: vi.fn().mockResolvedValue([0.1, 0.2, 0.3]),
+}))
+
+vi.mock('../src/lib/file/captureThumbnail', () => ({
+  captureThumbnail: vi.fn().mockResolvedValue('data:image/png;base64,mock'),
+}))
+
 // Mock detectBeatsFromVideo with a proper implementation
 vi.mock('../src/lib/file/detectBeatsFromVideo', () => {
   return {

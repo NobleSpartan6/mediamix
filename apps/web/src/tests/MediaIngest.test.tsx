@@ -1,8 +1,11 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
+import React from 'react'
 import { render, fireEvent, waitFor, screen } from '@testing-library/react'
 import MediaIngest from '../features/import/MediaIngest'
 import { useTimelineStore } from '../state/timelineStore'
 import useMotifStore from '../lib/store'
+import { useMediaStore } from '../state/mediaStore'
+import { Clip } from '../features/timeline/components/Clip'
 
 vi.mock('../lib/file/extractVideoMetadata', () => ({
   extractVideoMetadata: vi.fn().mockResolvedValue({
@@ -15,6 +18,12 @@ vi.mock('../lib/file/extractVideoMetadata', () => ({
     sampleRate: null,
     channelCount: null,
   }),
+}))
+vi.mock('../lib/file/generateWaveform', () => ({
+  generateWaveform: vi.fn().mockResolvedValue([0.1, 0.2]),
+}))
+vi.mock('../lib/file/captureThumbnail', () => ({
+  captureThumbnail: vi.fn().mockResolvedValue('data:image/png;base64,test'),
 }))
 
 const resetStores = () => {
@@ -29,6 +38,7 @@ const resetStores = () => {
     outPoint: null,
     beats: [],
   })
+  useMediaStore.setState({ assets: {} })
 }
 
 describe('MediaIngest', () => {
@@ -53,7 +63,24 @@ describe('MediaIngest', () => {
       expect(clips.length).toBe(2)
       expect(clips[0].assetId).toBeDefined()
       expect(clips[1].assetId).toBeDefined()
+      const assets = useMediaStore.getState().assets
+      const asset = assets[clips[0].assetId as string]
+      expect(asset.waveform?.length).toBeGreaterThan(0)
+      expect(asset.thumbnail).toContain('data:image')
     })
+
+    const clips = Object.values(useTimelineStore.getState().clipsById)
+    const videoClip = clips.find((c) => c.lane % 2 === 0)!
+    const audioClip = clips.find((c) => c.lane % 2 === 1)!
+    const { container: vCont } = render(
+      <Clip clip={videoClip} pixelsPerSecond={100} type="video" />,
+    )
+    const videoDiv = vCont.querySelector('div') as HTMLDivElement
+    expect(videoDiv.style.backgroundImage).toContain('data:image')
+    const { container: aCont } = render(
+      <Clip clip={audioClip} pixelsPerSecond={100} type="audio" />,
+    )
+    expect(aCont.querySelector('canvas')).not.toBeNull()
   })
 
   it('imports files when dropped', async () => {
