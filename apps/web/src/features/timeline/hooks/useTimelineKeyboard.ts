@@ -3,35 +3,39 @@ import { useTransportStore } from '../../../state/transportStore'
 import { useTimelineStore } from '../../../state/timelineStore'
 
 /**
- * Hook that installs global key listeners for shuttle (J/K/L) and jog (←/→)
-actions. The listeners are attached to `window`, so shortcuts work
- * regardless of focus. Attach by calling inside the Timeline component – it
- * automatically cleans up on unmount.
+ * Installs global key listeners for shuttle (J/K/L) and jog (←/→) actions.
+ * Listeners are attached to `window`, so shortcuts work regardless of focus.
+ * Call inside the Timeline component – it automatically cleans up on unmount.
  */
 export function useTimelineKeyboard() {
-  const stepShuttle = useTransportStore((s) => s.stepShuttle)
-  const setPlayRate = useTransportStore((s) => s.setPlayRate)
-  const nudgeFrames = useTransportStore((s) => s.nudgeFrames)
+  const stepShuttle   = useTransportStore((s) => s.stepShuttle)
+  const setPlayRate   = useTransportStore((s) => s.setPlayRate)
+  const nudgeFrames   = useTransportStore((s) => s.nudgeFrames)
   const playheadFrame = useTransportStore((s) => s.playheadFrame)
-  const playheadRef = useRef(playheadFrame)
-  const setInPoint = useTimelineStore((s) => s.setInPoint)
-  const setOutPoint = useTimelineStore((s) => s.setOutPoint)
-  const splitClipAt = useTimelineStore((s) => s.splitClipAt)
 
-  // Using ref to prevent stale closures during rapid key repeat
-  const stepRef = useRef(stepShuttle)
-  const setRateRef = useRef(setPlayRate)
-  const nudgeRef = useRef(nudgeFrames)
-  const inRef = useRef(setInPoint)
-  const outRef = useRef(setOutPoint)
-  const splitRef = useRef(splitClipAt)
-  stepRef.current = stepShuttle
-  setRateRef.current = setPlayRate
-  nudgeRef.current = nudgeFrames
-  inRef.current = setInPoint
-  outRef.current = setOutPoint
-  splitRef.current = splitClipAt
-  playheadRef.current = playheadFrame
+  const setInPoint    = useTimelineStore((s) => s.setInPoint)
+  const setOutPoint   = useTimelineStore((s) => s.setOutPoint)
+  const splitClipAt   = useTimelineStore((s) => s.splitClipAt)
+
+  /** Refs prevent stale closures during rapid key-repeat */
+  const stepRef     = useRef(stepShuttle)
+  const setRateRef  = useRef(setPlayRate)
+  const nudgeRef    = useRef(nudgeFrames)
+  const playheadRef = useRef(playheadFrame)
+  const inRef       = useRef(setInPoint)
+  const outRef      = useRef(setOutPoint)
+  const splitRef    = useRef(splitClipAt)
+
+  /* Keep refs fresh each render */
+  useEffect(() => {
+    stepRef.current     = stepShuttle
+    setRateRef.current  = setPlayRate
+    nudgeRef.current    = nudgeFrames
+    playheadRef.current = playheadFrame
+    inRef.current       = setInPoint
+    outRef.current      = setOutPoint
+    splitRef.current    = splitClipAt
+  })
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -60,20 +64,26 @@ export function useTimelineKeyboard() {
           e.preventDefault()
           break
         case 'i':
-        case 'I':
+        case 'I': {
+          playheadRef.current = useTransportStore.getState().playheadFrame
           inRef.current(playheadRef.current / 30)
           e.preventDefault()
           break
+        }
         case 'o':
-        case 'O':
+        case 'O': {
+          playheadRef.current = useTransportStore.getState().playheadFrame
           outRef.current(playheadRef.current / 30)
           e.preventDefault()
           break
+        }
         case 'c':
-        case 'C':
+        case 'C': {
+          playheadRef.current = useTransportStore.getState().playheadFrame
           splitRef.current(playheadRef.current / 30)
           e.preventDefault()
           break
+        }
         default:
       }
     }
@@ -81,4 +91,5 @@ export function useTimelineKeyboard() {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
-} 
+}
+
