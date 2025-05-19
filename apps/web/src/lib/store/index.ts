@@ -1,9 +1,8 @@
 import { create } from 'zustand'
 import type { MotifState, FileInfo, ClipSegment, BeatMarker, MediaAsset } from './types'
 
-import { nanoid } from '../../utils/nanoid'
-
 import { generateId } from '../../utils/id'
+import { useTimelineStore } from '../state/timelineStore'
 
 // Create the store
 const useMotifStore = create<MotifState>((set) => ({
@@ -91,10 +90,23 @@ const useMotifStore = create<MotifState>((set) => ({
     fileError: error
   })),
 
-  /** Add a new media asset */
+  /**
+   * Add a new media asset and create paired timeline clips.
+   * Clips span the asset duration on the next free video and audio lanes.
+   */
   addMediaAsset: (assetInput) => {
     const id = generateId()
     set((state) => ({ mediaAssets: [...state.mediaAssets, { id, ...assetInput }] }))
+
+    const timeline = useTimelineStore.getState()
+    const maxLane = Object.values(timeline.clipsById).reduce(
+      (m, c) => Math.max(m, c.lane),
+      -1,
+    )
+    const baseLane = maxLane + 1
+    const duration = assetInput.metadata.duration ?? 0
+    timeline.addClip({ start: 0, end: duration, lane: baseLane, assetId: id })
+    timeline.addClip({ start: 0, end: duration, lane: baseLane + 1, assetId: id })
   },
 
   /** Replace all media assets */
