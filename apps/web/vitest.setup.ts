@@ -86,10 +86,43 @@ if (typeof global.ResizeObserver === 'undefined') {
 // Mock URL.createObjectURL for tests
 if (typeof window !== 'undefined') {
   if (!window.URL.createObjectURL) {
-    window.URL.createObjectURL = vi.fn().mockReturnValue('mock-object-url');
+    window.URL.createObjectURL = vi.fn().mockReturnValue('mock-object-url')
   }
   if (!window.URL.revokeObjectURL) {
-    window.URL.revokeObjectURL = vi.fn();
+    window.URL.revokeObjectURL = vi.fn()
+  }
+  if (!('indexedDB' in window)) {
+    class FakeDB {
+      name: string
+      objectStoreNames = new Set<string>()
+      constructor(name: string) {
+        this.name = name
+      }
+      createObjectStore(name: string) {
+        this.objectStoreNames.add(name)
+        return {}
+      }
+      close() {}
+    }
+    class FakeRequest {
+      result: any
+      onupgradeneeded: ((ev: any) => void) | null = null
+      onsuccess: ((ev: any) => void) | null = null
+      onerror: ((ev: any) => void) | null = null
+      constructor(result: any) {
+        this.result = result
+        setTimeout(() => {
+          this.onupgradeneeded?.({ target: { result } })
+          this.onsuccess?.({ target: { result } })
+        }, 0)
+      }
+    }
+    ;(window as any).indexedDB = {
+      open(name: string) {
+        const db = new FakeDB(name)
+        return new FakeRequest(db)
+      },
+    } as IDBFactory
   }
 }
 
@@ -112,6 +145,15 @@ vi.mock('../src/lib/file/extractAudioTrack', () => {
     })
   };
 });
+
+// Mock waveform and thumbnail generation to keep tests fast
+vi.mock('../src/lib/file/generateWaveform', () => ({
+  generateWaveform: vi.fn().mockResolvedValue([0.1, 0.2, 0.3]),
+}))
+
+vi.mock('../src/lib/file/captureThumbnail', () => ({
+  captureThumbnail: vi.fn().mockResolvedValue('data:image/png;base64,mock'),
+}))
 
 // Mock detectBeatsFromVideo with a proper implementation
 vi.mock('../src/lib/file/detectBeatsFromVideo', () => {
