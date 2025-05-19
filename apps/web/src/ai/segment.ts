@@ -1,4 +1,7 @@
-export const aiSegment = () => {
-  // TODO(tauri-port): integrate local-llm or edge function for AI-driven segmentation
-  console.log('aiSegment stub invoked')
-} 
+/**
+ * Invoke an external API to perform video segmentation.
+ */
+export const aiSegment = async (image: Blob): Promise<Uint8Array> => {
+  const res = await fetch('/api/segment', { method: 'POST', body: image })
+  return new Uint8Array(await res.arrayBuffer())
+}

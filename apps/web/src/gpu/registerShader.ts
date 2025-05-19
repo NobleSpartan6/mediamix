@@ -1,4 +1,7 @@
-export const registerShader = () => {
-  // TODO(tauri-port): implement shader registry with WebGPU / WebGL
-  console.log('registerShader stub executed')
-} 
+const registry = new Map<string, { vertex: string; fragment: string }>()
+
+export const registerShader = (name: string, sources: { vertex: string; fragment: string }): void => {
+  registry.set(name, sources)
+}
+
+export const getShader = (name: string) => registry.get(name)
