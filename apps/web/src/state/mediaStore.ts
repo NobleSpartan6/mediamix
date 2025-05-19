@@ -18,7 +18,7 @@ export interface MediaAsset {
 
 interface MediaState {
   assets: Record<string, MediaAsset>
-  addAsset: (asset: Omit<MediaAsset, 'id'>) => string
+  addAsset: (asset: Omit<MediaAsset, 'id'> & { id?: string }) => string
   updateAsset: (id: string, delta: Partial<Omit<MediaAsset, 'id'>>) => void
   removeAsset: (id: string) => void
 }
@@ -30,8 +30,9 @@ export const useMediaStore = create<MediaState>((set) => ({
    * Add a new media asset and return its generated id.
    */
   addAsset: (assetInput) => {
-    const id = generateId()
-    set((state) => ({ assets: { ...state.assets, [id]: { id, ...assetInput } } }))
+    const { id: providedId, ...rest } = assetInput as any
+    const id = providedId ?? generateId()
+    set((state) => ({ assets: { ...state.assets, [id]: { id, ...rest } } }))
     return id
   },
 
