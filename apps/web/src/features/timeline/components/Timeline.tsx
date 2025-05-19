@@ -8,6 +8,7 @@ import { Playhead } from './Playhead'
 import { TrackRow } from './TrackRow'
 import { GhostCuts } from './GhostCuts'
 import { useTransportStore } from '../../../state/transportStore'
+import { usePlaybackTicker } from '../../../state/playbackTicker'
 import { useBeatSlices } from '../hooks/useBeatSlices'
 import { useClipsArray } from '../hooks/useClipsArray'
 import { useTimelineKeyboard } from '../hooks/useTimelineKeyboard'
@@ -151,6 +152,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
   }, [currentTime, playRate, followPlayhead, zoom])
 
   useTimelineKeyboard()
+  usePlaybackTicker()
 
   return (
     <div className="w-full select-none relative">
