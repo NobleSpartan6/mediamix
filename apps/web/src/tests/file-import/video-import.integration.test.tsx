@@ -133,7 +133,6 @@ function mockUseMotifStore (selector?: (state: typeof mockStoreData & typeof moc
     setBeatDetectionStage: mockSetBeatDetectionStage,
     addMediaAsset: mockAddMediaAsset,
     resetStore: mockResetStore,
-    addMediaAsset: mockAddMediaAsset,
   };
 
   if (typeof selector === 'function') {
@@ -178,7 +177,6 @@ const mockActions = {
   setBeatDetectionStage: mockSetBeatDetectionStage,
   addMediaAsset: mockAddMediaAsset,
   resetStore: mockResetStore,
-  addMediaAsset: mockAddMediaAsset,
 };
 
 
