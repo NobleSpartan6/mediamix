@@ -13,6 +13,7 @@ export function useTimelineKeyboard() {
   const setPlayRate = useTransportStore((s) => s.setPlayRate)
   const nudgeFrames = useTransportStore((s) => s.nudgeFrames)
   const playheadFrame = useTransportStore((s) => s.playheadFrame)
+  const playheadRef = useRef(playheadFrame)
   const setInPoint = useTimelineStore((s) => s.setInPoint)
   const setOutPoint = useTimelineStore((s) => s.setOutPoint)
   const splitClipAt = useTimelineStore((s) => s.splitClipAt)
@@ -30,6 +31,7 @@ export function useTimelineKeyboard() {
   inRef.current = setInPoint
   outRef.current = setOutPoint
   splitRef.current = splitClipAt
+  playheadRef.current = playheadFrame
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -59,17 +61,17 @@ export function useTimelineKeyboard() {
           break
         case 'i':
         case 'I':
-          inRef.current(playheadFrame / 30)
+          inRef.current(playheadRef.current / 30)
           e.preventDefault()
           break
         case 'o':
         case 'O':
-          outRef.current(playheadFrame / 30)
+          outRef.current(playheadRef.current / 30)
           e.preventDefault()
           break
         case 'c':
         case 'C':
-          splitRef.current(playheadFrame / 30)
+          splitRef.current(playheadRef.current / 30)
           e.preventDefault()
           break
         default:
