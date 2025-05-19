@@ -86,10 +86,43 @@ if (typeof global.ResizeObserver === 'undefined') {
 // Mock URL.createObjectURL for tests
 if (typeof window !== 'undefined') {
   if (!window.URL.createObjectURL) {
-    window.URL.createObjectURL = vi.fn().mockReturnValue('mock-object-url');
+    window.URL.createObjectURL = vi.fn().mockReturnValue('mock-object-url')
   }
   if (!window.URL.revokeObjectURL) {
-    window.URL.revokeObjectURL = vi.fn();
+    window.URL.revokeObjectURL = vi.fn()
+  }
+  if (!('indexedDB' in window)) {
+    class FakeDB {
+      name: string
+      objectStoreNames = new Set<string>()
+      constructor(name: string) {
+        this.name = name
+      }
+      createObjectStore(name: string) {
+        this.objectStoreNames.add(name)
+        return {}
+      }
+      close() {}
+    }
+    class FakeRequest {
+      result: any
+      onupgradeneeded: ((ev: any) => void) | null = null
+      onsuccess: ((ev: any) => void) | null = null
+      onerror: ((ev: any) => void) | null = null
+      constructor(result: any) {
+        this.result = result
+        setTimeout(() => {
+          this.onupgradeneeded?.({ target: { result } })
+          this.onsuccess?.({ target: { result } })
+        }, 0)
+      }
+    }
+    ;(window as any).indexedDB = {
+      open(name: string) {
+        const db = new FakeDB(name)
+        return new FakeRequest(db)
+      },
+    } as IDBFactory
   }
 }
 

@@ -1,5 +1,7 @@
-export const readFileStream = (fileHandle: FileSystemFileHandle) => {
-  // TODO(tauri-port): implement streaming reads via File System Access API
-  console.log('readFileStream stub called', fileHandle)
-  return null
-} 
+export const readFileStream = async (fileHandle: FileSystemFileHandle): Promise<ReadableStream<Uint8Array>> => {
+  const file = await fileHandle.getFile()
+  if ('stream' in file) {
+    return (file as any).stream() as ReadableStream<Uint8Array>
+  }
+  return new Response(file).body as ReadableStream<Uint8Array>
+}
