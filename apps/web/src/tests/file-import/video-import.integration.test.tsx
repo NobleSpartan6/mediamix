@@ -117,8 +117,6 @@ const mockResetStore = vi.fn(() => {
   // vi.advanceTimersByTime(0); // Temporarily commented out
 });
 
-
-
 // This function will act as our mock `useMotifStore`
 // CONVERTED TO FUNCTION DECLARATION FOR HOISTING
 function mockUseMotifStore (selector?: (state: typeof mockStoreData & typeof mockActions) => any) {

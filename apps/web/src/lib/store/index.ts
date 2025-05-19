@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import type { MotifState, FileInfo, ClipSegment, BeatMarker, MediaAsset } from './types'
 
 import { generateId } from '../../utils/id'
-import { useTimelineStore } from '../state/timelineStore'
+import { useTimelineStore } from '../../state/timelineStore'
 
 // Create the store
 const useMotifStore = create<MotifState>((set) => ({
