@@ -2,18 +2,61 @@ import * as React from 'react'
 import { useTimelineStore } from '../../../state/timelineStore'
 import type { TimelineState } from '../../../state/timelineStore'
 
+/* -------------------------------------------------------------------------- */
+/* Types                                                                      */
+/* -------------------------------------------------------------------------- */
+
 interface TimeRulerProps {
-  /** Reference to the horizontal scroll container so we can sync tick offset */
+  /** Scroll container ref to stay in-sync with timeline scrolling      */
   scrollContainerRef: React.RefObject<HTMLDivElement>
-  /** Zoom factor – how many horizontal pixels represent one second */
+  /** How many horizontal pixels represent one second                   */
   pixelsPerSecond: number
-  /** Total timeline duration in seconds. Used to compute full ruler width. */
+  /** Total timeline duration in seconds (defines full ruler width)     */
   duration: number
 }
 
-/* ------------------------------------------------------------------------ */
-/* Utility: convert seconds → HH:MM:SS.FF (30 fps)                          */
-/* ------------------------------------------------------------------------ */
+/* -------------------------------------------------------------------------- */
+/* Hooks                                                                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Keeps `scrollLeft` state in sync with a scroll container
+ * without triggering excessive re-renders (throttled to rAF).
+ */
+function useScrollLeft(ref: React.RefObject<HTMLDivElement>) {
+  const [scrollLeft, setScrollLeft] = React.useState(0)
+  const raf = React.useRef<number>()
+
+  React.useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    const onScroll = () => {
+      if (raf.current) return
+      raf.current = requestAnimationFrame(() => {
+        setScrollLeft(el.scrollLeft)
+        if (raf.current) cancelAnimationFrame(raf.current)
+        raf.current = undefined
+      })
+    }
+
+    // initialise + listen
+    setScrollLeft(el.scrollLeft)
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      el.removeEventListener('scroll', onScroll)
+      if (raf.current) cancelAnimationFrame(raf.current)
+    }
+  }, [ref])
+
+  return scrollLeft
+}
+
+/* -------------------------------------------------------------------------- */
+/* Helpers                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/** Format seconds → HH:MM:SS.FF (30 fps)                                    */
 const formatTimecode = (seconds: number) => {
   const fps = 30
   const totalFrames = Math.round(seconds * fps)
@@ -26,49 +69,29 @@ const formatTimecode = (seconds: number) => {
   return `${pad(hrs)}:${pad(mins)}:${pad(secs)}.${pad(frames)}`
 }
 
-/* ------------------------------------------------------------------------ */
-/* TimeRuler: Canvas-based tick / timecode ruler                            */
-/* ------------------------------------------------------------------------ */
+/* -------------------------------------------------------------------------- */
+/* Component                                                                  */
+/* -------------------------------------------------------------------------- */
+
 export const TimeRuler: React.FC<TimeRulerProps> = ({
   scrollContainerRef,
   pixelsPerSecond,
   duration,
 }) => {
+  /* --------------- state & refs --------------------------------------- */
   const beats = useTimelineStore((s: TimelineState) => s.beats)
+  const scrollLeft = useScrollLeft(scrollContainerRef)
 
-  /* ------------------------------ state --------------------------------- */
-  const [scrollLeft, setScrollLeft] = React.useState(0)
-  const requestRef = React.useRef<number>()
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
   const containerRef = React.useRef<HTMLDivElement>(null)
 
-  /* --------------------- keep scrollLeft in sync ------------------------ */
-  React.useEffect(() => {
-    const el = scrollContainerRef.current
-    if (!el) return
+  const [tooltip, setTooltip] = React.useState<{
+    visible: boolean
+    x: number
+    time: number
+  }>({ visible: false, x: 0, time: 0 })
 
-    const onScroll = () => {
-      if (requestRef.current) return
-      requestRef.current = window.requestAnimationFrame(() => {
-        setScrollLeft(el.scrollLeft)
-        if (requestRef.current) {
-          window.cancelAnimationFrame(requestRef.current)
-          requestRef.current = undefined
-        }
-      })
-    }
-
-    /* initialise + listen */
-    setScrollLeft(el.scrollLeft)
-    el.addEventListener('scroll', onScroll, { passive: true })
-    return () => {
-      el.removeEventListener('scroll', onScroll)
-      if (requestRef.current)
-        window.cancelAnimationFrame(requestRef.current)
-    }
-  }, [scrollContainerRef])
-
-  /* ----------------------------- draw loop ------------------------------ */
+  /* --------------- drawing logic -------------------------------------- */
   const draw = React.useCallback(() => {
     const canvas = canvasRef.current
     const container = containerRef.current
@@ -78,7 +101,7 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
     const h = container.clientHeight
     const dpr = window.devicePixelRatio || 1
 
-    /* resize backing canvas on DPI / container changes */
+    /* Ensure backing resolution matches DPI / container size */
     if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
       canvas.width = w * dpr
       canvas.height = h * dpr
@@ -93,33 +116,32 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
     ctx.scale(dpr, dpr)
     ctx.clearRect(0, 0, w, h)
 
-    const firstVisibleSec = Math.floor(scrollLeft / pixelsPerSecond)
-    const lastVisibleSec = Math.ceil((scrollLeft + w) / pixelsPerSecond)
-
-    /* style setup */
     ctx.font = '10px monospace'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'top'
 
-    for (let s = firstVisibleSec; s <= lastVisibleSec; s += 1) {
-      const x = s * pixelsPerSecond - scrollLeft + 0.5
+    const firstSec = Math.floor(scrollLeft / pixelsPerSecond)
+    const lastSec = Math.ceil((scrollLeft + w) / pixelsPerSecond)
+
+    for (let sec = firstSec; sec <= lastSec; sec++) {
+      const x = sec * pixelsPerSecond - scrollLeft + 0.5
 
       /* major tick */
-      ctx.strokeStyle = '#4B5563' // gray-600
+      ctx.strokeStyle = '#4B5563'
       ctx.beginPath()
       ctx.moveTo(x, 0)
       ctx.lineTo(x, h)
       ctx.stroke()
 
       /* label */
-      ctx.fillStyle = '#D1D5DB' // gray-300
-      ctx.fillText(formatTimecode(s), x, 0)
+      ctx.fillStyle = '#D1D5DB'
+      ctx.fillText(formatTimecode(sec), x, 0)
 
-      /* minor ticks (every 10 frames) when sufficiently zoomed */
+      /* minor ticks (every 10 frames) if zoomed in enough */
       if (pixelsPerSecond >= 60) {
-        ctx.strokeStyle = '#374151' // gray-700
+        ctx.strokeStyle = '#374151'
         for (let f = 10; f < 30; f += 10) {
-          const subX = (s + f / 30) * pixelsPerSecond - scrollLeft + 0.5
+          const subX = (sec + f / 30) * pixelsPerSecond - scrollLeft + 0.5
           ctx.beginPath()
           ctx.moveTo(subX, h / 2)
           ctx.lineTo(subX, h)
@@ -128,7 +150,7 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
       }
     }
 
-    /* optional beat markers */
+    /* beat markers */
     if (beats?.length) {
       ctx.strokeStyle = 'rgba(78,140,255,0.2)'
       beats.forEach((b) => {
@@ -144,39 +166,36 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
     ctx.restore()
   }, [beats, pixelsPerSecond, scrollLeft])
 
-  /* schedule draw every frame */
+  /* Schedule draw each frame when dependencies change */
   React.useEffect(() => {
     const id = requestAnimationFrame(draw)
     return () => cancelAnimationFrame(id)
   }, [draw])
 
-  /* ------------------------------ tooltip ------------------------------- */
-  const [tooltip, setTooltip] = React.useState<{
-    visible: boolean
-    x: number
-    time: number
-  }>({ visible: false, x: 0, time: 0 })
-
-  const handleMouseMove = React.useCallback(
+  /* --------------- tooltip handlers ----------------------------------- */
+  const onMouseMove = React.useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       const rect = e.currentTarget.getBoundingClientRect()
       const localX = e.clientX - rect.left
       const absoluteX = localX + scrollLeft
-      const time = absoluteX / pixelsPerSecond
-      setTooltip({ visible: true, x: localX, time })
+      setTooltip({
+        visible: true,
+        x: localX,
+        time: absoluteX / pixelsPerSecond,
+      })
     },
     [pixelsPerSecond, scrollLeft],
   )
-  const handleMouseLeave = () =>
-    setTooltip((t) => ({ ...t, visible: false }))
 
-  /* ------------------------------ render -------------------------------- */
+  /* --------------- render --------------------------------------------- */
   return (
     <div
       ref={containerRef}
       className="relative h-6 select-none border-b border-white/10 bg-panel-bg"
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+      onMouseMove={onMouseMove}
+      onMouseLeave={() =>
+        setTooltip((prev) => ({ ...prev, visible: false }))
+      }
     >
       {/* spacer gives canvas its scrollable width */}
       <div style={{ width: duration * pixelsPerSecond }}>
