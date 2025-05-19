@@ -21,12 +21,14 @@ export function useTimelineKeyboard() {
   const stepRef = useRef(stepShuttle)
   const setRateRef = useRef(setPlayRate)
   const nudgeRef = useRef(nudgeFrames)
+  const playheadRef = useRef(playheadFrame)
   const inRef = useRef(setInPoint)
   const outRef = useRef(setOutPoint)
   const splitRef = useRef(splitClipAt)
   stepRef.current = stepShuttle
   setRateRef.current = setPlayRate
   nudgeRef.current = nudgeFrames
+  playheadRef.current = playheadFrame
   inRef.current = setInPoint
   outRef.current = setOutPoint
   splitRef.current = splitClipAt
@@ -59,17 +61,20 @@ export function useTimelineKeyboard() {
           break
         case 'i':
         case 'I':
-          inRef.current(playheadFrame / 30)
+          playheadRef.current = useTransportStore.getState().playheadFrame
+          inRef.current(playheadRef.current / 30)
           e.preventDefault()
           break
         case 'o':
         case 'O':
-          outRef.current(playheadFrame / 30)
+          playheadRef.current = useTransportStore.getState().playheadFrame
+          outRef.current(playheadRef.current / 30)
           e.preventDefault()
           break
         case 'c':
         case 'C':
-          splitRef.current(playheadFrame / 30)
+          playheadRef.current = useTransportStore.getState().playheadFrame
+          splitRef.current(playheadRef.current / 30)
           e.preventDefault()
           break
         default:
