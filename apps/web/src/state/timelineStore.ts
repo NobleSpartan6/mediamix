@@ -1,4 +1,7 @@
 import { create } from 'zustand'
+
+import { nanoid } from '../utils/nanoid'
+
 import { generateId } from '../utils/id'
 
 export interface Clip {

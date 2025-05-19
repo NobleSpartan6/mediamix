@@ -1,5 +1,8 @@
 import { create } from 'zustand'
 import type { MotifState, FileInfo, ClipSegment, BeatMarker, MediaAsset } from './types'
+
+import { nanoid } from '../../utils/nanoid'
+
 import { generateId } from '../../utils/id'
 
 // Create the store

@@ -3,6 +3,22 @@ import { act, renderHook, render, waitFor } from '@testing-library/react'
 
 import { useBeatSlices } from '../../features/timeline/hooks/useBeatSlices'
 import { Timeline } from '../../features/timeline/components/Timeline'
+
+// Mock react-moveable to avoid dependency errors in tests
+vi.mock('react-moveable', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+
+// Polyfill ResizeObserver for JSDOM environment
+class DummyResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+// @ts-ignore
+global.ResizeObserver = DummyResizeObserver
+
 import { useTimelineStore } from '../../state/timelineStore'
 
 // Stub complex drag/resize library which requires React runtime during tests
