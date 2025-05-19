@@ -14,9 +14,15 @@ import { useTimelineStore } from '../../../state/timelineStore'
  */
 export const useBeatSlices = () => {
   const beats = useTimelineStore((state) => state.beats)
+  const tracks = useTimelineStore((state) => state.tracks)
 
   return useMemo(() => {
     if (!beats || beats.length < 2) return []
+
+    const videoLaneCount = Math.max(
+      1,
+      tracks.filter((t) => t.type === 'video').length,
+    )
 
     const slices = []
     for (let i = 0; i < beats.length - 1; i += 1) {
@@ -26,14 +32,19 @@ export const useBeatSlices = () => {
       // Guard against malformed beat arrays where times are not ascending
       if (end <= start) continue
 
+      const lane = (i % videoLaneCount) * 2
+
       slices.push({
-        id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${start}-${end}`,
+        id:
+          typeof crypto !== 'undefined' && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `${start}-${end}`,
         start,
         end,
-        lane: 0,
+        lane,
       })
     }
 
     return slices
-  }, [beats])
-} 
+  }, [beats, tracks])
+}

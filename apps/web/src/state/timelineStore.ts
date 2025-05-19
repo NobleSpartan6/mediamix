@@ -1,5 +1,8 @@
 import { create } from 'zustand'
+
 import { nanoid } from '../utils/nanoid'
+
+import { generateId } from '../utils/id'
 
 export interface Clip {
   id: string
@@ -90,15 +93,16 @@ export const useTimelineStore = create<TimelineState>((set) => ({
    */
   setClips: (clips) =>
     set((state) => {
-      let tracks = state.tracks
-      clips.forEach((c) => {
-        tracks = ensureTracks(tracks, c.lane)
-      })
       const dict = toDict(clips)
+      const maxLane = clips.reduce((m, c) => Math.max(m, c.lane), -1)
+      const tracks = pruneTracks(
+        ensureTracks(state.tracks, maxLane),
+        dict,
+      )
       return {
         clipsById: dict,
         durationSec: clips.reduce((m, c) => Math.max(m, c.end), 0),
-        tracks: pruneTracks(tracks, dict),
+        tracks,
       }
     }),
 
@@ -110,8 +114,8 @@ export const useTimelineStore = create<TimelineState>((set) => ({
    * Track metadata is expanded to fit the clip lane.
    */
   addClip: (clipInput) => {
-    const id = nanoid()
-    const newClip: Clip = { id, ...clipInput }
+    const id = generateId()
+    const newClip: Clip = { ...clipInput, id }
     set((state) => {
       const clipsById = { ...state.clipsById, [id]: newClip }
       const durationSec = Math.max(state.durationSec, newClip.end)
@@ -183,7 +187,7 @@ export const useTimelineStore = create<TimelineState>((set) => ({
       const entry = Object.entries(state.clipsById).find(([, c]) => c.start < time && c.end > time)
       if (!entry) return {}
       const [id, clip] = entry
-      newId = nanoid()
+      newId = generateId()
       const first: Clip = { ...clip, end: time }
       const second: Clip = { ...clip, id: newId, start: time }
       const clipsById = { ...state.clipsById, [id]: first, [newId]: second }
