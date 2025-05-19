@@ -57,11 +57,39 @@ export default function MediaIngest() {
     }
   }
 
-  return (
-    <div className="p-4 border-2 border-dashed border-gray-600 rounded" onDragOver={(e) => e.preventDefault()} onDrop={(e) => {
+  const handleDrop = useCallback(
+    async (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault()
-      // TODO: handle drag-and-drop import if desired
-    }}>
+      const handles: FileSystemFileHandle[] = []
+      await Promise.all(
+        Array.from(e.dataTransfer.items).map(async (item) => {
+          if (item.kind !== 'file') return
+          const withHandle = item as DataTransferItem & {
+            getAsFileSystemHandle?: () => Promise<FileSystemHandle>
+          }
+          try {
+            const handle = await withHandle.getAsFileSystemHandle?.()
+            if (handle && handle.kind === 'file') {
+              handles.push(handle as FileSystemFileHandle)
+            }
+          } catch (err) {
+            console.error('Drop import error:', err)
+          }
+        }),
+      )
+      if (handles.length > 0) {
+        await handleFileHandles(handles)
+      }
+    },
+    [handleFileHandles],
+  )
+
+  return (
+    <div
+      className="p-4 border-2 border-dashed border-gray-600 rounded"
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={handleDrop}
+    >
       <button onClick={openPicker} className="px-4 py-2 bg-accent text-white rounded hover:bg-accent/90 disabled:opacity-50" disabled={loading}>
         {loading ? 'Importing...' : 'Import Media'}
       </button>

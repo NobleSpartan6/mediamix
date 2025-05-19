@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, fireEvent, act } from '@testing-library/react'
+import { render, fireEvent, act, waitFor } from '@testing-library/react'
 import { Timeline } from '../../features/timeline/components/Timeline'
 import { useTransportStore } from '../../state/transportStore'
 import { useTimelineStore } from '../../state/timelineStore'
@@ -39,7 +39,7 @@ describe('useTimelineKeyboard', () => {
     vi.restoreAllMocks()
   })
 
-  it('updates stores based on keyboard shortcuts', () => {
+  it('updates stores based on keyboard shortcuts', async () => {
     act(() => {
       useTimelineStore.getState().addClip({ id: undefined as never, start: 0, end: 4, lane: 0 })
     })
@@ -59,7 +59,9 @@ describe('useTimelineKeyboard', () => {
 
     fireEvent.keyDown(window, { key: 'ArrowRight' })
     // arrow right jogs the playhead by one frame
-    expect(useTransportStore.getState().playheadFrame).toBeGreaterThan(30)
+    await waitFor(() => {
+      expect(useTransportStore.getState().playheadFrame).toBeGreaterThan(30)
+    })
 
     fireEvent.keyDown(window, { key: 'i' })
     expect(useTimelineStore.getState().inPoint).toBeCloseTo(
@@ -67,6 +69,9 @@ describe('useTimelineKeyboard', () => {
     )
 
     useTransportStore.setState({ playheadFrame: 45 })
+    await waitFor(() => {
+      expect(useTransportStore.getState().playheadFrame).toBe(45)
+    })
     fireEvent.keyDown(window, { key: 'o' })
     expect(useTimelineStore.getState().outPoint).toBeCloseTo(45 / 30)
 
