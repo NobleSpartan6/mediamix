@@ -5,13 +5,15 @@ import type { TimelineState } from '../../../state/timelineStore'
 interface TimeRulerProps {
   /** Reference to the horizontal scroll container so we can sync tick offset */
   scrollContainerRef: React.RefObject<HTMLDivElement>
-  /** zoom factor – how many horizontal pixels represent one second */
+  /** Zoom factor – how many horizontal pixels represent one second */
   pixelsPerSecond: number
   /** Total timeline duration in seconds. Used to compute full ruler width. */
   duration: number
 }
 
-// Utility to format seconds into HH:MM:SS.FF (30fps) timecode
+/* ------------------------------------------------------------------------ */
+/* Utility: convert seconds → HH:MM:SS.FF (30 fps)                          */
+/* ------------------------------------------------------------------------ */
 const formatTimecode = (seconds: number) => {
   const fps = 30
   const totalFrames = Math.round(seconds * fps)
@@ -24,121 +26,151 @@ const formatTimecode = (seconds: number) => {
   return `${pad(hrs)}:${pad(mins)}:${pad(secs)}.${pad(frames)}`
 }
 
-/**
- * TimeRuler – draws tick-marks (major each second, minor each frame @ 30 fps) that
- * scroll in sync with the timeline content. The component is purely visual and
- * intentionally kept lightweight to avoid expensive re-renders. It re-computes
- * visible ticks at most once per rAF via a scroll listener.
- */
-export const TimeRuler: React.FC<TimeRulerProps> = ({ scrollContainerRef, pixelsPerSecond, duration }) => {
-  const [scrollLeft, setScrollLeft] = React.useState(0)
-  const [width, setWidth] = React.useState(0)
-  const requestRef = React.useRef<number>()
+/* ------------------------------------------------------------------------ */
+/* TimeRuler: Canvas-based tick / timecode ruler                            */
+/* ------------------------------------------------------------------------ */
+export const TimeRuler: React.FC<TimeRulerProps> = ({
+  scrollContainerRef,
+  pixelsPerSecond,
+  duration,
+}) => {
+  const beats = useTimelineStore((s: TimelineState) => s.beats)
 
-  // Attach scroll listener to keep local scrollLeft state in sync
+  /* ------------------------------ state --------------------------------- */
+  const [scrollLeft, setScrollLeft] = React.useState(0)
+  const requestRef = React.useRef<number>()
+  const canvasRef = React.useRef<HTMLCanvasElement>(null)
+  const containerRef = React.useRef<HTMLDivElement>(null)
+
+  /* --------------------- keep scrollLeft in sync ------------------------ */
   React.useEffect(() => {
     const el = scrollContainerRef.current
     if (!el) return
 
-    const handleScroll = () => {
-      // Throttle updates with rAF to avoid flooding React state updates
+    const onScroll = () => {
       if (requestRef.current) return
       requestRef.current = window.requestAnimationFrame(() => {
         setScrollLeft(el.scrollLeft)
-        setWidth(el.clientWidth)
-        requestRef.current && window.cancelAnimationFrame(requestRef.current)
-        requestRef.current = undefined
+        if (requestRef.current) {
+          window.cancelAnimationFrame(requestRef.current)
+          requestRef.current = undefined
+        }
       })
     }
 
-    // initial measure
+    /* initialise + listen */
     setScrollLeft(el.scrollLeft)
-    setWidth(el.clientWidth)
-
-    el.addEventListener('scroll', handleScroll, { passive: true })
+    el.addEventListener('scroll', onScroll, { passive: true })
     return () => {
-      el.removeEventListener('scroll', handleScroll)
-      requestRef.current && window.cancelAnimationFrame(requestRef.current)
+      el.removeEventListener('scroll', onScroll)
+      if (requestRef.current)
+        window.cancelAnimationFrame(requestRef.current)
     }
   }, [scrollContainerRef])
 
-  // Compute visible second range
-  const firstVisibleSec = Math.floor(scrollLeft / pixelsPerSecond)
-  const lastVisibleSec = Math.ceil((scrollLeft + width) / pixelsPerSecond)
+  /* ----------------------------- draw loop ------------------------------ */
+  const draw = React.useCallback(() => {
+    const canvas = canvasRef.current
+    const container = containerRef.current
+    if (!canvas || !container) return
 
-  const ticks = [] as React.ReactElement[]
+    const w = container.clientWidth
+    const h = container.clientHeight
+    const dpr = window.devicePixelRatio || 1
 
-  for (let s = firstVisibleSec; s <= lastVisibleSec; s += 1) {
-    const xPos = s * pixelsPerSecond
-    // Major tick every 1 second (height 100%)
-    ticks.push(
-      <div
-        key={`major-${s}`}
-        className="absolute top-0 w-px bg-gray-600"
-        style={{ height: '100%', transform: `translateX(${xPos}px)` }}
-      />,
-    )
+    /* resize backing canvas on DPI / container changes */
+    if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+      canvas.width = w * dpr
+      canvas.height = h * dpr
+      canvas.style.width = `${w}px`
+      canvas.style.height = `${h}px`
+    }
 
-    // Second label (mono 10px) – place slightly above the major tick
-    ticks.push(
-      <span
-        key={`label-${s}`}
-        className="absolute -top-0.5 translate-x-1/2 font-mono text-[10px] text-gray-300 select-none pointer-events-none"
-        style={{ transform: `translateX(${xPos}px)` }}
-      >
-        {formatTimecode(s)}
-      </span>,
-    )
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
 
-    // Minor ticks every 10 frames (approx 0.333s @ 30fps) only when zoomed in enough
-    if (pixelsPerSecond >= 60) {
-      for (let f = 10; f < 30; f += 10) {
-        const subX = (s + f / 30) * pixelsPerSecond
-        ticks.push(
-          <div
-            key={`minor-${s}-${f}`}
-            className="absolute top-1/2 w-px bg-gray-700"
-            style={{ height: '50%', transform: `translateX(${subX}px)` }}
-          />,
-        )
+    ctx.save()
+    ctx.scale(dpr, dpr)
+    ctx.clearRect(0, 0, w, h)
+
+    const firstVisibleSec = Math.floor(scrollLeft / pixelsPerSecond)
+    const lastVisibleSec = Math.ceil((scrollLeft + w) / pixelsPerSecond)
+
+    /* style setup */
+    ctx.font = '10px monospace'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'top'
+
+    for (let s = firstVisibleSec; s <= lastVisibleSec; s += 1) {
+      const x = s * pixelsPerSecond - scrollLeft + 0.5
+
+      /* major tick */
+      ctx.strokeStyle = '#4B5563' // gray-600
+      ctx.beginPath()
+      ctx.moveTo(x, 0)
+      ctx.lineTo(x, h)
+      ctx.stroke()
+
+      /* label */
+      ctx.fillStyle = '#D1D5DB' // gray-300
+      ctx.fillText(formatTimecode(s), x, 0)
+
+      /* minor ticks (every 10 frames) when sufficiently zoomed */
+      if (pixelsPerSecond >= 60) {
+        ctx.strokeStyle = '#374151' // gray-700
+        for (let f = 10; f < 30; f += 10) {
+          const subX = (s + f / 30) * pixelsPerSecond - scrollLeft + 0.5
+          ctx.beginPath()
+          ctx.moveTo(subX, h / 2)
+          ctx.lineTo(subX, h)
+          ctx.stroke()
+        }
       }
     }
-  }
 
-  // --- Beat tick lines ------------------------------------------------------
-  const beats = useTimelineStore((state: TimelineState) => state.beats)
-  const beatElements = React.useMemo(() => {
-    if (!beats || beats.length === 0) return []
-    return beats.map((b: number) => (
-      <div
-        key={`beat-${b}`}
-        className="absolute top-0 w-px bg-accent/20"
-        style={{ height: '100%', transform: `translateX(${b * pixelsPerSecond}px)` }}
-      />
-    ))
-  }, [beats, pixelsPerSecond])
+    /* optional beat markers */
+    if (beats?.length) {
+      ctx.strokeStyle = 'rgba(78,140,255,0.2)'
+      beats.forEach((b) => {
+        const x = b * pixelsPerSecond - scrollLeft + 0.5
+        if (x < 0 || x > w) return
+        ctx.beginPath()
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, h)
+        ctx.stroke()
+      })
+    }
 
-  // Tooltip state ------------------------------------------------------------
-  const [tooltip, setTooltip] = React.useState<{ visible: boolean; x: number; time: number }>({
-    visible: false,
-    x: 0,
-    time: 0,
-  })
+    ctx.restore()
+  }, [beats, pixelsPerSecond, scrollLeft])
 
-  const containerRef = React.useRef<HTMLDivElement>(null)
+  /* schedule draw every frame */
+  React.useEffect(() => {
+    const id = requestAnimationFrame(draw)
+    return () => cancelAnimationFrame(id)
+  }, [draw])
 
-  // Mouse move handler to update tooltip position/time
+  /* ------------------------------ tooltip ------------------------------- */
+  const [tooltip, setTooltip] = React.useState<{
+    visible: boolean
+    x: number
+    time: number
+  }>({ visible: false, x: 0, time: 0 })
+
   const handleMouseMove = React.useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
-      const x = e.clientX - rect.left + scrollLeft
-      const time = x / pixelsPerSecond
-      setTooltip({ visible: true, x: e.clientX - rect.left, time })
+      const rect = e.currentTarget.getBoundingClientRect()
+      const localX = e.clientX - rect.left
+      const absoluteX = localX + scrollLeft
+      const time = absoluteX / pixelsPerSecond
+      setTooltip({ visible: true, x: localX, time })
     },
     [pixelsPerSecond, scrollLeft],
   )
-  const handleMouseLeave = () => setTooltip((t) => ({ ...t, visible: false }))
+  const handleMouseLeave = () =>
+    setTooltip((t) => ({ ...t, visible: false }))
 
+  /* ------------------------------ render -------------------------------- */
   return (
     <div
       ref={containerRef}
@@ -146,18 +178,15 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({ scrollContainerRef, pixels
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
-      {/* total width spacer to make ruler scrollable */}
+      {/* spacer gives canvas its scrollable width */}
       <div style={{ width: duration * pixelsPerSecond }}>
-        {/* tick container */}
-        <div className="relative h-full w-full">
-          {ticks}
-          {beatElements}
-        </div>
+        <canvas ref={canvasRef} className="block h-full w-full" />
       </div>
-      {/* Hover tooltip */}
+
+      {/* hover timecode tooltip */}
       {tooltip.visible && (
         <div
-          className="pointer-events-none absolute -top-6 bg-gray-800/90 text-[10px] font-mono text-white px-1 py-0.5 rounded"
+          className="pointer-events-none absolute -top-6 rounded bg-gray-800/90 px-1 py-0.5 font-mono text-[10px] text-white"
           style={{ left: tooltip.x }}
         >
           {formatTimecode(tooltip.time)}
@@ -167,4 +196,4 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({ scrollContainerRef, pixels
   )
 }
 
-TimeRuler.displayName = 'TimeRuler' 
+TimeRuler.displayName = 'TimeRuler'
