@@ -1,5 +1,5 @@
 // vitest.setup.ts
-import { vi } from 'vitest';
+import { vi } from 'vitest'
 
 // Ensure FFmpeg module is mocked correctly
 vi.mock('@ffmpeg/ffmpeg', () => {
@@ -11,40 +11,44 @@ vi.mock('@ffmpeg/ffmpeg', () => {
     exec: vi.fn().mockResolvedValue(undefined),
     FS: vi.fn().mockImplementation((command, filename, data) => {
       if (command === 'readFile') {
-        return new Uint8Array(1024); // Mock audio data
+        return new Uint8Array(1024) // Mock audio data
       }
-      return undefined;
+      return undefined
     }),
     writeFile: vi.fn().mockResolvedValue(undefined),
     readFile: vi.fn().mockResolvedValue(new Uint8Array(1024)),
     unlink: vi.fn(),
     setProgress: vi.fn(),
-    on: vi.fn()
-  };
+    on: vi.fn(),
+  }
 
   return {
     createFFmpeg: vi.fn().mockReturnValue(mockFFmpeg),
-    FFmpeg: vi.fn().mockImplementation(() => mockFFmpeg)
-  };
-});
+    FFmpeg: vi.fn().mockImplementation(() => mockFFmpeg),
+  }
+})
 
 // Mock the worker import - IMPORTANT: Use the correct path as seen in your screenshots
-vi.mock('../src/workers/audio-extraction.worker.ts?worker', () => {
-  return {
-    default: 'mock-worker-url'
-  };
-}, { virtual: true });
+vi.mock(
+  '../src/workers/audio-extraction.worker.ts?worker',
+  () => {
+    return {
+      default: 'mock-worker-url',
+    }
+  },
+  { virtual: true },
+)
 
 // Define MockWorker class
 class MockWorker {
-  onmessage: ((event: MessageEvent) => void) | null = null;
-  onerror: ((event: ErrorEvent) => void) | null = null;
-  
+  onmessage: ((event: MessageEvent) => void) | null = null
+  onerror: ((event: ErrorEvent) => void) | null = null
+
   constructor(stringUrl: string) {
     // Constructor implementation
-    console.log(`MockWorker created with URL: ${stringUrl}`);
+    console.log(`MockWorker created with URL: ${stringUrl}`)
   }
-  
+
   postMessage(data: any): void {
     // Simulate worker response
     setTimeout(() => {
@@ -54,14 +58,14 @@ class MockWorker {
             type: 'AUDIO_EXTRACTED',
             audioData: new ArrayBuffer(1024),
             format: data.payload?.outputFormat || 'wav',
-            sampleRate: 44100
-          }
-        });
-        this.onmessage(mockEvent);
+            sampleRate: 44100,
+          },
+        })
+        this.onmessage(mockEvent)
       }
-    }, 10);
+    }, 10)
   }
-  
+
   terminate(): void {
     // Cleanup
   }
@@ -69,7 +73,39 @@ class MockWorker {
 
 // Define Worker globally if it doesn't exist
 if (typeof Worker === 'undefined') {
-  (globalThis as any).Worker = MockWorker;
+  ;(globalThis as any).Worker = MockWorker
+}
+
+// Simple canvas context mock so components using canvas don't throw
+if (typeof HTMLCanvasElement !== 'undefined') {
+  // Override getContext with a simple mock implementation
+  // @ts-ignore
+  HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
+    fillRect: vi.fn(),
+    clearRect: vi.fn(),
+    getImageData: vi.fn(() => ({ data: [] })),
+    putImageData: vi.fn(),
+    createImageData: vi.fn(),
+    setTransform: vi.fn(),
+    drawImage: vi.fn(),
+    save: vi.fn(),
+    fillText: vi.fn(),
+    restore: vi.fn(),
+    beginPath: vi.fn(),
+    moveTo: vi.fn(),
+    lineTo: vi.fn(),
+    closePath: vi.fn(),
+    stroke: vi.fn(),
+    translate: vi.fn(),
+    scale: vi.fn(),
+    rotate: vi.fn(),
+    arc: vi.fn(),
+    fill: vi.fn(),
+    measureText: vi.fn(() => ({ width: 0 })),
+    transform: vi.fn(),
+    rect: vi.fn(),
+    clip: vi.fn(),
+  }))
 }
 
 // Polyfill ResizeObserver for component libraries
@@ -80,7 +116,7 @@ if (typeof global.ResizeObserver === 'undefined') {
     disconnect() {}
   }
   // @ts-ignore
-  global.ResizeObserver = MockResizeObserver;
+  global.ResizeObserver = MockResizeObserver
 }
 
 // Mock URL.createObjectURL for tests
@@ -132,19 +168,19 @@ vi.mock('../src/lib/file/extractAudioTrack', () => {
     extractAudioTrack: vi.fn().mockImplementation((videoFile, outputFormat, onProgress) => {
       // Call the progress callback if provided
       if (onProgress) {
-        setTimeout(() => onProgress(0.5), 10);
-        setTimeout(() => onProgress(1.0), 20);
+        setTimeout(() => onProgress(0.5), 10)
+        setTimeout(() => onProgress(1.0), 20)
       }
-      
+
       // Return a promise that resolves to the expected structure
       return Promise.resolve({
         audioData: new ArrayBuffer(1024),
         format: outputFormat || 'raw',
-        sampleRate: 44100
-      });
-    })
-  };
-});
+        sampleRate: 44100,
+      })
+    }),
+  }
+})
 
 // Mock waveform and thumbnail generation to keep tests fast
 vi.mock('../src/lib/file/generateWaveform', () => ({
@@ -161,12 +197,12 @@ vi.mock('../src/lib/file/detectBeatsFromVideo', () => {
     detectBeatsFromVideo: vi.fn().mockImplementation((videoFile, options, onProgress) => {
       // Call progress callback if provided
       if (onProgress) {
-        onProgress('extractAudio', 0.1);
-        onProgress('analyzePCM', 0.5);
-        onProgress('complete', 1.0);
+        onProgress('extractAudio', 0.1)
+        onProgress('analyzePCM', 0.5)
+        onProgress('complete', 1.0)
       }
-      
-      return Promise.resolve([0.5, 1.0, 1.5, 2.0, 2.5]);
-    })
-  };
-});
+
+      return Promise.resolve([0.5, 1.0, 1.5, 2.0, 2.5])
+    }),
+  }
+})
