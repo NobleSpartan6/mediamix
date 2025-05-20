@@ -5,6 +5,7 @@ import FileInfoCard from './features/import/FileInfoCard'
 import BeatMarkerBar from './features/timeline/BeatMarkerBar'
 import { Timeline } from './features/timeline/components/Timeline'
 import { CommandInput } from './features/timeline/components/CommandInput'
+import AppShell from './features/shell/AppShell'
 import './App.css'
 import { useTimelineStore } from './state/timelineStore'
 import useMotifStore from './lib/store'
@@ -53,7 +54,7 @@ function App() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-panel-bg text-white flex flex-col p-6 font-sans">
+    <AppShell>
       {/* Header */}
       <header className="mb-6 text-center">
         <h1 className="text-accent text-ui-heading font-ui-semibold mb-1">Motif — Timeline MVP</h1>
@@ -84,7 +85,7 @@ function App() {
           <CommandInput />
         </section>
       </main>
-    </div>
+    </AppShell>
   )
 }
 
