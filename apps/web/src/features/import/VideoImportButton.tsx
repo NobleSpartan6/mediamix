@@ -12,6 +12,7 @@ import { BeatDetectionProgress } from './BeatDetectionProgress'
 import { useMediaStore } from '../../state/mediaStore'
 import { generateWaveform } from '../../lib/file/generateWaveform'
 import { captureThumbnail } from '../../lib/file/captureThumbnail'
+import { generateProxy } from '../../workers/proxy'
 
 export function VideoImportButton() {
   const { isFileLoading, fileError, setFileInfo } = useFileState()
@@ -61,20 +62,35 @@ export function VideoImportButton() {
       // Retrieve generated id and register with mediaStore
       const assets = useMotifStore.getState().mediaAssets
       const assetId = assets[assets.length - 1]?.id
+      let analysisFile: File = file
+      let proxyUrl: string | undefined
       if (assetId) {
         useMediaStore.getState().addAsset({
           id: assetId,
           fileName: file.name,
           duration: metadata.duration ?? 0,
         })
+
+        if ((metadata.duration ?? 0) > 600) {
+          try {
+            const data = await generateProxy(file)
+            const blob = new Blob([data], { type: 'video/mp4' })
+            analysisFile = new File([data], `proxy-${file.name}`, { type: 'video/mp4' })
+            proxyUrl = URL.createObjectURL(blob)
+          } catch (err) {
+            console.warn('Proxy generation failed', err)
+          }
+        }
+
         try {
           const [waveform, thumbnail] = await Promise.all([
-            generateWaveform(file),
-            captureThumbnail(file),
+            generateWaveform(analysisFile),
+            captureThumbnail(analysisFile),
           ])
           useMediaStore.getState().updateAsset(assetId, {
             waveform,
             thumbnail,
+            ...(proxyUrl ? { proxyUrl } : {}),
           })
         } catch (analysisErr) {
           console.warn('Media analysis failed', analysisErr)
@@ -90,7 +106,7 @@ export function VideoImportButton() {
       setBeatDetectionStage('extractAudio')
       setBeatDetectionProgress(0)
       try {
-        const beats = await detectBeatsFromVideo(file, (stage, progress) => {
+        const beats = await detectBeatsFromVideo(analysisFile, (stage, progress) => {
           if (stage === 'extractAudio') {
             setBeatDetectionStage('extractAudio')
             setBeatDetectionProgress(progress ?? 0)
