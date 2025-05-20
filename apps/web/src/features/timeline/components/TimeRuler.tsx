@@ -217,12 +217,24 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
     [pixelsPerSecond, scrollLeft],
   )
 
+  const onClick = React.useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      const rect = e.currentTarget.getBoundingClientRect()
+      const localX = e.clientX - rect.left
+      const absoluteX = localX + scrollLeft
+      const time = absoluteX / pixelsPerSecond
+      useTimelineStore.getState().setCurrentTime(time)
+    },
+    [pixelsPerSecond, scrollLeft],
+  )
+
   /* --------------- render --------------------------------------------- */
   return (
     <div
       ref={containerRef}
       className="relative h-6 select-none border-b border-white/10 bg-panel-bg"
       onMouseMove={onMouseMove}
+      onClick={onClick}
       onMouseLeave={() =>
         setTooltip((prev) => ({ ...prev, visible: false }))
       }
