@@ -3,18 +3,22 @@ import * as React from 'react'
 import type { Clip as ClipType } from '../../../state/timelineStore'
 import { useMediaStore } from '../../../state/mediaStore'
 
+/** Props for {@link Clip}. */
 interface ClipProps {
+  /** Clip data describing timing and lane */
   clip: ClipType
+  /** Zoom level in pixels per second for sizing */
   pixelsPerSecond: number
   /** Track type for styling */
   type: 'video' | 'audio'
 }
 
-/*
- * Memoized for perf – parent handles re-renders when clip array changes.
- * Inline styles are used here only for dynamic positioning/size which cannot
- * be expressed via Tailwind utility classes at build-time due to their
- * runtime nature.
+/**
+ * Visual representation of a timeline clip.
+ *
+ * Memoized for performance – parent components re-render when the clip array
+ * changes. Uses inline styles for positioning/size which depend on runtime
+ * values (start, end, zoom level).
  */
 export const Clip = React.memo(
   React.forwardRef<HTMLDivElement, ClipProps>(({ clip, pixelsPerSecond, type }, ref) => {

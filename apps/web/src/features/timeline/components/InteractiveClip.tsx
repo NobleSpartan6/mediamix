@@ -8,13 +8,25 @@ import { useTimelineStore } from '../../../state/timelineStore'
 import { useClipsArray } from '../hooks/useClipsArray'
 import { Clip } from './Clip'
 
+/** Props for {@link InteractiveClip}. */
 interface InteractiveClipProps {
+  /** Clip data to render and manipulate */
   clip: ClipType
+  /** Current zoom level in pixels per second */
   pixelsPerSecond: number
   /** Track type to style the clip – video vs audio */
   type: 'video' | 'audio'
 }
 
+/**
+ * Wrapper around {@link Clip} that adds drag and resize behavior via
+ * `react-moveable`.
+ *
+ * @param clip clip data being edited
+ * @param pixelsPerSecond zoom level for positioning
+ * @param type media type to style the clip
+ * @returns element rendering the interactive clip
+ */
 export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ clip, pixelsPerSecond, type }) => {
   const updateClip = useTimelineStore((s) => s.updateClip)
   const beats = useTimelineStore((s) => s.beats)

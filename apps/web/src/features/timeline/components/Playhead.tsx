@@ -1,8 +1,10 @@
 import * as React from 'react'
 
+/** Props for the {@link Playhead} component. */
 interface PlayheadProps {
-  /** playhead position in seconds */
+  /** Playhead position in seconds */
   positionSeconds: number
+  /** Pixels per second used to calculate x position */
   pixelsPerSecond: number
   /** Height of the timeline area to span */
   height: number | string
@@ -11,8 +13,14 @@ interface PlayheadProps {
 }
 
 /**
- * Playhead – simple vertical line representing the current playhead location.
- * For MVP it is purely presentational driven by parent state.
+ * Vertical line showing the current playhead location.
+ * Purely presentational and controlled by parent state.
+ *
+ * @param positionSeconds playhead position in seconds
+ * @param pixelsPerSecond zoom scale for converting time to pixels
+ * @param height height of the line
+ * @param offsetX horizontal scroll offset when overlaid
+ * @returns visual playhead line element
  */
 export const Playhead: React.FC<PlayheadProps> = React.memo(({ positionSeconds, pixelsPerSecond, height, offsetX = 0 }) => {
   const x = positionSeconds * pixelsPerSecond - offsetX
