@@ -97,6 +97,10 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
 }) => {
   /* --------------- state & refs --------------------------------------- */
   const beats = useTimelineStore((s: TimelineState) => s.beats)
+  const [inPoint, outPoint] = useTimelineStore((s: TimelineState) => [
+    s.inPoint,
+    s.outPoint,
+  ])
   const scrollLeft = useScrollLeft(scrollContainerRef)
 
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
@@ -107,6 +111,15 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
     x: number
     time: number
   }>({ visible: false, x: 0, time: 0 })
+
+  const showRange =
+    inPoint !== null && outPoint !== null && outPoint > inPoint
+  const rangeStyle = React.useMemo(() => {
+    if (!showRange) return undefined
+    const left = inPoint! * pixelsPerSecond - scrollLeft
+    const width = (outPoint! - inPoint!) * pixelsPerSecond
+    return { left: `${left}px`, width: `${width}px` }
+  }, [showRange, inPoint, outPoint, pixelsPerSecond, scrollLeft])
 
   /* --------------- drawing logic -------------------------------------- */
   const draw = React.useCallback(() => {
@@ -218,6 +231,13 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
       <div style={{ width: duration * pixelsPerSecond }}>
         <canvas ref={canvasRef} className="block h-full w-full" />
       </div>
+      {showRange && (
+        <div
+          data-testid="inout-overlay"
+          className="absolute top-0 bottom-0 bg-accent/20 pointer-events-none"
+          style={rangeStyle}
+        />
+      )}
 
       {/* hover timecode tooltip */}
       {tooltip.visible && (
