@@ -52,3 +52,8 @@ export default tseslint.config({
   },
 })
 ```
+
+## Test Assets
+
+Sample media files for local testing reside in `public/test-assets/`. This includes `test-video.mp4`, a short placeholder video used for demonstrating asset loading.
+
