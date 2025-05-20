@@ -5,6 +5,8 @@ import FileInfoCard from './features/import/FileInfoCard'
 import BeatMarkerBar from './features/timeline/BeatMarkerBar'
 import { Timeline } from './features/timeline/components/Timeline'
 import { CommandInput } from './features/timeline/components/CommandInput'
+import AppShell from './features/shell/AppShell'
+import { VideoPreview } from './features/preview'
 import './App.css'
 import { exportTimelineVideo } from './export/segment'
 import { useExportStatus } from './lib/store/hooks'
@@ -61,7 +63,7 @@ function App() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-panel-bg text-white flex flex-col p-6 font-sans">
+    <AppShell>
       {/* Header */}
       <header className="mb-6 text-center">
         <h1 className="text-accent text-ui-heading font-ui-semibold mb-1">Motif — Timeline MVP</h1>
@@ -89,11 +91,12 @@ function App() {
         {/* Timeline */}
         <section className="bg-gray-800/40 rounded-lg p-4">
           <h2 className="text-ui-body font-ui-medium text-gray-300 mb-2">Timeline</h2>
+          <VideoPreview />
           <Timeline pixelsPerSecond={120} />
           <CommandInput />
         </section>
       </main>
-    </div>
+    </AppShell>
   )
 }
 

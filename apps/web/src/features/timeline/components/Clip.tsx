@@ -2,6 +2,7 @@ import * as React from 'react'
 
 import type { Clip as ClipType } from '../../../state/timelineStore'
 import { useMediaStore } from '../../../state/mediaStore'
+import { useTimelineStore } from '../../../state/timelineStore'
 
 /** Props for {@link Clip}. */
 interface ClipProps {
@@ -24,6 +25,9 @@ export const Clip = React.memo(
   React.forwardRef<HTMLDivElement, ClipProps>(({ clip, pixelsPerSecond, type }, ref) => {
     const localRef = React.useRef<HTMLDivElement>(null)
     const canvasRef = React.useRef<HTMLCanvasElement>(null)
+    const selectedIds = useTimelineStore((s) => s.selectedClipIds)
+    const setSelected = useTimelineStore((s) => s.setSelectedClips)
+    const isSelected = selectedIds.includes(clip.id)
 
     // expose DOM node to parent
     React.useImperativeHandle(ref, () => localRef.current as HTMLDivElement)
@@ -80,12 +84,29 @@ export const Clip = React.memo(
     const backgroundImage =
       type === 'video' && asset?.thumbnail ? `url(${asset.thumbnail})` : undefined
 
+    const handlePointerDown = React.useCallback(
+      (e: React.PointerEvent) => {
+        e.stopPropagation()
+        if (e.shiftKey || e.metaKey || e.ctrlKey) {
+          if (isSelected) {
+            setSelected(selectedIds.filter((id) => id !== clip.id))
+          } else {
+            setSelected([...selectedIds, clip.id])
+          }
+        } else if (!isSelected || selectedIds.length > 1) {
+          setSelected([clip.id])
+        }
+      },
+      [clip.id, isSelected, selectedIds, setSelected],
+    )
+
     return (
       <div
         ref={localRef}
         // Container acts as `react-moveable` target. `group` enables hover state for handles.
         tabIndex={0}
-        className={`group absolute top-0 h-full select-none rounded-sm border border-white/10 ${colorClass} text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-accent`}
+        className={`group absolute top-0 h-full select-none rounded-sm border border-white/10 ${colorClass} text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${isSelected ? 'ring-2 ring-accent' : ''}`}
+        onPointerDown={handlePointerDown}
         style={{ width, transform: `translateX(${offset}px)`, willChange: 'transform', backgroundImage, backgroundSize: 'cover', backgroundPosition: 'center' }}
         aria-label={`Clip from ${clip.start.toFixed(2)}s to ${clip.end.toFixed(2)}s`}
       >
