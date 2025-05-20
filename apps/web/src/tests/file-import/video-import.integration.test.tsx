@@ -44,7 +44,21 @@ const initialFileInfo: FileInfo = {
 // Global mock store that components can update
 // Typed mockStoreData using a subset of MotifState relevant to these tests.
 // It's important that the initial shape includes all keys that will be accessed or set.
-let mockStoreData: Pick<MotifState, 'fileInfo' | 'isFileLoading' | 'fileError' | 'beatMarkers' | 'isBeatDetectionRunning' | 'beatDetectionError' | 'beatDetectionProgress' | 'beatDetectionStage' | 'timeline' | 'isExporting' | 'exportProgress' | 'exportError'> & { currentFile: FileInfo | null } = {
+let mockStoreData: Pick<
+  MotifState,
+  | 'fileInfo'
+  | 'isFileLoading'
+  | 'fileError'
+  | 'beatMarkers'
+  | 'isBeatDetectionRunning'
+  | 'beatDetectionError'
+  | 'beatDetectionProgress'
+  | 'beatDetectionStage'
+  | 'timeline'
+  | 'isExporting'
+  | 'exportProgress'
+  | 'exportError'
+> & { currentFile: FileInfo | null; mediaAssets: any[] } = {
   fileInfo: { ...initialFileInfo }, // Initialize with the full FileInfo structure
   isFileLoading: false,
   fileError: null,
@@ -57,6 +71,7 @@ let mockStoreData: Pick<MotifState, 'fileInfo' | 'isFileLoading' | 'fileError' |
   isExporting: false,
   exportProgress: 0,
   exportError: null,
+  mediaAssets: [],
   currentFile: null,
 };
 
@@ -97,7 +112,13 @@ const mockSetBeatDetectionStage = vi.fn((stage) => {
   mockStoreData = { ...mockStoreData, beatDetectionStage: stage };
   // vi.advanceTimersByTime(0); // Temporarily commented out
 });
-const mockAddMediaAsset = vi.fn();
+const mockAddMediaAsset = vi.fn((asset) => {
+  const id = `asset-${mockStoreData.mediaAssets.length + 1}`;
+  mockStoreData.mediaAssets = [
+    ...mockStoreData.mediaAssets,
+    { id, ...asset },
+  ];
+});
 const mockResetStore = vi.fn(() => {
   mockStoreData = {
     fileInfo: { ...initialFileInfo },
@@ -112,6 +133,7 @@ const mockResetStore = vi.fn(() => {
     isExporting: false,
     exportProgress: 0,
     exportError: null,
+    mediaAssets: [],
     currentFile: null,
   };
   // vi.advanceTimersByTime(0); // Temporarily commented out
@@ -178,6 +200,8 @@ const mockActions = {
   addMediaAsset: mockAddMediaAsset,
   resetStore: mockResetStore,
 };
+
+mockUseMotifStore.getState = () => ({ ...mockStoreData, ...mockActions });
 
 
 vi.mock('../../lib/store', () => ({
@@ -297,6 +321,7 @@ describe('Video import flow (integration)', () => {
       isExporting: false,
       exportProgress: 0,
       exportError: null,
+      mediaAssets: [],
       currentFile: null,
     };
     // vi.useFakeTimers(); // Temporarily commented out
