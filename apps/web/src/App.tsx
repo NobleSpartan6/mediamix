@@ -2,12 +2,12 @@ import { useEffect, useRef, useMemo } from 'react'
 import { Button } from './components/ui/Button'
 import VideoImportButton from './features/import/VideoImportButton'
 import FileInfoCard from './features/import/FileInfoCard'
+import MediaLibrary from './features/import/MediaLibrary'
 import BeatMarkerBar from './features/timeline/BeatMarkerBar'
 import { Timeline } from './features/timeline/components/Timeline'
 import { CommandInput } from './features/timeline/components/CommandInput'
 import './App.css'
 import { useTimelineStore } from './state/timelineStore'
-import useMotifStore from './lib/store'
 
 function App() {
   // Demo beats & clips for showcasing the timeline MVP
@@ -17,25 +17,6 @@ function App() {
   const beats = useTimelineStore((s) => s.beats)
   const setBeats = useTimelineStore((s) => s.setBeats)
 
-  // Demo: seed clips from imported media assets
-  const mediaAssets = useMotifStore((s) => s.mediaAssets)
-  const prevAssetCount = useRef(0)
-  useEffect(() => {
-    if (mediaAssets.length > prevAssetCount.current) {
-      const newAssets = mediaAssets.slice(prevAssetCount.current)
-      newAssets.forEach((asset, idx) => {
-        // demo: use first 5 seconds or asset duration
-        const end =
-          asset.metadata.duration != null
-            ? Math.min(5, asset.metadata.duration)
-            : 5
-        const baseLane = (prevAssetCount.current + idx) * 2
-        addClip({ start: 0, end, lane: baseLane, assetId: asset.id })
-        addClip({ start: 0, end, lane: baseLane + 1, assetId: asset.id })
-      })
-      prevAssetCount.current = mediaAssets.length
-    }
-  }, [mediaAssets, addClip])
 
   // Populate demo data once on mount if store is empty
   useEffect(() => {
@@ -67,6 +48,7 @@ function App() {
           <div className="flex-1 space-y-4">
             <VideoImportButton />
             <FileInfoCard />
+            <MediaLibrary />
             <BeatMarkerBar />
           </div>
           <div className="hidden md:block w-px bg-gray-700/40" />
