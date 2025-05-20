@@ -16,15 +16,20 @@ import { useZoomScroll } from '../hooks/useZoomScroll'
 import { ZoomSlider } from './ZoomSlider'
 import { Button } from '../../../components/ui/Button'
 
+/** Props for the {@link Timeline} component. */
 interface TimelineProps {
-  /** zoom factor – how many horizontal pixels represent one second */
+  /**
+   * Initial zoom level – number of horizontal pixels that represent one second
+   * of timeline time.
+   */
   pixelsPerSecond?: number
 }
 
 /**
- * Timeline container that renders clip segments horizontally.
- * The component itself has minimal logic – behaviour (drag/resize, playhead) is
- * added in later subtasks.
+ * Main timeline container displaying tracks, clips and the playhead.
+ *
+ * @param pixelsPerSecond initial zoom level in pixels per second
+ * @returns React element containing the entire timeline UI
  */
 export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond = 100 }) => {
   // Zoom and scroll: initialize state and scroll container ref

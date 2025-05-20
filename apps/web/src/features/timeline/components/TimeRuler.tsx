@@ -6,12 +6,13 @@ import type { TimelineState } from '../../../state/timelineStore'
 /* Types                                                                      */
 /* -------------------------------------------------------------------------- */
 
+/** Props for {@link TimeRuler}. */
 interface TimeRulerProps {
-  /** Scroll container ref to stay in-sync with timeline scrolling      */
+  /** Scroll container ref to stay in-sync with timeline scrolling */
   scrollContainerRef: React.RefObject<HTMLDivElement>
-  /** How many horizontal pixels represent one second                   */
+  /** How many horizontal pixels represent one second */
   pixelsPerSecond: number
-  /** Total timeline duration in seconds (defines full ruler width)     */
+  /** Total timeline duration in seconds (defines full ruler width) */
   duration: number
 }
 
@@ -20,8 +21,11 @@ interface TimeRulerProps {
 /* -------------------------------------------------------------------------- */
 
 /**
- * Keeps `scrollLeft` state in sync with a scroll container
- * without triggering excessive re-renders (throttled to rAF).
+ * Keeps `scrollLeft` state in sync with a scroll container without
+ * triggering excessive re-renders (throttled with `requestAnimationFrame`).
+ *
+ * @param ref reference to the scrollable element
+ * @returns current scrollLeft value
  */
 function useScrollLeft(ref: React.RefObject<HTMLDivElement>) {
   const [scrollLeft, setScrollLeft] = React.useState(0)
@@ -56,7 +60,12 @@ function useScrollLeft(ref: React.RefObject<HTMLDivElement>) {
 /* Helpers                                                                    */
 /* -------------------------------------------------------------------------- */
 
-/** Format seconds → HH:MM:SS.FF (30 fps)                                    */
+/**
+ * Convert seconds to a HH:MM:SS.FF timecode string at 30fps.
+ *
+ * @param seconds time in seconds
+ * @returns formatted timecode
+ */
 const formatTimecode = (seconds: number) => {
   const fps = 30
   const totalFrames = Math.round(seconds * fps)
@@ -73,6 +82,14 @@ const formatTimecode = (seconds: number) => {
 /* Component                                                                  */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Canvas-based ruler displaying time ticks and optional beat markers.
+ *
+ * @param scrollContainerRef reference to the synced scroll container
+ * @param pixelsPerSecond zoom scale for drawing ticks
+ * @param duration total timeline duration in seconds
+ * @returns React element with a canvas ruler
+ */
 export const TimeRuler: React.FC<TimeRulerProps> = ({
   scrollContainerRef,
   pixelsPerSecond,

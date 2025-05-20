@@ -1,17 +1,22 @@
 import { useEffect, useRef } from 'react'
 
+/** Optional configuration for {@link useZoomScroll}. */
 interface UseZoomScrollOptions {
+  /** Minimum allowed zoom level */
   minZoom?: number
+  /** Maximum allowed zoom level */
   maxZoom?: number
+  /** Increment applied per wheel delta */
   zoomStep?: number
 }
 
 /**
- * Hook to enable smooth zooming (Ctrl+Wheel, pinch) and click-and-drag scrolling with inertia.
- * @param containerRef Ref to the scrollable container element
- * @param zoom Current zoom level (pixels per second)
- * @param setZoom Function to update the zoom level
- * @param options minZoom, maxZoom, and zoomStep configuration
+ * Enable smooth zooming (Ctrl+wheel or pinch) and drag panning with inertia.
+ *
+ * @param containerRef ref to the scrollable container element
+ * @param zoom current zoom level in pixels per second
+ * @param setZoom callback to update the zoom level
+ * @param options optional configuration
  */
 export function useZoomScroll(
   containerRef: React.RefObject<HTMLElement>,

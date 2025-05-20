@@ -2,9 +2,10 @@ import { useEffect, useRef } from 'react'
 import { useTransportStore } from './transportStore'
 
 /**
- * Hook that advances the playhead while playback is active.
- * It runs a requestAnimationFrame loop throttled to ~30fps
- * and nudges the playhead by the current play rate each tick.
+ * Advance the playhead while playback is running.
+ *
+ * Runs a `requestAnimationFrame` loop throttled to roughly 30 fps and
+ * calls `nudgeFrames` each tick according to the current play rate.
  */
 export function usePlaybackTicker() {
   const playRate = useTransportStore((s) => s.playRate)
