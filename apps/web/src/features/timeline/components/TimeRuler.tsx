@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useTimelineStore } from '../../../state/timelineStore'
 import type { TimelineState } from '../../../state/timelineStore'
+import { shallow } from 'zustand/shallow'
 
 /* -------------------------------------------------------------------------- */
 /* Types                                                                      */
@@ -29,19 +30,13 @@ interface TimeRulerProps {
  */
 function useScrollLeft(ref: React.RefObject<HTMLDivElement>) {
   const [scrollLeft, setScrollLeft] = React.useState(0)
-  const raf = React.useRef<number>()
 
   React.useEffect(() => {
     const el = ref.current
     if (!el) return
 
     const onScroll = () => {
-      if (raf.current) return
-      raf.current = requestAnimationFrame(() => {
-        setScrollLeft(el.scrollLeft)
-        if (raf.current) cancelAnimationFrame(raf.current)
-        raf.current = undefined
-      })
+      setScrollLeft(el.scrollLeft)
     }
 
     // initialise + listen
@@ -49,7 +44,6 @@ function useScrollLeft(ref: React.RefObject<HTMLDivElement>) {
     el.addEventListener('scroll', onScroll, { passive: true })
     return () => {
       el.removeEventListener('scroll', onScroll)
-      if (raf.current) cancelAnimationFrame(raf.current)
     }
   }, [ref])
 
@@ -96,11 +90,9 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
   duration,
 }) => {
   /* --------------- state & refs --------------------------------------- */
-  const beats = useTimelineStore((s: TimelineState) => s.beats)
-  const [inPoint, outPoint] = useTimelineStore((s: TimelineState) => [
-    s.inPoint,
-    s.outPoint,
-  ])
+  const beats = useTimelineStore((s: TimelineState) => s.beats, shallow)
+  const inPoint = useTimelineStore((s: TimelineState) => s.inPoint)
+  const outPoint = useTimelineStore((s: TimelineState) => s.outPoint)
   const scrollLeft = useScrollLeft(scrollContainerRef)
 
   const canvasRef = React.useRef<HTMLCanvasElement>(null)

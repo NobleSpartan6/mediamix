@@ -161,34 +161,37 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
 
   return (
     <div className="w-full select-none relative">
-      <div className="flex">
-        {/* Left gutter: spacer for ruler then track labels */}
-        <div className="flex flex-col">
-          {/* spacer matching ruler height */}
-          <div className="h-6" />
-          {lanes.map(([laneIndex]) => {
-            const isVideo = laneIndex % 2 === 0
-            const heightClass = isVideo ? 'h-12' : 'h-8'
-            const label = tracks[laneIndex]?.label ?? ''
-            return (
-              <div
-                key={laneIndex}
-                className={`${heightClass} flex items-center justify-center border-b border-white/10 text-xs text-gray-300 font-ui-medium`}
-              >
-                {label}
-              </div>
-            )
-          })}
-        </div>
-        {/* Ruler and tracks */}
-        <div className="flex-1 overflow-hidden">
-          {/* Numeric time ruler */}
-          <TimeRuler scrollContainerRef={scrollRef} pixelsPerSecond={zoom} duration={duration} />
+      <div className="flex-1 overflow-hidden">
+        {/* Numeric time ruler */}
+        <TimeRuler
+          scrollContainerRef={scrollRef}
+          pixelsPerSecond={zoom}
+          duration={duration}
+        />
+        {/* Labels and tracks share the same scroll container */}
+        <div className="flex overflow-y-auto">
+          {/* Left gutter: spacer for ruler then track labels */}
+          <div className="flex flex-col shrink-0">
+            <div className="h-6" />
+            {lanes.map(([laneIndex]) => {
+              const isVideo = laneIndex % 2 === 0
+              const heightClass = isVideo ? 'h-12' : 'h-8'
+              const label = tracks[laneIndex]?.label ?? ''
+              return (
+                <div
+                  key={laneIndex}
+                  className={`${heightClass} flex items-center justify-center border-b border-white/10 text-xs text-gray-300 font-ui-medium`}
+                >
+                  {label}
+                </div>
+              )
+            })}
+          </div>
           {/* Track area with overlay */}
-          <div className="relative" style={{ height: trackAreaHeight }}>
+          <div className="relative flex-1" style={{ minHeight: trackAreaHeight }}>
             <div
               ref={scrollRef}
-              className="relative h-full overflow-x-scroll overflow-y-auto bg-panel-bg cursor-grab"
+              className="relative h-full overflow-x-scroll bg-panel-bg cursor-grab"
             >
               <div className="relative h-full flex flex-col" style={{ width: duration * zoom }}>
                 {renderedTracks}
