@@ -1,4 +1,14 @@
-export function captureThumbnail(videoFile: File): Promise<string> {
+import { cacheKeyForFile } from './cacheKey'
+import { getCachedAnalysis, setCachedAnalysis } from '../cache'
+
+export async function captureThumbnail(
+  videoFile: File,
+  ratio = 0.5,
+): Promise<string> {
+  const key = `${cacheKeyForFile(videoFile)}-thumb-${ratio}`
+  const cached = await getCachedAnalysis<string>(key)
+  if (cached) return cached
+
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(videoFile)
     const video = document.createElement('video')
@@ -6,7 +16,14 @@ export function captureThumbnail(videoFile: File): Promise<string> {
     video.muted = true
     video.playsInline = true
     video.src = url
-    video.addEventListener('loadeddata', () => {
+    video.addEventListener('loadedmetadata', () => {
+      try {
+        video.currentTime = video.duration * ratio
+      } catch {
+        /* fall back to first frame */
+      }
+    })
+    const capture = () => {
       const canvas = document.createElement('canvas')
       const w = video.videoWidth || 160
       const h = video.videoHeight || 90
@@ -21,8 +38,11 @@ export function captureThumbnail(videoFile: File): Promise<string> {
       ctx.drawImage(video, 0, 0, w, h)
       const data = canvas.toDataURL('image/png')
       cleanup()
+      setCachedAnalysis(key, data).catch(() => {})
       resolve(data)
-    })
+    }
+    video.addEventListener('seeked', capture)
+    video.addEventListener('loadeddata', capture)
     video.addEventListener('error', () => {
       cleanup()
       reject(new Error('Video load error'))

@@ -1,42 +1,41 @@
 import { extractAudioTrack } from './extractAudioTrack'
-import { int16ToFloat32 } from '../../utils/pcm'
+import WaveformWorker from '../../workers/waveform.worker.ts?worker'
+import { cacheKeyForFile } from './cacheKey'
+import { getCachedAnalysis, setCachedAnalysis } from '../cache'
 
 export async function generateWaveform(
   videoFile: File,
   peakCount = 200,
 ): Promise<number[]> {
-  const { audioData, sampleRate } = await extractAudioTrack(
-    videoFile,
-    'raw',
-  )
-  let samples = int16ToFloat32(audioData)
-  if (typeof OfflineAudioContext !== 'undefined') {
-    try {
-      const ctx = new OfflineAudioContext(1, samples.length, sampleRate)
-      const buffer = ctx.createBuffer(1, samples.length, sampleRate)
-      buffer.getChannelData(0).set(samples)
-      const src = ctx.createBufferSource()
-      src.buffer = buffer
-      src.connect(ctx.destination)
-      src.start()
-      const rendered = await ctx.startRendering()
-      samples = rendered.getChannelData(0)
-    } catch (err) {
-      console.warn('OfflineAudioContext processing failed', err)
+  const key = `${cacheKeyForFile(videoFile)}-waveform-${peakCount}`
+  const cached = await getCachedAnalysis<number[]>(key)
+  if (cached) return cached
+
+  const { audioData, sampleRate } = await extractAudioTrack(videoFile, 'raw')
+
+  const peaks = await new Promise<number[]>((resolve, reject) => {
+    const worker = new WaveformWorker()
+    worker.onmessage = (
+      event: MessageEvent<{ type: string; peaks?: number[]; error?: string }>,
+    ) => {
+      if (event.data.type === 'WAVEFORM') {
+        resolve(event.data.peaks ?? [])
+        worker.terminate()
+      } else if (event.data.type === 'ERROR') {
+        reject(new Error(event.data.error ?? 'waveform worker error'))
+        worker.terminate()
+      }
     }
-  }
-  const len = peakCount
-  const step = samples.length / len
-  const peaks = new Array<number>(len)
-  for (let i = 0; i < len; i += 1) {
-    const start = Math.floor(i * step)
-    const end = Math.floor((i + 1) * step)
-    let max = 0
-    for (let j = start; j < end && j < samples.length; j += 1) {
-      const v = Math.abs(samples[j])
-      if (v > max) max = v
+    worker.onerror = (err: ErrorEvent) => {
+      reject(new Error(err.message))
+      worker.terminate()
     }
-    peaks[i] = max
-  }
+    worker.postMessage(
+      { type: 'GEN_WAVEFORM', payload: { samples: audioData, sampleRate, peakCount } },
+      [audioData],
+    )
+  })
+
+  await setCachedAnalysis(key, peaks)
   return peaks
 }
