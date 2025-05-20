@@ -185,6 +185,7 @@ export const exportTimelineVideo = async (): Promise<void> => {
     console.error('Export failed', err)
     setExportStatus(false, 0, err?.message || 'Export failed')
   }
+}
 export interface SegmentRange {
   start: number
   end: number

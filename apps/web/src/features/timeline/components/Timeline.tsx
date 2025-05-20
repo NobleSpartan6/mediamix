@@ -2,7 +2,6 @@ import * as React from 'react'
 
 import { useTimelineStore } from '../../../state/timelineStore'
 import type { Clip as ClipType } from '../../../state/timelineStore'
-import { InteractiveClip } from './InteractiveClip'
 import { TimeRuler } from './TimeRuler'
 import { Playhead } from './Playhead'
 import { TrackRow } from './TrackRow'
@@ -73,6 +72,10 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
   const currentTime = useTimelineStore((s) => s.currentTime)
   const followPlayhead = useTimelineStore((s) => s.followPlayhead)
   const setFollowPlayhead = useTimelineStore((s) => s.setFollowPlayhead)
+  const splitClipAt = useTimelineStore((s) => s.splitClipAt)
+  const removeClip = useTimelineStore((s) => s.removeClip)
+  const selectedIds = useTimelineStore((s) => s.selectedClipIds)
+  const setSelected = useTimelineStore((s) => s.setSelectedClips)
   const playheadSeconds = React.useMemo(() => playheadFrame / 30, [playheadFrame])
   React.useEffect(() => {
     setCurrentTime(playheadSeconds)
@@ -156,6 +159,16 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
     }
   }, [currentTime, playRate, followPlayhead, zoom])
 
+  const handleSplit = React.useCallback(
+    () => splitClipAt(currentTime),
+    [splitClipAt, currentTime],
+  )
+
+  const handleDelete = React.useCallback(() => {
+    selectedIds.forEach((id) => removeClip(id))
+    if (selectedIds.length > 0) setSelected([])
+  }, [removeClip, selectedIds, setSelected])
+
   useTimelineKeyboard()
   usePlaybackTicker()
 
@@ -216,6 +229,20 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
       {/* Zoom slider and follow toggle */}
       <div className="absolute top-8 right-2 flex items-center space-x-2">
         <ZoomSlider value={zoom} onChange={setZoom} />
+        <Button
+          variant="secondary"
+          className="px-2 py-1 text-xs"
+          onClick={handleSplit}
+        >
+          Split
+        </Button>
+        <Button
+          variant="secondary"
+          className="px-2 py-1 text-xs"
+          onClick={handleDelete}
+        >
+          Delete
+        </Button>
         <Button
           variant="secondary"
           className="px-2 py-1 text-xs"
