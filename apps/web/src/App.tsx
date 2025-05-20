@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react'
+import { useEffect, useRef, useMemo, useCallback } from 'react'
 import { Button } from './components/ui/Button'
 import VideoImportButton from './features/import/VideoImportButton'
 import FileInfoCard from './features/import/FileInfoCard'
@@ -6,6 +6,9 @@ import BeatMarkerBar from './features/timeline/BeatMarkerBar'
 import { Timeline } from './features/timeline/components/Timeline'
 import { CommandInput } from './features/timeline/components/CommandInput'
 import './App.css'
+import { exportTimelineVideo } from './export/segment'
+import { useExportStatus } from './lib/store/hooks'
+import ExportProgress from './features/export/ExportProgress'
 import { useTimelineStore } from './state/timelineStore'
 import useMotifStore from './lib/store'
 
@@ -36,6 +39,11 @@ function App() {
       prevAssetCount.current = mediaAssets.length
     }
   }, [mediaAssets, addClip])
+
+  const { isExporting } = useExportStatus()
+  const handleExport = useCallback(() => {
+    exportTimelineVideo()
+  }, [])
 
   // Populate demo data once on mount if store is empty
   useEffect(() => {
@@ -70,10 +78,11 @@ function App() {
             <BeatMarkerBar />
           </div>
           <div className="hidden md:block w-px bg-gray-700/40" />
-          <div className="md:w-64 lg:w-80 self-start">
-            <Button className="w-full" variant="default">
-              Export (stub)
+          <div className="md:w-64 lg:w-80 self-start space-y-2">
+            <Button className="w-full" variant="default" onClick={handleExport} disabled={isExporting}>
+              {isExporting ? 'Exporting…' : 'Export Video'}
             </Button>
+            <ExportProgress />
           </div>
         </div>
 
