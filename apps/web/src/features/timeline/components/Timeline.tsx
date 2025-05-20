@@ -78,6 +78,37 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
     setCurrentTime(playheadSeconds)
   }, [playheadSeconds, setCurrentTime])
 
+  // -- Scrubbing -------------------------------------------------------------
+  const scrubRef = React.useRef(false)
+  const scrub = React.useCallback(
+    (e: PointerEvent | React.PointerEvent) => {
+      if (!scrollRef.current) return
+      const rect = scrollRef.current.getBoundingClientRect()
+      const x = e.clientX - rect.left + scrollRef.current.scrollLeft
+      const time = x / zoom
+      setCurrentTime(Math.max(0, time))
+    },
+    [setCurrentTime, zoom],
+  )
+
+  const stopScrub = React.useCallback(() => {
+    if (!scrubRef.current) return
+    scrubRef.current = false
+    document.removeEventListener('pointermove', scrub)
+    document.removeEventListener('pointerup', stopScrub)
+  }, [scrub])
+
+  const startScrub = React.useCallback(
+    (e: React.PointerEvent) => {
+      if (e.button !== 0) return
+      scrubRef.current = true
+      scrub(e)
+      document.addEventListener('pointermove', scrub)
+      document.addEventListener('pointerup', stopScrub)
+    },
+    [scrub, stopScrub],
+  )
+
   // Track scroll position for playhead overlay
   React.useEffect(() => {
     const el = scrollRef.current
@@ -192,6 +223,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
             <div
               ref={scrollRef}
               className="relative h-full overflow-x-scroll bg-panel-bg cursor-grab"
+              onPointerDown={startScrub}
             >
               <div className="relative h-full flex flex-col" style={{ width: duration * zoom }}>
                 {renderedTracks}

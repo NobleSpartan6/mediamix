@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { Button } from '../../components/ui/Button'
-import { selectVideoFiles } from '../../lib/file/selectVideoFiles'
+import { selectVideoFile } from '../../lib/file/selectVideoFile'
 import { extractVideoMetadata } from '../../lib/file/extractVideoMetadata'
 import { checkCodecSupport } from '../../lib/file/checkCodecSupport'
 import useMotifStore from '../../lib/store'
@@ -33,8 +33,9 @@ export function VideoImportButton() {
     setBeatDetectionStage('idle')
     setBeatDetectionProgress(0)
     try {
-      const selections = await selectVideoFiles()
-      if (selections.length === 0) return
+      const selection = await selectVideoFile()
+      if (!selection) return
+      const selections = [selection]
       for (let i = 0; i < selections.length; i += 1) {
         const { file, handle } = selections[i]
 
@@ -56,17 +57,11 @@ export function VideoImportButton() {
         setFileInfo(metadata)
 
         const assetId = useMediaStore.getState().addAsset({
-      // Retrieve generated id and register with mediaStore
-      const assets = useMotifStore.getState().mediaAssets
-      const assetId = assets[assets.length - 1]?.id
-      let analysisFile: File = file
-      let proxyUrl: string | undefined
-      if (assetId) {
-        useMediaStore.getState().addAsset({
-          id: assetId,
           fileName: file.name,
           duration: metadata.duration ?? 0,
         })
+
+        if (assetId) {
 
         if ((metadata.duration ?? 0) > 600) {
           try {
