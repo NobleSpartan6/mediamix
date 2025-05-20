@@ -30,10 +30,22 @@ interface InteractiveClipProps {
 export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ clip, pixelsPerSecond, type }) => {
   const updateClip = useTimelineStore((s) => s.updateClip)
   const beats = useTimelineStore((s) => s.beats)
+  const tracks = useTimelineStore((s) => s.tracks)
   const clips = useClipsArray()
   const ref = React.useRef<HTMLDivElement>(null)
 
   const SNAP_THRESHOLD = 0.1 // seconds
+
+  const laneHeights = React.useMemo(() =>
+    tracks.map((t) => (t.type === 'video' ? 48 : 32)), [tracks])
+  const laneOffsets = React.useMemo(() => {
+    let off = 0
+    return laneHeights.map((h) => {
+      const o = off
+      off += h
+      return o
+    })
+  }, [laneHeights])
 
   const neighborTimes = React.useMemo(() => {
     return clips
@@ -67,15 +79,15 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
   // mutable refs to store original values at the start of interaction
   const origin = React.useRef({ startSec: clip.start, endSec: clip.end, widthPx: 0 })
   const translateXRef = React.useRef(0)
+  const translateYRef = React.useRef(0)
+  const laneRef = React.useRef(clip.lane)
 
   // --- Imperative DOM updates -------------------------------------------------
   const applyTransform = React.useCallback(
-    (translateXPx: number, newWidthPx?: number) => {
+    (x: number, y = 0, newWidthPx?: number) => {
       if (!ref.current) return
-      // only update properties that are cheap for the compositor
-      ref.current.style.transform = `translateX(${translateXPx}px)`
+      ref.current.style.transform = `translate(${x}px, ${y}px)`
       if (newWidthPx !== undefined) {
-        // Width changes are unavoidable during resize; keep them minimal.
         ref.current.style.width = `${newWidthPx}px`
       }
     },
@@ -90,11 +102,13 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
       endSec: clip.end,
       widthPx: (clip.end - clip.start) * pixelsPerSecond,
     }
+    translateYRef.current = 0
+    laneRef.current = clip.lane
   }
 
   const onDrag = (e: OnDrag) => {
     const { beforeTranslate } = e
-    const [translateX] = beforeTranslate
+    const [translateX, translateY] = beforeTranslate
     let newStart = origin.current.startSec + translateX / pixelsPerSecond
     const snap = findSnap(newStart)
     if (snap !== null) {
@@ -105,8 +119,20 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
       translateXRef.current = translateX
       setSnapTime(null)
     }
+    translateYRef.current = translateY
+    const yAbs = laneOffsets[clip.lane] + translateY
+    let lane = clip.lane
+    for (let i = 0; i < laneOffsets.length; i += 1) {
+      const off = laneOffsets[i]
+      const h = laneHeights[i]
+      if (yAbs >= off && yAbs < off + h) {
+        lane = i
+        break
+      }
+    }
+    laneRef.current = lane
     const translateTarget = newStart * pixelsPerSecond
-    applyTransform(translateTarget)
+    applyTransform(translateTarget, translateY)
   }
 
   const onDragEnd = (/* e: OnDragEnd */ _e: OnDrag) => {
@@ -115,7 +141,11 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
         ? snapTime
         : origin.current.startSec + translateXRef.current / pixelsPerSecond
     const duration = origin.current.endSec - origin.current.startSec
-    updateClip(clip.id, { start: finalStart, end: finalStart + duration })
+    updateClip(clip.id, {
+      start: finalStart,
+      end: finalStart + duration,
+      lane: laneRef.current,
+    })
     setSnapTime(null)
   }
 
@@ -134,11 +164,11 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
         newStart = snap
         newWidthPx = (origin.current.endSec - snap) * pixelsPerSecond
         setSnapTime(snap)
-        applyTransform(newStart * pixelsPerSecond, newWidthPx)
+        applyTransform(newStart * pixelsPerSecond, translateYRef.current, newWidthPx)
       } else {
         setSnapTime(null)
         const translateTarget = origin.current.endSec * pixelsPerSecond - newWidthPx + translateX
-        applyTransform(translateTarget, newWidthPx)
+        applyTransform(translateTarget, translateYRef.current, newWidthPx)
       }
     } else {
       // Resizing from right – transform unchanged, only width scales
@@ -151,7 +181,7 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
       } else {
         setSnapTime(null)
       }
-      applyTransform(origin.current.startSec * pixelsPerSecond, newWidthPx)
+      applyTransform(origin.current.startSec * pixelsPerSecond, translateYRef.current, newWidthPx)
     }
   }
 

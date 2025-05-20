@@ -16,6 +16,9 @@ export function useTimelineKeyboard() {
   const setInPoint    = useTimelineStore((s) => s.setInPoint)
   const setOutPoint   = useTimelineStore((s) => s.setOutPoint)
   const splitClipAt   = useTimelineStore((s) => s.splitClipAt)
+  const removeClip    = useTimelineStore((s) => s.removeClip)
+  const selectedIds   = useTimelineStore((s) => s.selectedClipIds)
+  const setSelected   = useTimelineStore((s) => s.setSelectedClips)
 
   /** Refs prevent stale closures during rapid key-repeat */
   const stepRef     = useRef(stepShuttle)
@@ -25,6 +28,9 @@ export function useTimelineKeyboard() {
   const inRef       = useRef(setInPoint)
   const outRef      = useRef(setOutPoint)
   const splitRef    = useRef(splitClipAt)
+  const removeRef   = useRef(removeClip)
+  const selectedRef = useRef(selectedIds)
+  const setSelRef   = useRef(setSelected)
 
   /* Keep refs fresh each render */
   useEffect(() => {
@@ -35,6 +41,9 @@ export function useTimelineKeyboard() {
     inRef.current       = setInPoint
     outRef.current      = setOutPoint
     splitRef.current    = splitClipAt
+    removeRef.current   = removeClip
+    selectedRef.current = selectedIds
+    setSelRef.current   = setSelected
   })
 
   useEffect(() => {
@@ -81,6 +90,13 @@ export function useTimelineKeyboard() {
         case 'C': {
           playheadRef.current = useTransportStore.getState().playheadFrame
           splitRef.current(playheadRef.current / 30)
+          e.preventDefault()
+          break
+        }
+        case 'Delete':
+        case 'Backspace': {
+          selectedRef.current.forEach((id) => removeRef.current(id))
+          if (selectedRef.current.length > 0) setSelRef.current([])
           e.preventDefault()
           break
         }

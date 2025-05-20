@@ -33,6 +33,8 @@ export interface TimelineState {
   currentTime: number
   /** Auto-scroll timeline to keep playhead in view */
   followPlayhead: boolean
+  /** Ids of currently selected clips */
+  selectedClipIds: string[]
   /** Optional in/out points in seconds */
   inPoint: number | null
   outPoint: number | null
@@ -49,6 +51,7 @@ export interface TimelineState {
   setInPoint: (time: number | null) => void
   setOutPoint: (time: number | null) => void
   setFollowPlayhead: (follow: boolean) => void
+  setSelectedClips: (ids: string[]) => void
 }
 
 const toDict = (arr: Clip[]) => Object.fromEntries(arr.map((c) => [c.id, c]))
@@ -86,6 +89,7 @@ export const useTimelineStore = create<TimelineState>((set) => ({
   outPoint: null,
   beats: [],
   followPlayhead: true,
+  selectedClipIds: [],
 
   /**
    * Replace the entire clip collection with a new set.
@@ -206,6 +210,8 @@ export const useTimelineStore = create<TimelineState>((set) => ({
   setOutPoint: (time) => set({ outPoint: time }),
   /** Enable or disable auto-follow behavior */
   setFollowPlayhead: (follow) => set({ followPlayhead: follow }),
+  /** Replace current selection */
+  setSelectedClips: (ids) => set({ selectedClipIds: ids }),
 }))
 
 // ---- Selectors -----------------------------------------------------------
@@ -214,4 +220,7 @@ export const selectClipsArray = (state: TimelineState): Clip[] =>
   Object.values(state.clipsById)
 
 export const selectTracks = (state: TimelineState): Track[] => state.tracks
+
+export const selectSelectedClipIds = (state: TimelineState): string[] =>
+  state.selectedClipIds
 
