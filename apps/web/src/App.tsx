@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react'
+import { useEffect, useRef, useMemo, useCallback } from 'react'
 import { Button } from './components/ui/Button'
 import VideoImportButton from './features/import/VideoImportButton'
 import FileInfoCard from './features/import/FileInfoCard'
@@ -6,7 +6,12 @@ import MediaLibrary from './features/import/MediaLibrary'
 import BeatMarkerBar from './features/timeline/BeatMarkerBar'
 import { Timeline } from './features/timeline/components/Timeline'
 import { CommandInput } from './features/timeline/components/CommandInput'
+import AppShell from './features/shell/AppShell'
+import { VideoPreview } from './features/preview'
 import './App.css'
+import { exportTimelineVideo } from './export/segment'
+import { useExportStatus } from './lib/store/hooks'
+import ExportProgress from './features/export/ExportProgress'
 import { useTimelineStore } from './state/timelineStore'
 
 function App() {
@@ -17,6 +22,11 @@ function App() {
   const beats = useTimelineStore((s) => s.beats)
   const setBeats = useTimelineStore((s) => s.setBeats)
 
+
+  const { isExporting } = useExportStatus()
+  const handleExport = useCallback(() => {
+    exportTimelineVideo()
+  }, [])
 
   // Populate demo data once on mount if store is empty
   useEffect(() => {
@@ -34,7 +44,7 @@ function App() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-panel-bg text-white flex flex-col p-6 font-sans">
+    <AppShell>
       {/* Header */}
       <header className="mb-6 text-center">
         <h1 className="text-accent text-ui-heading font-ui-semibold mb-1">Motif — Timeline MVP</h1>
@@ -52,21 +62,23 @@ function App() {
             <BeatMarkerBar />
           </div>
           <div className="hidden md:block w-px bg-gray-700/40" />
-          <div className="md:w-64 lg:w-80 self-start">
-            <Button className="w-full" variant="default">
-              Export (stub)
+          <div className="md:w-64 lg:w-80 self-start space-y-2">
+            <Button className="w-full" variant="default" onClick={handleExport} disabled={isExporting}>
+              {isExporting ? 'Exporting…' : 'Export Video'}
             </Button>
+            <ExportProgress />
           </div>
         </div>
 
         {/* Timeline */}
         <section className="bg-gray-800/40 rounded-lg p-4">
           <h2 className="text-ui-body font-ui-medium text-gray-300 mb-2">Timeline</h2>
+          <VideoPreview />
           <Timeline pixelsPerSecond={120} />
           <CommandInput />
         </section>
       </main>
-    </div>
+    </AppShell>
   )
 }
 

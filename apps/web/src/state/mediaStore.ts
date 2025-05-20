@@ -14,6 +14,8 @@ export interface MediaAsset {
   waveform?: number[]
   /** optional thumbnail image as data URL */
   thumbnail?: string
+  /** optional URL to a lower-resolution proxy video */
+  proxyUrl?: string
 }
 
 interface MediaState {
