@@ -23,7 +23,11 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    "types": ["vitest", "vite/client"]
+    "types": ["vitest", "vite/client"],
+    "baseUrl": ".",
+    "paths": {
+      "lucide-react": ["./src/stubs/lucide-react.tsx"]
+    }
   },
   "include": ["src"]
 }
