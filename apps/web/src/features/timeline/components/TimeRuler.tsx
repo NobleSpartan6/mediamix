@@ -142,11 +142,30 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
     ctx.textAlign = 'center'
     ctx.textBaseline = 'top'
 
-    const firstSec = Math.floor(scrollLeft / pixelsPerSecond)
-    const lastSec = Math.ceil((scrollLeft + w) / pixelsPerSecond)
+    const targetPx = 80
+    const labelMin = 20
+    const options = [1 / 30, 0.1, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60]
+    let major = options[options.length - 1]
+    for (const o of options) {
+      if (o * pixelsPerSecond >= targetPx) {
+        major = o
+        break
+      }
+    }
+    const showLabel = major * pixelsPerSecond >= labelMin
 
-    for (let sec = firstSec; sec <= lastSec; sec++) {
-      const x = sec * pixelsPerSecond - scrollLeft + 0.5
+    let minor: number | null = null
+    if (pixelsPerSecond >= 200) minor = 1 / 30
+    else if (pixelsPerSecond >= 80) minor = major / 10
+    else if (pixelsPerSecond >= 40) minor = major / 5
+    else if (pixelsPerSecond >= 20) minor = major / 2
+    if (minor && minor * pixelsPerSecond < 5) minor = null
+
+    const first = Math.floor(scrollLeft / pixelsPerSecond / major) * major
+    const last = Math.ceil((scrollLeft + w) / pixelsPerSecond / major) * major
+
+    for (let t = first; t <= last; t += major) {
+      const x = t * pixelsPerSecond - scrollLeft + 0.5
 
       /* major tick */
       ctx.strokeStyle = '#4B5563'
@@ -156,14 +175,16 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
       ctx.stroke()
 
       /* label */
-      ctx.fillStyle = '#D1D5DB'
-      ctx.fillText(formatTimecode(sec), x, 0)
+      if (showLabel) {
+        ctx.fillStyle = '#D1D5DB'
+        ctx.fillText(formatTimecode(t), x, 0)
+      }
 
-      /* minor ticks (every 10 frames) if zoomed in enough */
-      if (pixelsPerSecond >= 60) {
+      /* minor ticks */
+      if (minor) {
         ctx.strokeStyle = '#374151'
-        for (let f = 10; f < 30; f += 10) {
-          const subX = (sec + f / 30) * pixelsPerSecond - scrollLeft + 0.5
+        for (let mt = t + minor; mt < t + major; mt += minor) {
+          const subX = mt * pixelsPerSecond - scrollLeft + 0.5
           ctx.beginPath()
           ctx.moveTo(subX, h / 2)
           ctx.lineTo(subX, h)

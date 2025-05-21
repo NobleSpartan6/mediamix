@@ -5,7 +5,6 @@ import type { Clip as ClipType } from '../../../state/timelineStore'
 import { TimeRuler } from './TimeRuler'
 import { Playhead } from './Playhead'
 import { TrackRow } from './TrackRow'
-import { GhostCuts } from './GhostCuts'
 import { useTransportStore } from '../../../state/transportStore'
 import { usePlaybackTicker } from '../../../state/playbackTicker'
 import { useBeatSlices } from '../hooks/useBeatSlices'
@@ -43,6 +42,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
   const clips = useClipsArray()
   const setClips = useTimelineStore((state) => state.setClips)
   const tracks = useTimelineStore((s) => s.tracks)
+  const beats = useTimelineStore((s) => s.beats)
 
   // Show zoom change indicator briefly
   React.useEffect(() => {
@@ -240,7 +240,13 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
             >
               <div className="relative h-full flex flex-col" style={{ width: duration * zoom }}>
                 {renderedTracks}
-                <GhostCuts pixelsPerSecond={zoom} height="100%" />
+                {beats.map((b) => (
+                  <div
+                    key={b}
+                    className="absolute top-0 bottom-0 w-px bg-accent/20 pointer-events-none"
+                    style={{ transform: `translateX(${b * zoom}px)` }}
+                  />
+                ))}
               </div>
             </div>
             <Playhead
