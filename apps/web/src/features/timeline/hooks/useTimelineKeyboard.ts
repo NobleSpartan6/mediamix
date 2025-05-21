@@ -64,6 +64,12 @@ export function useTimelineKeyboard() {
           setRateRef.current(0)
           e.preventDefault()
           break
+        case ' ': {
+          const rate = useTransportStore.getState().playRate
+          setRateRef.current(rate === 0 ? 1 : 0)
+          e.preventDefault()
+          break
+        }
         case 'ArrowRight':
           nudgeRef.current(e.shiftKey ? 10 : 1)
           e.preventDefault()

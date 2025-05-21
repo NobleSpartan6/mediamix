@@ -57,6 +57,12 @@ describe('useTimelineKeyboard', () => {
     fireEvent.keyDown(window, { key: 'k' })
     expect(useTransportStore.getState().playRate).toBe(0)
 
+    fireEvent.keyDown(window, { key: ' ' })
+    expect(useTransportStore.getState().playRate).toBe(1)
+
+    fireEvent.keyDown(window, { key: ' ' })
+    expect(useTransportStore.getState().playRate).toBe(0)
+
     fireEvent.keyDown(window, { key: 'ArrowRight' })
     // arrow right jogs the playhead by one frame
     await waitFor(() => {
