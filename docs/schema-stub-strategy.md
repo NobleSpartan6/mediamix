@@ -46,6 +46,7 @@ These files compile but purposefully perform **no real work** yet. Each includes
 | `apps/web/src/state/yjsStore.ts` | `CollabProvider` | CRDT-powered realtime collaboration slice. |
 | `apps/web/src/lib/fs.ts` | `DesktopAdapter` | Swap browser FS API for Tauri native Rust bindings. |
 | `apps/web/src/lib/cache.ts` | `CacheLayer` | IndexedDB / OPFS media chunk caching with eviction. |
+| `apps/web/src/stubs/lucide-react.tsx` | `LucideIcons` | Placeholder icons before bundling real lucide-react. |
 
 ### Extending the Catalogue
 
