@@ -3,6 +3,7 @@ import { create } from 'zustand'
 import { nanoid } from '../utils/nanoid'
 
 import { generateId } from '../utils/id'
+import { processMediaAsset } from '../lib/media-utils'
 
 
 export interface MediaAsset {
@@ -16,11 +17,13 @@ export interface MediaAsset {
   thumbnail?: string
   /** optional URL to a lower-resolution proxy video */
   proxyUrl?: string
+  /** Original file object, to be used by the worker, not stored long-term in state. */
+  file?: File
 }
 
 interface MediaState {
   assets: Record<string, MediaAsset>
-  addAsset: (asset: Omit<MediaAsset, 'id'> & { id?: string }) => string
+  addAsset: (asset: Omit<MediaAsset, 'id'> & { id?: string; file?: File }) => string
   updateAsset: (id: string, delta: Partial<Omit<MediaAsset, 'id'>>) => void
   removeAsset: (id: string) => void
 }
@@ -30,11 +33,18 @@ export const useMediaStore = create<MediaState>((set) => ({
 
   /**
    * Add a new media asset and return its generated id.
+   * Also triggers background processing for waveform/thumbnail if a file is provided.
    */
   addAsset: (assetInput) => {
-    const { id: providedId, ...rest } = assetInput as any
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id: providedId, file, ...rest } = assetInput as Omit<MediaAsset, 'id'> & { id?: string; file?: File }
     const id = providedId ?? generateId()
-    set((state) => ({ assets: { ...state.assets, [id]: { id, ...rest } } }))
+    // Store asset metadata (excluding the file object itself from the state)
+    set((state) => ({ assets: { ...state.assets, [id]: { id, fileName: rest.fileName, duration: rest.duration } } }))
+
+    if (file) {
+      processMediaAsset(id, file)
+    }
     return id
   },
 

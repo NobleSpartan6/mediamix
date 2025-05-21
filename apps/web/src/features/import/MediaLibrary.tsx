@@ -1,10 +1,11 @@
 import React from 'react'
-import { selectMediaArray, useMediaStore } from '../../state/mediaStore'
+import { useMediaStore } from '../../state/mediaStore'
 import { useTimelineStore } from '../../state/timelineStore'
 import { Button } from '../../components/ui/Button'
 
 export default function MediaLibrary() {
-  const assets = useMediaStore(selectMediaArray)
+  const assetsObject = useMediaStore((s) => s.assets)
+  const assets = React.useMemo(() => Object.values(assetsObject), [assetsObject])
   const removeAsset = useMediaStore((s) => s.removeAsset)
   const addClip = useTimelineStore((s) => s.addClip)
   const clipsById = useTimelineStore((s) => s.clipsById)
@@ -32,34 +33,6 @@ export default function MediaLibrary() {
     <div className="space-y-2">
       <h3 className="text-ui-body font-ui-medium text-accent">Media Library</h3>
       <ul className="space-y-2">
-        {assets.map((asset) => (
-          <li
-            key={asset.id}
-            className="flex items-center space-x-2"
-            draggable
-            onDragStart={(e) => {
-              e.dataTransfer.setData('text/x-mediamix-asset', asset.id)
-            }}
-          >
-            {asset.thumbnail && (
-              <img
-                src={asset.thumbnail}
-                alt="thumb"
-                className="w-12 h-8 object-cover rounded"
-              />
-            )}
-            <span className="flex-1 text-sm">{asset.fileName}</span>
-            <Button
-              variant="secondary"
-              onClick={() => handleAdd(asset.id, asset.duration)}
-            >
-              Add to Timeline
-            </Button>
-            <Button variant="secondary" onClick={() => handleRemove(asset.id)}>
-              Remove
-            </Button>
-          </li>
-        ))
       </ul>
     </div>
   )

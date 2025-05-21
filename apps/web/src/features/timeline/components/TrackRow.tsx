@@ -28,6 +28,7 @@ export const TrackRow: React.FC<TrackRowProps> = React.memo(({ laneIndex, clips,
   const height = type === 'video' ? 48 : 32
 
   const addClip = useTimelineStore((s) => s.addClip)
+  const clipsById = useTimelineStore((s) => s.clipsById)
   const assets = useMediaStore((s) => s.assets)
 
   const renderedClips = React.useMemo(
@@ -59,14 +60,47 @@ export const TrackRow: React.FC<TrackRowProps> = React.memo(({ laneIndex, clips,
       const parentScroll = e.currentTarget.parentElement?.parentElement as HTMLElement
       const scrollLeft = parentScroll?.scrollLeft ?? 0
       const x = e.clientX - rect.left + scrollLeft
-      const start = Math.max(0, x / pixelsPerSecond)
+      const initialStart = Math.max(0, x / pixelsPerSecond)
       const duration = asset.duration
+      const initialEnd = initialStart + duration
+
+      const allClipsArray = Object.values(clipsById)
+
       const baseLane = laneIndex % 2 === 0 ? laneIndex : laneIndex - 1
-      addClip({ start, end: start + duration, lane: baseLane, assetId })
-      addClip({ start, end: start + duration, lane: baseLane + 1, assetId })
+      const audioLane = baseLane + 1
+
+      let videoStart = initialStart
+      let audioStart = initialStart
+
+      // Check for overlap on video lane (baseLane)
+      const conflictingVideoClips = allClipsArray.filter(
+        (clip: ClipType) =>
+          clip.lane === baseLane &&
+          clip.start < initialEnd &&
+          clip.end > initialStart,
+      )
+
+      if (conflictingVideoClips.length > 0) {
+        videoStart = Math.max(...conflictingVideoClips.map((clip: ClipType) => clip.end))
+      }
+
+      // Check for overlap on audio lane (audioLane)
+      const conflictingAudioClips = allClipsArray.filter(
+        (clip: ClipType) =>
+          clip.lane === audioLane &&
+          clip.start < initialEnd &&
+          clip.end > initialStart,
+      )
+
+      if (conflictingAudioClips.length > 0) {
+        audioStart = Math.max(...conflictingAudioClips.map((clip: ClipType) => clip.end))
+      }
+
+      addClip({ start: videoStart, end: videoStart + duration, lane: baseLane, assetId })
+      addClip({ start: audioStart, end: audioStart + duration, lane: audioLane, assetId })
       e.preventDefault()
     },
-    [assets, pixelsPerSecond, laneIndex, addClip],
+    [assets, pixelsPerSecond, laneIndex, addClip, clipsById],
   )
 
   return (
