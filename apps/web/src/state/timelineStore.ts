@@ -20,6 +20,8 @@ export interface Track {
   id: string
   type: 'video' | 'audio'
   label: string
+  /** id of the asset that originally created this track, if any */
+  parentAsset?: string
 }
 
 export interface TimelineState {
@@ -60,9 +62,9 @@ const ensureTracks = (tracks: Track[], lane: number): Track[] => {
   const next = [...tracks]
   while (next.length <= lane) {
     const index = next.length
-    const pair = Math.floor(index / 2) + 1
     const type = index % 2 === 0 ? 'video' : 'audio'
-    const label = type === 'video' ? `V${pair}` : `A${pair}`
+    const countOfType = next.filter((t) => t.type === type).length + 1
+    const label = type === 'video' ? `V${countOfType}` : `A${countOfType}`
     next.push({ id: `track-${index}`, type, label })
   }
   return next
