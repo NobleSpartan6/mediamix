@@ -60,6 +60,7 @@ export function VideoImportButton() {
       // Add asset to legacy store (also creates timeline clips)
       addMediaAsset({ fileName: file.name, fileHandle: handle ?? null, metadata })
 
+
       // Retrieve generated id and register with mediaStore
       const assets = useMotifStore.getState().mediaAssets
       const assetId = assets[assets.length - 1]?.id
@@ -98,8 +99,49 @@ export function VideoImportButton() {
         } catch (analysisErr) {
           console.warn('Media analysis failed', analysisErr)
         }
-      }
+        try {
+          const { videoSupported, audioSupported } = await checkCodecSupport({
+            width: metadata.width ?? undefined,
+            height: metadata.height ?? undefined,
+            sampleRate: metadata.sampleRate ?? undefined,
+            channelCount: metadata.channelCount ?? undefined,
+          })
+          setFileInfo({ videoSupported, audioSupported })
+        } catch (codecErr: any) {
+          console.warn('Codec support check failed', codecErr)
+        }
 
+        setIsBeatDetectionRunning(true)
+        setBeatDetectionStage('extractAudio')
+        setBeatDetectionProgress(0)
+        try {
+          const beats = await detectBeatsFromVideo(analysisFile, (stage, progress) => {
+            if (stage === 'extractAudio') {
+              setBeatDetectionStage('extractAudio')
+              setBeatDetectionProgress(progress ?? 0)
+              if (progress === 1) {
+                setBeatDetectionStage('detectBeats')
+                setBeatDetectionProgress(0)
+              }
+            }
+          })
+          const markers: BeatMarker[] = beats.map((t, idx) => ({
+            id: `beat-${idx}`,
+            timestamp: t,
+            confidence: 1,
+          }))
+          setBeatMarkers(markers)
+          setBeatDetectionError(null)
+          setBeatDetectionProgress(1)
+        } catch (beatErr: any) {
+          console.error('Beat detection failed:', beatErr)
+          setBeatDetectionError(
+            typeof beatErr?.message === 'string' ? beatErr.message : 'An error occurred during beat detection.',
+          )
+        } finally {
+          setIsBeatDetectionRunning(false)
+          setBeatDetectionStage('idle')
+        }
       /*
        * === Beat Detection ===
        * Kick off beat detection immediately after successful video import & metadata extraction.
@@ -172,6 +214,7 @@ export function VideoImportButton() {
         }
         console.warn('Codec support check failed', codecErr)
       }
+
     } catch (err: any) {
       // Reset store to ensure consistent state after a failure
       resetStore()
