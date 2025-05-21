@@ -56,6 +56,13 @@ export const TrackRow: React.FC<TrackRowProps> = React.memo(({ laneIndex, clips,
       if (!assetId) return
       const asset = assets[assetId]
       if (!asset) return
+      const ext = asset.fileName.split('.').pop()?.toLowerCase() ?? ''
+      const audioRegex = /^(mp3|wav|flac|ogg|aac|m4a)$/
+      const videoRegex = /^(mp4|mov|mkv|webm|avi|mpg|mpeg)$/
+      const isAudio = audioRegex.test(ext)
+      const isVideoFile = videoRegex.test(ext)
+      const isAudioOnly = isAudio && !isVideoFile
+      const isVideo = isVideoFile || (!isAudio && !isVideoFile)
       const rect = e.currentTarget.getBoundingClientRect()
       const parentScroll = e.currentTarget.parentElement?.parentElement as HTMLElement
       const scrollLeft = parentScroll?.scrollLeft ?? 0
@@ -96,8 +103,12 @@ export const TrackRow: React.FC<TrackRowProps> = React.memo(({ laneIndex, clips,
         audioStart = Math.max(...conflictingAudioClips.map((clip: ClipType) => clip.end))
       }
 
-      addClip({ start: videoStart, end: videoStart + duration, lane: baseLane, assetId })
-      addClip({ start: audioStart, end: audioStart + duration, lane: audioLane, assetId })
+      if (isVideo) {
+        addClip({ start: videoStart, end: videoStart + duration, lane: baseLane, assetId })
+      }
+      if (isVideo || isAudioOnly) {
+        addClip({ start: audioStart, end: audioStart + duration, lane: audioLane, assetId })
+      }
       e.preventDefault()
     },
     [assets, pixelsPerSecond, laneIndex, addClip, clipsById],

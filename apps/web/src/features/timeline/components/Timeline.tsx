@@ -141,38 +141,34 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
   }, [clips])
 
   // Group clips by lane index
-  const lanes = React.useMemo(() => {
+  const laneMap = React.useMemo(() => {
     const map = new Map<number, ClipType[]>()
     clips.forEach((clip) => {
       const arr = map.get(clip.lane) ?? []
       arr.push(clip)
       map.set(clip.lane, arr)
     })
-    return Array.from(map.entries()).sort((a, b) => a[0] - b[0]) // [[lane, clips]]
+    return map
   }, [clips])
 
   const renderedTracks = React.useMemo(
     () =>
-      lanes.map(([laneIndex, laneClips]) => (
+      tracks.map((track, laneIndex) => (
         <TrackRow
-          key={laneIndex}
+          key={track.id}
           laneIndex={laneIndex}
-          clips={laneClips}
+          clips={laneMap.get(laneIndex) ?? []}
           pixelsPerSecond={zoom}
-          type={laneIndex % 2 === 0 ? 'video' : 'audio'}
+          type={track.type}
         />
       )),
-    [lanes, zoom],
+    [tracks, laneMap, zoom],
   )
 
   // Track area height based on lane types (video lanes taller than audio)
   const trackAreaHeight = React.useMemo(
-    () =>
-      lanes.reduce(
-        (sum, [laneIndex]) => sum + (laneIndex % 2 === 0 ? 48 : 32),
-        0,
-      ),
-    [lanes],
+    () => tracks.reduce((sum, t) => sum + (t.type === 'video' ? 48 : 32), 0),
+    [tracks],
   )
 
   // Auto-scroll when playback is active
@@ -217,16 +213,14 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
           {/* Left gutter: spacer for ruler then track labels */}
           <div className="flex flex-col shrink-0">
             <div className="h-6" />
-            {lanes.map(([laneIndex]) => {
-              const isVideo = laneIndex % 2 === 0
-              const heightClass = isVideo ? 'h-12' : 'h-8'
-              const label = tracks[laneIndex]?.label ?? ''
+            {tracks.map((track, laneIndex) => {
+              const heightClass = track.type === 'video' ? 'h-12' : 'h-8'
               return (
                 <div
-                  key={laneIndex}
+                  key={track.id}
                   className={`${heightClass} flex items-center justify-center border-b border-white/10 text-xs text-gray-300 font-ui-medium`}
                 >
-                  {label}
+                  {track.label}
                 </div>
               )
             })}
