@@ -33,7 +33,14 @@ export default function MediaLibrary() {
       <h3 className="text-ui-body font-ui-medium text-accent">Media Library</h3>
       <ul className="space-y-2">
         {assets.map((asset) => (
-          <li key={asset.id} className="flex items-center space-x-2">
+          <li
+            key={asset.id}
+            className="flex items-center space-x-2"
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.setData('text/x-mediamix-asset', asset.id)
+            }}
+          >
             {asset.thumbnail && (
               <img
                 src={asset.thumbnail}

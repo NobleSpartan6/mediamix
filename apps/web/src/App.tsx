@@ -1,6 +1,6 @@
 import { useEffect, useRef, useMemo, useCallback } from 'react'
 import { Button } from './components/ui/Button'
-import VideoImportButton from './features/import/VideoImportButton'
+import MediaIngest from './features/import/MediaIngest'
 import FileInfoCard from './features/import/FileInfoCard'
 import MediaLibrary from './features/import/MediaLibrary'
 import BeatMarkerBar from './features/timeline/BeatMarkerBar'
@@ -56,7 +56,7 @@ function App() {
         {/* Import / File details */}
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 space-y-4">
-            <VideoImportButton />
+            <MediaIngest />
             <FileInfoCard />
             <MediaLibrary />
             <BeatMarkerBar />
