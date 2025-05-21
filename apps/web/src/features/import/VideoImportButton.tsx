@@ -35,6 +35,7 @@ export function VideoImportButton() {
     setBeatDetectionProgress(0)
     try {
       const selection = await selectVideoFile()
+
       if (!selection) return // user cancelled, no error
       const { file, handle } = selection
       // Basic file info first
@@ -43,6 +44,7 @@ export function VideoImportButton() {
         fileSize: file.size,
         fileHandle: handle ?? null,
       })
+
 
       // Extract metadata (duration, dimensions, codecs)
       const metadata = await extractVideoMetadata(file)
@@ -67,6 +69,23 @@ export function VideoImportButton() {
           fileName: file.name,
           duration: metadata.duration ?? 0,
         })
+        const assetId = useMediaStore.getState().addAsset({
+          fileName: file.name,
+          duration: metadata.duration ?? 0,
+        })
+
+        if (assetId) {
+
+        if ((metadata.duration ?? 0) > 600) {
+          try {
+            const data = await generateProxy(file)
+            const blob = new Blob([data], { type: 'video/mp4' })
+            analysisFile = new File([data], `proxy-${file.name}`, { type: 'video/mp4' })
+            proxyUrl = URL.createObjectURL(blob)
+          } catch (err) {
+            console.warn('Proxy generation failed', err)
+          }
+        }
         try {
           const [waveform, thumbnail] = await Promise.all([
             generateWaveform(file),
