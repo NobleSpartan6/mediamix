@@ -32,10 +32,25 @@ export function useZoomScroll(
   const velocity = useRef(0)
   const lastPos = useRef(0)
   const lastTime = useRef(0)
+  const spacePressed = useRef(false)
 
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        spacePressed.current = true
+        e.preventDefault()
+      }
+    }
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        spacePressed.current = false
+        e.preventDefault()
+      }
+    }
 
     // Handle zoom via Ctrl+Wheel or pinch gestures
     const handleWheel = (e: WheelEvent) => {
@@ -75,8 +90,8 @@ export function useZoomScroll(
 
     // Handle click-and-drag scrolling
     const handlePointerDown = (e: PointerEvent) => {
-      // Allow left-button (space-drag planned) and middle-button panning
-      if (e.button !== 0 && e.button !== 1) return
+      // Start dragging only with middle button or while holding space + left button
+      if (!(e.button === 1 || (e.button === 0 && spacePressed.current))) return
       isDragging.current = true
       el.setPointerCapture(e.pointerId)
       startX.current = e.clientX
@@ -121,6 +136,8 @@ export function useZoomScroll(
       momentum()
     }
 
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
     el.addEventListener('wheel', handleWheel, { passive: false })
     el.addEventListener('pointerdown', handlePointerDown)
     el.addEventListener('pointermove', handlePointerMove)
@@ -128,6 +145,8 @@ export function useZoomScroll(
     el.addEventListener('pointercancel', handlePointerUp)
 
     return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
       el.removeEventListener('wheel', handleWheel)
       el.removeEventListener('pointerdown', handlePointerDown)
       el.removeEventListener('pointermove', handlePointerMove)

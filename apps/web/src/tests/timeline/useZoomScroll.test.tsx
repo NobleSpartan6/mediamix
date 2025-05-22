@@ -87,7 +87,7 @@ describe('useZoomScroll', () => {
     expect(el.scrollLeft).toBeCloseTo(125)
   })
 
-  it('pans horizontally on pointer drag', () => {
+  it('does not pan on left drag without space held', () => {
     const { getByTestId } = render(<TestComponent />)
     const el = getByTestId('scroll') as HTMLDivElement
     el.getBoundingClientRect = () => ({
@@ -109,6 +109,80 @@ describe('useZoomScroll', () => {
           clientX: 100,
           pointerId: 1,
           button: 0,
+        }),
+      )
+      el.dispatchEvent(
+        createPointerEvent('pointermove', {
+          clientX: 50,
+          pointerId: 1,
+        }),
+      )
+      vi.advanceTimersByTime(20)
+    })
+
+    expect(el.scrollLeft).toBeCloseTo(100)
+  })
+
+  it('pans on left drag when space is held', () => {
+    const { getByTestId } = render(<TestComponent />)
+    const el = getByTestId('scroll') as HTMLDivElement
+    el.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 200,
+      height: 20,
+      right: 200,
+      bottom: 20,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    })
+    el.scrollLeft = 100
+
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space', bubbles: true }))
+      el.dispatchEvent(
+        createPointerEvent('pointerdown', {
+          clientX: 100,
+          pointerId: 1,
+          button: 0,
+        }),
+      )
+      el.dispatchEvent(
+        createPointerEvent('pointermove', {
+          clientX: 50,
+          pointerId: 1,
+        }),
+      )
+      vi.advanceTimersByTime(20)
+      window.dispatchEvent(new KeyboardEvent('keyup', { code: 'Space', bubbles: true }))
+    })
+
+    expect(el.scrollLeft).toBeCloseTo(150)
+  })
+
+  it('pans on middle button drag', () => {
+    const { getByTestId } = render(<TestComponent />)
+    const el = getByTestId('scroll') as HTMLDivElement
+    el.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 200,
+      height: 20,
+      right: 200,
+      bottom: 20,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    })
+    el.scrollLeft = 100
+
+    act(() => {
+      el.dispatchEvent(
+        createPointerEvent('pointerdown', {
+          clientX: 100,
+          pointerId: 1,
+          button: 1,
         }),
       )
       el.dispatchEvent(
