@@ -19,12 +19,6 @@ vi.mock('../lib/file/extractVideoMetadata', () => ({
     channelCount: null,
   }),
 }))
-vi.mock('../lib/file/generateWaveform', () => ({
-  generateWaveform: vi.fn().mockResolvedValue([0.1, 0.2]),
-}))
-vi.mock('../lib/file/captureThumbnail', () => ({
-  captureThumbnail: vi.fn().mockResolvedValue('data:image/png;base64,test'),
-}))
 
 const resetStores = () => {
   useMotifStore.getState().resetState()
@@ -65,8 +59,7 @@ describe('MediaIngest', () => {
       expect(clips[1].assetId).toBeDefined()
       const assets = useMediaStore.getState().assets
       const asset = assets[clips[0].assetId as string]
-      expect(asset.waveform?.length).toBeGreaterThan(0)
-      expect(asset.thumbnail).toContain('data:image')
+      expect(asset).toBeDefined()
     })
 
     const clips = Object.values(useTimelineStore.getState().clipsById)
@@ -75,8 +68,6 @@ describe('MediaIngest', () => {
     const { container: vCont } = render(
       <Clip clip={videoClip} pixelsPerSecond={100} type="video" />,
     )
-    const videoDiv = vCont.querySelector('div') as HTMLDivElement
-    expect(videoDiv.style.backgroundImage).toContain('data:image')
     const { container: aCont } = render(
       <Clip clip={audioClip} pixelsPerSecond={100} type="audio" />,
     )

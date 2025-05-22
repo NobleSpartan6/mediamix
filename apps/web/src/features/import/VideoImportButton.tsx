@@ -10,8 +10,6 @@ import { useBeatDetection } from '../../lib/store/hooks'
 import type { BeatMarker } from '../../lib/store/types'
 import { BeatDetectionProgress } from './BeatDetectionProgress'
 import { useMediaStore } from '../../state/mediaStore'
-import { generateWaveform } from '../../lib/file/generateWaveform'
-import { captureThumbnail } from '../../lib/file/captureThumbnail'
 
 export function VideoImportButton() {
   const { isFileLoading, fileError, setFileInfo } = useFileState()
@@ -69,13 +67,8 @@ export function VideoImportButton() {
           id: assetId,
           fileName: file.name,
           duration: metadata.duration ?? 0,
+          file,
         })
-        const assetId = useMediaStore.getState().addAsset({
-          fileName: file.name,
-          duration: metadata.duration ?? 0,
-        })
-
-        if (assetId) {
 
         if ((metadata.duration ?? 0) > 600) {
           try {
@@ -87,18 +80,7 @@ export function VideoImportButton() {
             console.warn('Proxy generation failed', err)
           }
         }
-        try {
-          const [waveform, thumbnail] = await Promise.all([
-            generateWaveform(file),
-            captureThumbnail(file),
-          ])
-          useMediaStore.getState().updateAsset(assetId, {
-            waveform,
-            thumbnail,
-          })
-        } catch (analysisErr) {
-          console.warn('Media analysis failed', analysisErr)
-        }
+      }
         try {
           const { videoSupported, audioSupported } = await checkCodecSupport({
             width: metadata.width ?? undefined,
