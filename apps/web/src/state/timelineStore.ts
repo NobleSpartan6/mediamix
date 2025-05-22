@@ -20,6 +20,8 @@ export interface Track {
   id: string
   type: 'video' | 'audio'
   label: string
+  /** identifier grouping related tracks (e.g. video+audio pair) */
+  groupId: string
   /** id of the asset that originally created this track, if any */
   parentAsset?: string
 }
@@ -42,7 +44,10 @@ export interface TimelineState {
   outPoint: number | null
   /** Replace all clips (normalised input) */
   setClips: (clips: Clip[]) => void
-  addClip: (clip: Omit<Clip, 'id'>) => string
+  addClip: (
+    clip: Omit<Clip, 'id'>,
+    opts?: { trackType?: 'video' | 'audio'; groupId?: string },
+  ) => string
   updateClip: (id: string, delta: Partial<Omit<Clip, 'id'>>) => void
   removeClip: (id: string, opts?: { ripple?: boolean }) => void
   splitClipAt: (time: number) => string | null
@@ -58,14 +63,19 @@ export interface TimelineState {
 
 const toDict = (arr: Clip[]) => Object.fromEntries(arr.map((c) => [c.id, c]))
 
-const ensureTracks = (tracks: Track[], lane: number): Track[] => {
+const ensureTracks = (
+  tracks: Track[],
+  lane: number,
+  opts?: { type?: 'video' | 'audio'; groupId?: string },
+): Track[] => {
   const next = [...tracks]
   while (next.length <= lane) {
     const index = next.length
-    const type = index % 2 === 0 ? 'video' : 'audio'
+    const type = index === lane && opts?.type ? opts.type : index % 2 === 0 ? 'video' : 'audio'
     const countOfType = next.filter((t) => t.type === type).length + 1
     const label = type === 'video' ? `V${countOfType}` : `A${countOfType}`
-    next.push({ id: `track-${index}`, type, label })
+    const groupId = opts?.groupId ?? `group-${Math.floor(index / 2)}`
+    next.push({ id: `track-${index}`, type, label, groupId })
   }
   return next
 }
@@ -119,14 +129,14 @@ export const useTimelineStore = create<TimelineState>((set) => ({
    * Add a new clip and return its generated id.
    * Track metadata is expanded to fit the clip lane.
    */
-  addClip: (clipInput) => {
+  addClip: (clipInput, opts) => {
     const id = generateId()
     const newClip: Clip = { ...clipInput, id }
     set((state) => {
       const clipsById = { ...state.clipsById, [id]: newClip }
       const durationSec = Math.max(state.durationSec, newClip.end)
       const tracks = pruneTracks(
-        ensureTracks(state.tracks, newClip.lane),
+        ensureTracks(state.tracks, newClip.lane, opts),
         clipsById,
       )
       return { clipsById, durationSec, tracks }
