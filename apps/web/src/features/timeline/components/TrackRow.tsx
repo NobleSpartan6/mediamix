@@ -1,6 +1,7 @@
 import * as React from 'react'
 import type { Clip as ClipType } from '../../../state/timelineStore'
 import { useTimelineStore } from '../../../state/timelineStore'
+import { nanoid } from '../../../utils/nanoid'
 import { useMediaStore } from '../../../state/mediaStore'
 import { InteractiveClip } from './InteractiveClip'
 
@@ -73,45 +74,47 @@ export const TrackRow: React.FC<TrackRowProps> = React.memo(({ laneIndex, clips,
 
       const allClipsArray = Object.values(clipsById)
 
-      const baseLane = laneIndex % 2 === 0 ? laneIndex : laneIndex - 1
-      const audioLane = baseLane + 1
+      const groupId = nanoid()
 
-      let videoStart = initialStart
-      let audioStart = initialStart
-
-      // Check for overlap on video lane (baseLane)
-      const conflictingVideoClips = allClipsArray.filter(
-        (clip: ClipType) =>
-          clip.lane === baseLane &&
-          clip.start < initialEnd &&
-          clip.end > initialStart,
-      )
-
-      if (conflictingVideoClips.length > 0) {
-        videoStart = Math.max(...conflictingVideoClips.map((clip: ClipType) => clip.end))
-      }
-
-      // Check for overlap on audio lane (audioLane)
-      const conflictingAudioClips = allClipsArray.filter(
-        (clip: ClipType) =>
-          clip.lane === audioLane &&
-          clip.start < initialEnd &&
-          clip.end > initialStart,
-      )
-
-      if (conflictingAudioClips.length > 0) {
-        audioStart = Math.max(...conflictingAudioClips.map((clip: ClipType) => clip.end))
+      const calcStart = (lane: number): number => {
+        const conflicts = allClipsArray.filter(
+          (clip: ClipType) =>
+            clip.lane === lane &&
+            clip.start < initialEnd &&
+            clip.end > initialStart,
+        )
+        if (conflicts.length > 0) {
+          return Math.max(...conflicts.map((c) => c.end))
+        }
+        return initialStart
       }
 
       if (isVideo) {
-        addClip({ start: videoStart, end: videoStart + duration, lane: baseLane, assetId })
-      }
-      if (isVideo || isAudioOnly) {
-        addClip({ start: audioStart, end: audioStart + duration, lane: audioLane, assetId })
+        const videoLane = type === 'video' ? laneIndex : Math.max(0, laneIndex - 1)
+        const audioLane = videoLane + 1
+        const videoStart = calcStart(videoLane)
+        const audioStart = calcStart(audioLane)
+        addClip(
+          { start: videoStart, end: videoStart + duration, lane: videoLane, assetId },
+          { trackType: 'video', groupId },
+        )
+        if (!isAudioOnly) {
+          addClip(
+            { start: audioStart, end: audioStart + duration, lane: audioLane, assetId },
+            { trackType: 'audio', groupId },
+          )
+        }
+      } else {
+        const audioLane = type === 'audio' ? laneIndex : laneIndex + 1
+        const audioStart = calcStart(audioLane)
+        addClip(
+          { start: audioStart, end: audioStart + duration, lane: audioLane, assetId },
+          { trackType: 'audio', groupId },
+        )
       }
       e.preventDefault()
     },
-    [assets, pixelsPerSecond, laneIndex, addClip, clipsById],
+    [assets, pixelsPerSecond, laneIndex, addClip, clipsById, type],
   )
 
   return (
