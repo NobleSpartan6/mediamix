@@ -2,6 +2,7 @@ import * as React from 'react'
 import { useTimelineStore } from '../../state/timelineStore'
 import { useTransportStore } from '../../state/transportStore'
 import useMotifStore from '../../lib/store'
+import { GPUEffectPipeline } from '../../gpu/effectsPipeline'
 import { useClipsArray } from '../timeline/hooks/useClipsArray'
 
 /**
@@ -17,6 +18,17 @@ export const VideoPreview: React.FC = React.memo(() => {
   const mediaAssets = useMotifStore((s) => s.mediaAssets)
   const clips = useClipsArray()
   const videoRef = React.useRef<HTMLVideoElement>(null)
+  const canvasRef = React.useRef<HTMLCanvasElement>(null)
+  const pipelineRef = React.useRef<GPUEffectPipeline | null>(null)
+
+  // Initialise GPU pipeline if available
+  React.useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    if (typeof WebGL2RenderingContext !== 'undefined' && canvas.getContext('webgl2')) {
+      pipelineRef.current = new GPUEffectPipeline(canvas)
+    }
+  }, [])
 
   // Sort video clips by start time (lane even => video)
   const sortedClips = React.useMemo(
@@ -35,14 +47,16 @@ export const VideoPreview: React.FC = React.memo(() => {
     [sortedClips, currentTime],
   )
 
-  // Load the clip's media into the video element
+  // Load the clip's media into the video element and render via GPU pipeline
   React.useEffect(() => {
     const video = videoRef.current
+    const pipeline = pipelineRef.current
     if (!video || !activeClip) return
     const asset = mediaAssets.find((a) => a.id === activeClip.assetId)
     if (!asset?.fileHandle) return
     let url: string | null = null
     let cancelled = false
+    let raf = 0
 
     asset.fileHandle.getFile().then((file) => {
       if (cancelled) return
@@ -54,11 +68,19 @@ export const VideoPreview: React.FC = React.memo(() => {
           video.playbackRate = Math.abs(playRate)
           void video.play()
         }
+        const draw = () => {
+          if (pipeline) {
+            pipeline.apply(video, 'passthrough')
+            raf = requestAnimationFrame(draw)
+          }
+        }
+        if (pipeline) raf = requestAnimationFrame(draw)
       }
     })
     return () => {
       cancelled = true
       if (url) URL.revokeObjectURL(url)
+      if (raf) cancelAnimationFrame(raf)
     }
   }, [activeClip, mediaAssets, currentTime, playRate])
 
@@ -85,8 +107,9 @@ export const VideoPreview: React.FC = React.memo(() => {
   }, [playRate, activeClip])
 
   return (
-    <div className="w-full bg-black aspect-video mb-4">
+    <div className="w-full bg-black aspect-video mb-4 relative">
       <video ref={videoRef} className="w-full h-full" muted playsInline />
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
     </div>
   )
 })
