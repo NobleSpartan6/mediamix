@@ -36,8 +36,11 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
 
   const SNAP_THRESHOLD = 0.1 // seconds
 
-  const laneHeights = React.useMemo(() =>
-    tracks.map((t) => (t.type === 'video' ? 48 : 32)), [tracks])
+  const laneHeights = React.useMemo(
+    () => tracks.map((t) => (t.type === 'video' ? 48 : 32)),
+    [tracks],
+  )
+  const laneTypes = React.useMemo(() => tracks.map((t) => t.type), [tracks])
   const laneOffsets = React.useMemo(() => {
     let off = 0
     return laneHeights.map((h) => {
@@ -106,6 +109,11 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
     laneRef.current = clip.lane
   }
 
+  const clipTrackType = React.useMemo(
+    () => laneTypes[clip.lane] ?? type,
+    [laneTypes, clip.lane, type],
+  )
+
   const onDrag = (e: OnDrag) => {
     const { beforeTranslate } = e
     const [translateX, translateY] = beforeTranslate
@@ -119,7 +127,6 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
       translateXRef.current = translateX
       setSnapTime(null)
     }
-    translateYRef.current = translateY
     const yAbs = laneOffsets[clip.lane] + translateY
     let lane = clip.lane
     for (let i = 0; i < laneOffsets.length; i += 1) {
@@ -130,9 +137,14 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
         break
       }
     }
+    if (laneTypes[lane] !== clipTrackType) {
+      lane = clip.lane
+    }
     laneRef.current = lane
+    const yTarget = laneOffsets[lane] - laneOffsets[clip.lane]
+    translateYRef.current = yTarget
     const translateTarget = newStart * pixelsPerSecond
-    applyTransform(translateTarget, translateY)
+    applyTransform(translateTarget, yTarget)
   }
 
   const onDragEnd = (/* e: OnDragEnd */ _e: OnDrag) => {
@@ -141,10 +153,13 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
         ? snapTime
         : origin.current.startSec + translateXRef.current / pixelsPerSecond
     const duration = origin.current.endSec - origin.current.startSec
+    const finalLane =
+      laneTypes[laneRef.current] === clipTrackType ? laneRef.current : clip.lane
+    laneRef.current = finalLane
     updateClip(clip.id, {
       start: finalStart,
       end: finalStart + duration,
-      lane: laneRef.current,
+      lane: finalLane,
     })
     setSnapTime(null)
   }
