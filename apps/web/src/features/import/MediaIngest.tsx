@@ -3,8 +3,6 @@ import useMotifStore from '../../lib/store'
 import { extractVideoMetadata } from '../../lib/file/extractVideoMetadata'
 import type { VideoMetadata } from '../../lib/file/extractVideoMetadata'
 import { useMediaStore } from '../../state/mediaStore'
-import { generateWaveform } from '../../lib/file/generateWaveform'
-import { captureThumbnail } from '../../lib/file/captureThumbnail'
 
 const defaultMetadata: VideoMetadata = {
   duration: null,
@@ -37,20 +35,7 @@ export default function MediaIngest() {
               id: assetId,
               fileName: file.name,
               duration: metadata.duration ?? 0,
-            })
-            let waveform: number[] | undefined
-            let thumbnail: string | undefined
-            try {
-              ;[waveform, thumbnail] = await Promise.all([
-                generateWaveform(file),
-                captureThumbnail(file),
-              ])
-            } catch (err) {
-              console.warn('Media analysis failed', err)
-            }
-            useMediaStore.getState().updateAsset(assetId, {
-              waveform: waveform && waveform.length > 0 ? waveform : [0],
-              thumbnail: thumbnail ?? 'data:image/placeholder',
+              file,
             })
           }
         } catch (err) {
