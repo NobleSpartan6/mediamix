@@ -113,24 +113,28 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
   )
 
   // Track scroll position for playhead overlay
-  React.useEffect(() => {
+  const scrollRaf = React.useRef<number>()
+  const handleScroll = React.useCallback(() => {
     const el = scrollRef.current
     if (!el) return
-    let raf: number | undefined
-    const handleScroll = () => {
-      if (raf) return
-      raf = window.requestAnimationFrame(() => {
-        setScrollLeft(el.scrollLeft)
-        raf && window.cancelAnimationFrame(raf)
-        raf = undefined
-      })
-    }
+    if (scrollRaf.current) return
+    scrollRaf.current = window.requestAnimationFrame(() => {
+      setScrollLeft(el.scrollLeft)
+      if (scrollRaf.current) {
+        window.cancelAnimationFrame(scrollRaf.current)
+        scrollRaf.current = undefined
+      }
+    })
+  }, [])
 
-    setScrollLeft(el.scrollLeft)
-    el.addEventListener('scroll', handleScroll, { passive: true })
+  React.useEffect(() => {
+    if (scrollRef.current) {
+      setScrollLeft(scrollRef.current.scrollLeft)
+    }
     return () => {
-      el.removeEventListener('scroll', handleScroll)
-      raf && window.cancelAnimationFrame(raf)
+      if (scrollRaf.current) {
+        window.cancelAnimationFrame(scrollRaf.current)
+      }
     }
   }, [])
 
@@ -186,10 +190,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
     }
   }, [currentTime, playRate, followPlayhead, zoom])
 
-  const handleSplit = React.useCallback(
-    () => splitClipAt(currentTime),
-    [splitClipAt, currentTime],
-  )
+  const handleSplit = React.useCallback(() => splitClipAt(currentTime), [splitClipAt, currentTime])
 
   const handleDelete = React.useCallback(() => {
     selectedIds.forEach((id) => removeClip(id))
@@ -203,11 +204,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
     <div className="w-full select-none relative">
       <div className="flex-1 overflow-hidden">
         {/* Numeric time ruler */}
-        <TimeRuler
-          scrollContainerRef={scrollRef}
-          pixelsPerSecond={zoom}
-          duration={duration}
-        />
+        <TimeRuler scrollContainerRef={scrollRef} pixelsPerSecond={zoom} duration={duration} />
         {/* Labels and tracks share the same scroll container */}
         <div className="flex overflow-y-auto">
           {/* Left gutter: spacer for ruler then track labels */}
@@ -231,6 +228,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
               ref={scrollRef}
               className="relative h-full overflow-x-scroll bg-panel-bg cursor-grab"
               onPointerDown={startScrub}
+              onScroll={handleScroll}
             >
               <div className="relative h-full flex flex-col" style={{ width: duration * zoom }}>
                 {renderedTracks}
@@ -243,12 +241,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
                 ))}
               </div>
             </div>
-            <Playhead
-              positionSeconds={playheadSeconds}
-              pixelsPerSecond={zoom}
-              height="100%"
-              offsetX={scrollLeft}
-            />
+            <Playhead positionSeconds={playheadSeconds} pixelsPerSecond={zoom} height="100%" offsetX={scrollLeft} />
           </div>
         </div>
       </div>
@@ -261,25 +254,13 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
       {/* Zoom slider and follow toggle */}
       <div className="absolute top-8 right-2 flex items-center space-x-2">
         <ZoomSlider value={zoom} onChange={setZoom} />
-        <Button
-          variant="secondary"
-          className="px-2 py-1 text-xs"
-          onClick={handleSplit}
-        >
+        <Button variant="secondary" className="px-2 py-1 text-xs" onClick={handleSplit}>
           Split
         </Button>
-        <Button
-          variant="secondary"
-          className="px-2 py-1 text-xs"
-          onClick={handleDelete}
-        >
+        <Button variant="secondary" className="px-2 py-1 text-xs" onClick={handleDelete}>
           Delete
         </Button>
-        <Button
-          variant="secondary"
-          className="px-2 py-1 text-xs"
-          onClick={() => setFollowPlayhead(!followPlayhead)}
-        >
+        <Button variant="secondary" className="px-2 py-1 text-xs" onClick={() => setFollowPlayhead(!followPlayhead)}>
           {followPlayhead ? 'Unfollow' : 'Follow'}
         </Button>
       </div>
