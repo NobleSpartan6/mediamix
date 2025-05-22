@@ -26,3 +26,7 @@ With the dev server running, open your browser to `http://localhost:5173`. Use t
 - **Drag and trim clips** – clips can be moved along the timeline and resized from either edge. Snapping helps align edits to beats and neighbouring clips.
 - **Zoomable view** – scroll or pinch while holding <kbd>Ctrl</kbd> to zoom, or use the zoom slider. The timeline can also be panned by dragging.
 - **Keyboard shortcuts** – J, K and L shuttle playback; the arrow keys jog the playhead; press **I** and **O** to set in/out points; press **C** to cut the clip under the playhead.
+
+## Collaboration stubs
+
+This prototype uses lightweight local stubs for the `yjs` and `y-protocols/awareness` packages. The stubs implement minimal `Doc` and `Awareness` classes so tests compile without pulling in the real libraries. When realtime collaboration work begins, swap these for the official modules and remove the stubs.
