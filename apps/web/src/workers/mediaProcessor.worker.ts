@@ -1,5 +1,7 @@
 // apps/web/src/workers/mediaProcessor.worker.ts
 
+import { generateWaveform, captureThumbnail } from '../lib/file'
+
 interface WorkerData {
   file: File;
   assetId: string;
@@ -11,22 +13,11 @@ self.onmessage = async (event: MessageEvent<WorkerData>) => {
 
   try {
     if (type === 'generateWaveform') {
-      // Placeholder for waveform generation logic
-      // const waveform = await generateWaveformFromFile(file);
-      // self.postMessage({ assetId, waveform, type: 'waveformResult' });
-      console.log(`[Worker] Placeholder for waveform generation for ${assetId}`);
-      // Simulate async work
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      self.postMessage({ assetId, waveform: Array(100).fill(0).map(() => Math.random() * 2 - 1), type: 'waveformResult' });
-
+      const waveform = await generateWaveform(file)
+      self.postMessage({ assetId, waveform, type: 'waveformResult' })
     } else if (type === 'generateThumbnail') {
-      // Placeholder for thumbnail generation logic
-      // const thumbnail = await generateThumbnailFromFile(file);
-      // self.postMessage({ assetId, thumbnail, type: 'thumbnailResult' });
-      console.log(`[Worker] Placeholder for thumbnail generation for ${assetId}`);
-      // Simulate async work
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      self.postMessage({ assetId, thumbnail: 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=', type: 'thumbnailResult' }); // Placeholder 1x1 blue gif
+      const thumbnail = await captureThumbnail(file)
+      self.postMessage({ assetId, thumbnail, type: 'thumbnailResult' })
     }
   } catch (error) {
     console.error(`[Worker] Error processing ${assetId} (${type}):`, error);
