@@ -26,7 +26,9 @@
     "types": ["vitest", "vite/client"],
     "baseUrl": ".",
     "paths": {
-      "lucide-react": ["./src/stubs/lucide-react.tsx"]
+      "lucide-react": ["./src/stubs/lucide-react.tsx"],
+      "yjs": ["./src/stubs/yjs.ts"],
+      "y-protocols/awareness": ["./src/stubs/awareness.ts"]
     }
   },
   "include": ["src"]
