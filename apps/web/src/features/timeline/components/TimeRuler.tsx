@@ -72,6 +72,45 @@ const formatTimecode = (seconds: number) => {
   return `${pad(hrs)}:${pad(mins)}:${pad(secs)}.${pad(frames)}`
 }
 
+export interface TickSettings {
+  major: number
+  minor: number | null
+  labelEvery: number
+}
+
+/**
+ * Calculate tick spacing values based on the zoom level.
+ * Exposed for testing.
+ */
+export function calculateTickSettings(
+  pixelsPerSecond: number,
+): TickSettings {
+  const targetPx = 80
+  const labelMin = 20
+  const options = [1 / 30, 0.1, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60]
+  let major = options[options.length - 1]
+  for (const o of options) {
+    if (o * pixelsPerSecond >= targetPx) {
+      major = o
+      break
+    }
+  }
+
+  let minor: number | null = null
+  if (pixelsPerSecond >= 200) minor = 1 / 30
+  else if (pixelsPerSecond >= 80) minor = major / 10
+  else if (pixelsPerSecond >= 40) minor = major / 5
+  else if (pixelsPerSecond >= 20) minor = major / 2
+  if (minor && minor * pixelsPerSecond < 5) minor = null
+
+  const labelEvery = Math.max(
+    1,
+    Math.ceil(labelMin / (major * pixelsPerSecond)),
+  )
+
+  return { major, minor, labelEvery }
+}
+
 /* -------------------------------------------------------------------------- */
 /* Component                                                                  */
 /* -------------------------------------------------------------------------- */
@@ -142,29 +181,13 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
     ctx.textAlign = 'center'
     ctx.textBaseline = 'top'
 
-    const targetPx = 80
-    const labelMin = 20
-    const options = [1 / 30, 0.1, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60]
-    let major = options[options.length - 1]
-    for (const o of options) {
-      if (o * pixelsPerSecond >= targetPx) {
-        major = o
-        break
-      }
-    }
-    const showLabel = major * pixelsPerSecond >= labelMin
-
-    let minor: number | null = null
-    if (pixelsPerSecond >= 200) minor = 1 / 30
-    else if (pixelsPerSecond >= 80) minor = major / 10
-    else if (pixelsPerSecond >= 40) minor = major / 5
-    else if (pixelsPerSecond >= 20) minor = major / 2
-    if (minor && minor * pixelsPerSecond < 5) minor = null
+    const { major, minor, labelEvery } = calculateTickSettings(pixelsPerSecond)
 
     const first = Math.floor(scrollLeft / pixelsPerSecond / major) * major
     const last = Math.ceil((scrollLeft + w) / pixelsPerSecond / major) * major
 
-    for (let t = first; t <= last; t += major) {
+    let idx = 0
+    for (let t = first; t <= last; t += major, idx++) {
       const x = t * pixelsPerSecond - scrollLeft + 0.5
 
       /* major tick */
@@ -175,7 +198,7 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
       ctx.stroke()
 
       /* label */
-      if (showLabel) {
+      if (idx % labelEvery === 0) {
         ctx.fillStyle = '#D1D5DB'
         ctx.fillText(formatTimecode(t), x, 0)
       }
