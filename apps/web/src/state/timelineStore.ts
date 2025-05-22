@@ -236,3 +236,24 @@ export const selectTracks = (state: TimelineState): Track[] => state.tracks
 export const selectSelectedClipIds = (state: TimelineState): string[] =>
   state.selectedClipIds
 
+/** Return clips occupying the given lane, sorted by start time */
+export const selectLaneClips =
+  (lane: number) =>
+  (state: TimelineState): Clip[] =>
+    Object.values(state.clipsById)
+      .filter((c) => c.lane === lane)
+      .sort((a, b) => a.start - b.start)
+
+/** Determine if a time range collides with any clip on the lane */
+export const laneHasCollision =
+  (
+    lane: number,
+    start: number,
+    end: number,
+    excludeId?: string,
+  ) =>
+  (state: TimelineState): boolean =>
+    selectLaneClips(lane)(state).some(
+      (c) => c.id !== excludeId && start < c.end && end > c.start,
+    )
+
