@@ -4,8 +4,9 @@ import Moveable from 'react-moveable'
 import type { OnDrag, OnResize } from 'react-moveable'
 
 import type { Clip as ClipType } from '../../../state/timelineStore'
-import { useTimelineStore } from '../../../state/timelineStore'
-import { useClipsArray } from '../hooks/useClipsArray'
+import { useTimelineStore, selectLaneClips } from '../../../state/timelineStore'
+import { useMediaStore } from '../../../state/mediaStore'
+import { useLaneClips } from '../hooks/useLaneClips'
 import { Clip } from './Clip'
 
 /** Props for {@link InteractiveClip}. */
@@ -31,13 +32,21 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
   const updateClip = useTimelineStore((s) => s.updateClip)
   const beats = useTimelineStore((s) => s.beats)
   const tracks = useTimelineStore((s) => s.tracks)
-  const clips = useClipsArray()
+  const asset = useMediaStore(
+    React.useCallback(
+      (s) => (clip.assetId ? s.assets[clip.assetId] : undefined),
+      [clip.assetId],
+    ),
+  )
   const ref = React.useRef<HTMLDivElement>(null)
 
   const SNAP_THRESHOLD = 0.1 // seconds
 
-  const laneHeights = React.useMemo(() =>
-    tracks.map((t) => (t.type === 'video' ? 48 : 32)), [tracks])
+  const laneHeights = React.useMemo(
+    () => tracks.map((t) => (t.type === 'video' ? 48 : 32)),
+    [tracks],
+  )
+  const laneTypes = React.useMemo(() => tracks.map((t) => t.type), [tracks])
   const laneOffsets = React.useMemo(() => {
     let off = 0
     return laneHeights.map((h) => {
@@ -47,11 +56,19 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
     })
   }, [laneHeights])
 
-  const neighborTimes = React.useMemo(() => {
-    return clips
-      .filter((c) => c.id !== clip.id && c.lane === clip.lane)
-      .flatMap((c) => [c.start, c.end])
-  }, [clips, clip.id, clip.lane])
+  const clipTrackType = React.useMemo(
+    () => laneTypes[clip.lane] ?? type,
+    [laneTypes, clip.lane, type],
+  )
+
+  const laneClips = useLaneClips(clip.lane)
+  const neighborTimes = React.useMemo(
+    () =>
+      laneClips
+        .filter((c) => c.id !== clip.id)
+        .flatMap((c) => [c.start, c.end]),
+    [laneClips, clip.id],
+  )
 
   const snapCandidates = React.useMemo(
     () => [...beats, ...neighborTimes],
@@ -94,6 +111,15 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
     [],
   )
 
+  const flashInvalid = React.useCallback(() => {
+    const el = ref.current
+    if (!el) return
+    el.style.outline = '2px solid #f66'
+    setTimeout(() => {
+      if (el) el.style.outline = ''
+    }, 300)
+  }, [])
+
   // ---------------------------------------------------------------------------
 
   const onDragStart = () => {
@@ -119,7 +145,6 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
       translateXRef.current = translateX
       setSnapTime(null)
     }
-    translateYRef.current = translateY
     const yAbs = laneOffsets[clip.lane] + translateY
     let lane = clip.lane
     for (let i = 0; i < laneOffsets.length; i += 1) {
@@ -130,22 +155,58 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
         break
       }
     }
+    if (laneTypes[lane] !== clipTrackType) {
+      lane = clip.lane
+    }
     laneRef.current = lane
+    const yTarget = laneOffsets[lane] - laneOffsets[clip.lane]
+    translateYRef.current = yTarget
     const translateTarget = newStart * pixelsPerSecond
-    applyTransform(translateTarget, translateY)
+    applyTransform(translateTarget, yTarget)
   }
 
   const onDragEnd = (/* e: OnDragEnd */ _e: OnDrag) => {
-    const finalStart =
+    let finalStart =
       snapTime !== null
         ? snapTime
         : origin.current.startSec + translateXRef.current / pixelsPerSecond
+    finalStart = Math.max(0, finalStart)
     const duration = origin.current.endSec - origin.current.startSec
+    const lane = laneRef.current
+
+    const laneClipsState = selectLaneClips(lane)(useTimelineStore.getState())
+    let prevEnd = 0
+    let nextStart = Infinity
+    let collision = false
+    laneClipsState.forEach((c) => {
+      if (c.id === clip.id) return
+      if (c.end <= finalStart) {
+        prevEnd = Math.max(prevEnd, c.end)
+      } else if (c.start >= finalStart + duration) {
+        nextStart = Math.min(nextStart, c.start)
+      } else {
+        collision = true
+      }
+    })
+
+    if (nextStart - prevEnd < duration) {
+      collision = true
+      finalStart = origin.current.startSec
+    } else {
+      const clamped = Math.min(Math.max(finalStart, prevEnd), nextStart - duration)
+      if (clamped !== finalStart) collision = true
+      finalStart = clamped
+    }
+
+    const finalLane =
+      laneTypes[lane] === clipTrackType ? lane : clip.lane
+    laneRef.current = finalLane
     updateClip(clip.id, {
       start: finalStart,
       end: finalStart + duration,
-      lane: laneRef.current,
+      lane: finalLane,
     })
+    if (collision) flashInvalid()
     setSnapTime(null)
   }
 
@@ -155,10 +216,14 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
     const [translateX] = beforeTranslate
 
     let newWidthPx = width
+    const maxDuration = asset?.duration ?? Infinity
     
     if (direction[0] === -1) {
       // Resizing from left – update translate as well as width
-      let newStart = origin.current.endSec - newWidthPx / pixelsPerSecond + translateX / pixelsPerSecond
+      let newStart =
+        origin.current.endSec - newWidthPx / pixelsPerSecond +
+        translateX / pixelsPerSecond
+      newStart = Math.max(newStart, origin.current.endSec - maxDuration)
       const snap = findSnap(newStart)
       if (snap !== null) {
         newStart = snap
@@ -173,6 +238,7 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
     } else {
       // Resizing from right – transform unchanged, only width scales
       let newEnd = origin.current.startSec + newWidthPx / pixelsPerSecond
+      newEnd = Math.min(newEnd, origin.current.startSec + maxDuration)
       const snap = findSnap(newEnd)
       if (snap !== null) {
         newEnd = snap
@@ -191,16 +257,26 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
     const [translateX] = beforeTranslate
 
     const newWidthSeconds = width / pixelsPerSecond
+    const maxDuration = asset?.duration ?? Infinity
 
+    let invalid = false
     if (direction[0] === -1) {
-      let newStart = origin.current.endSec - newWidthSeconds + translateX / pixelsPerSecond
-      if (snapTime !== null) newStart = snapTime
+      let newStart =
+        origin.current.endSec - newWidthSeconds + translateX / pixelsPerSecond
+      const clamped = Math.max(newStart, origin.current.endSec - maxDuration)
+      if (clamped !== newStart) invalid = true
+      newStart = clamped
+      if (snapTime !== null) newStart = Math.max(snapTime, origin.current.endSec - maxDuration)
       updateClip(clip.id, { start: newStart })
     } else {
       let newEnd = origin.current.startSec + newWidthSeconds
-      if (snapTime !== null) newEnd = snapTime
+      const clamped = Math.min(newEnd, origin.current.startSec + maxDuration)
+      if (clamped !== newEnd) invalid = true
+      newEnd = clamped
+      if (snapTime !== null) newEnd = Math.min(snapTime, origin.current.startSec + maxDuration)
       updateClip(clip.id, { end: newEnd })
     }
+    if (invalid) flashInvalid()
     setSnapTime(null)
   }
 
