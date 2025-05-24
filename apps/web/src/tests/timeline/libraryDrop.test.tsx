@@ -45,6 +45,7 @@ describe.skip('TrackRow drop', () => {
         id: 'asset1',
         fileName: 'test.mp4',
         duration: 2,
+        file: new File(['dummy'], 'test.mp4', { type: 'video/mp4' }),
       })
       useTimelineStore.getState().addClip({
         // dummy existing clip to create lanes
