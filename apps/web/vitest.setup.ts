@@ -46,19 +46,46 @@ class MockWorker {
 
   constructor(stringUrl: string) {
     // Constructor implementation
-    console.log(`MockWorker created with URL: ${stringUrl}`)
   }
 
   postMessage(data: any): void {
     // Simulate worker response
-    setTimeout(() => {
-      if (this.onmessage && data.type === 'EXTRACT_AUDIO') {
+    setTimeout(async () => {
+      if (!this.onmessage) return
+
+      if (data.type === 'EXTRACT_AUDIO') {
         const mockEvent = new MessageEvent('message', {
           data: {
             type: 'AUDIO_EXTRACTED',
             audioData: new ArrayBuffer(1024),
             format: data.payload?.outputFormat || 'wav',
             sampleRate: 44100,
+          },
+        })
+        this.onmessage(mockEvent)
+      } else if (data.type === 'generateWaveform') {
+        const { generateWaveform } = await import(
+          './src/lib/file/generateWaveform'
+        )
+        const peaks = await generateWaveform(data.file)
+        const mockEvent = new MessageEvent('message', {
+          data: {
+            assetId: data.assetId,
+            waveform: peaks,
+            type: 'waveformResult',
+          },
+        })
+        this.onmessage(mockEvent)
+      } else if (data.type === 'generateThumbnail') {
+        const { captureThumbnail } = await import(
+          './src/lib/file/captureThumbnail'
+        )
+        const thumbnail = await captureThumbnail(data.file)
+        const mockEvent = new MessageEvent('message', {
+          data: {
+            assetId: data.assetId,
+            thumbnail,
+            type: 'thumbnailResult',
           },
         })
         this.onmessage(mockEvent)
