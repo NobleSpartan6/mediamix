@@ -24,6 +24,10 @@ export interface Track {
   groupId: string
   /** id of the asset that originally created this track, if any */
   parentAsset?: string
+  /** disable edits when true */
+  locked: boolean
+  /** hide or silence the track */
+  muted: boolean
 }
 
 export interface TimelineState {
@@ -49,6 +53,7 @@ export interface TimelineState {
     opts?: { trackType?: 'video' | 'audio'; groupId?: string },
   ) => string
   updateClip: (id: string, delta: Partial<Omit<Clip, 'id'>>) => void
+  updateTrack: (id: string, delta: Partial<Omit<Track, 'id'>>) => void
   removeClip: (id: string, opts?: { ripple?: boolean }) => void
   splitClipAt: (time: number) => string | null
   /** array of beat timestamps in seconds (monotonically increasing) */
@@ -68,14 +73,25 @@ const ensureTracks = (
   lane: number,
   opts?: { type?: 'video' | 'audio'; groupId?: string },
 ): Track[] => {
-  const next = [...tracks]
+  const next = tracks.map((t) => ({
+    locked: false,
+    muted: false,
+    ...t,
+  }))
   while (next.length <= lane) {
     const index = next.length
     const type = index === lane && opts?.type ? opts.type : index % 2 === 0 ? 'video' : 'audio'
     const countOfType = next.filter((t) => t.type === type).length + 1
     const label = type === 'video' ? `V${countOfType}` : `A${countOfType}`
     const groupId = opts?.groupId ?? `group-${Math.floor(index / 2)}`
-    next.push({ id: `track-${index}`, type, label, groupId })
+    next.push({
+      id: `track-${index}`,
+      type,
+      label,
+      groupId,
+      locked: false,
+      muted: false,
+    })
   }
   return next
 }
@@ -159,6 +175,17 @@ export const useTimelineStore = create<TimelineState>((set) => ({
         clipsById,
       )
       return { clipsById, durationSec, tracks }
+    }),
+
+  /** Update track properties like locked or muted */
+  updateTrack: (id, delta) =>
+    set((state) => {
+      const index = state.tracks.findIndex((t) => t.id === id)
+      if (index === -1) return {}
+      const updated: Track = { ...state.tracks[index], ...delta }
+      const tracks = [...state.tracks]
+      tracks[index] = updated
+      return { tracks }
     }),
 
   /**
