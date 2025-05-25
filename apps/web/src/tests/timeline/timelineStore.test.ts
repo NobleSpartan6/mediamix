@@ -52,4 +52,52 @@ describe('timelineStore', () => {
     expect(clips[0]).toMatchObject({ start: 0, end: 2 })
     expect(clips[1]).toMatchObject({ start: 2, end: 4 })
   })
+
+  it('updateClip moves paired clips with same groupId', () => {
+    let videoId = ''
+    let audioId = ''
+    act(() => {
+      videoId = useTimelineStore.getState().addClip(
+        { id: undefined as never, start: 0, end: 1, lane: 0 },
+        { trackType: 'video', groupId: 'g1' },
+      )
+      audioId = useTimelineStore.getState().addClip(
+        { id: undefined as never, start: 0, end: 1, lane: 1 },
+        { trackType: 'audio', groupId: 'g1' },
+      )
+    })
+
+    act(() => {
+      useTimelineStore.getState().updateClip(videoId, { start: 1, end: 2, lane: 2 })
+    })
+
+    const v = useTimelineStore.getState().clipsById[videoId]
+    const a = useTimelineStore.getState().clipsById[audioId]
+    expect(v.start).toBe(1)
+    expect(a.start).toBe(1)
+    expect(v.lane).toBe(2)
+    expect(a.lane).toBe(3)
+  })
+
+  it('removeClip deletes all clips in the same group', () => {
+    let videoId = ''
+    let audioId = ''
+    act(() => {
+      videoId = useTimelineStore.getState().addClip(
+        { id: undefined as never, start: 0, end: 1, lane: 0 },
+        { trackType: 'video', groupId: 'g2' },
+      )
+      audioId = useTimelineStore.getState().addClip(
+        { id: undefined as never, start: 0, end: 1, lane: 1 },
+        { trackType: 'audio', groupId: 'g2' },
+      )
+    })
+
+    act(() => {
+      useTimelineStore.getState().removeClip(videoId)
+    })
+
+    expect(useTimelineStore.getState().clipsById[videoId]).toBeUndefined()
+    expect(useTimelineStore.getState().clipsById[audioId]).toBeUndefined()
+  })
 })

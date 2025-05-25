@@ -14,6 +14,8 @@ export interface Clip {
   lane: number
   /** id of source media asset */
   assetId?: string
+  /** identifier grouping paired audio/video clips */
+  groupId?: string
 }
 
 export interface Track {
@@ -131,7 +133,7 @@ export const useTimelineStore = create<TimelineState>((set) => ({
    */
   addClip: (clipInput, opts) => {
     const id = generateId()
-    const newClip: Clip = { ...clipInput, id }
+    const newClip: Clip = { ...clipInput, id, groupId: opts?.groupId }
     set((state) => {
       const clipsById = { ...state.clipsById, [id]: newClip }
       const durationSec = Math.max(state.durationSec, newClip.end)
@@ -144,20 +146,50 @@ export const useTimelineStore = create<TimelineState>((set) => ({
     return id
   },
 
-  /** Update an existing clip by id */
+  /** Update an existing clip by id. If the clip has a groupId, apply the same
+   * time and lane delta to other clips in the group. */
   updateClip: (id, delta) =>
     set((state) => {
       const existing = state.clipsById[id]
       if (!existing) return {}
-      const updated: Clip = { ...existing, ...delta }
-      const clipsById = { ...state.clipsById, [id]: updated }
+
+      const groupId = existing.groupId
+      const startDiff =
+        delta.start !== undefined ? delta.start - existing.start : 0
+      const endDiff = delta.end !== undefined ? delta.end - existing.end : 0
+      const laneDiff = delta.lane !== undefined ? delta.lane - existing.lane : 0
+
+      const clipsById = { ...state.clipsById }
+
+      const apply = (cid: string, clip: Clip) => {
+        const upd: Clip = {
+          ...clip,
+          ...(delta.start !== undefined && { start: clip.start + startDiff }),
+          ...(delta.end !== undefined && { end: clip.end + endDiff }),
+          ...(delta.lane !== undefined && { lane: clip.lane + laneDiff }),
+        }
+        clipsById[cid] = upd
+      }
+
+      apply(id, existing)
+
+      if (groupId) {
+        Object.entries(state.clipsById).forEach(([cid, c]) => {
+          if (cid === id) return
+          if (c.groupId === groupId) apply(cid, c)
+        })
+      }
+
       const durationSec = Math.max(
         ...Object.values(clipsById).map((c) => c.end),
       )
-      const tracks = pruneTracks(
-        ensureTracks(state.tracks, updated.lane),
-        clipsById,
+
+      const maxLane = Object.values(clipsById).reduce(
+        (m, c) => Math.max(m, c.lane),
+        -1,
       )
+      const tracks = pruneTracks(ensureTracks(state.tracks, maxLane), clipsById)
+
       return { clipsById, durationSec, tracks }
     }),
 
@@ -170,20 +202,33 @@ export const useTimelineStore = create<TimelineState>((set) => ({
       const clip = state.clipsById[id]
       if (!clip) return {}
       const { ripple } = opts ?? {}
-      const { [id]: _removed, ...rest } = state.clipsById
-      let clipsById: Record<string, Clip> = rest
-      if (ripple) {
-        const shift = clip.end - clip.start
-        clipsById = Object.fromEntries(
-          Object.entries(rest).map(([cid, c]) => {
-            if (c.lane === clip.lane && c.start > clip.start) {
-              const moved = { ...c, start: c.start - shift, end: c.end - shift }
-              return [cid, moved]
-            }
-            return [cid, c]
-          }),
-        )
-      }
+
+      const targetIds = Object.entries(state.clipsById)
+        .filter(([, c]) => c.groupId && c.groupId === clip.groupId)
+        .map(([cid]) => cid)
+      if (!targetIds.includes(id)) targetIds.push(id)
+
+      let clipsById: Record<string, Clip> = { ...state.clipsById }
+
+      targetIds.forEach((tid) => {
+        const cl = clipsById[tid]
+        if (!cl) return
+        const { [tid]: _removed, ...rest } = clipsById
+        clipsById = rest
+        if (ripple) {
+          const shift = cl.end - cl.start
+          clipsById = Object.fromEntries(
+            Object.entries(clipsById).map(([cid, c]) => {
+              if (c.lane === cl.lane && c.start > cl.start) {
+                const moved = { ...c, start: c.start - shift, end: c.end - shift }
+                return [cid, moved]
+              }
+              return [cid, c]
+            }),
+          )
+        }
+      })
+
       const durationSec = Math.max(
         0,
         ...Object.values(clipsById).map((c) => c.end),
