@@ -7,6 +7,7 @@ import type { Clip as ClipType } from '../../../state/timelineStore'
 import {
   useTimelineStore,
   selectLaneClips,
+  selectClipsArray,
 } from '../../../state/timelineStore'
 import { useMediaStore } from '../../../state/mediaStore'
 import { useLaneClips } from '../hooks/useLaneClips'
@@ -69,17 +70,24 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(
     // ------------------------------------------------------------------------
 
     const laneClips = useLaneClips(clip.lane)
-    const neighborTimes = React.useMemo(
+    const clipsById = useTimelineStore((s) => s.clipsById)
+    const allClips = React.useMemo(
+      () => selectClipsArray({ clipsById } as any),
+      [clipsById],
+    )
+    const playheadTime = useTimelineStore((s) => s.currentTime)
+
+    const globalTimes = React.useMemo(
       () =>
-        laneClips
+        allClips
           .filter((c) => c.id !== clip.id)
           .flatMap((c) => [c.start, c.end]),
-      [laneClips, clip.id],
+      [allClips, clip.id],
     )
 
     const snapCandidates = React.useMemo(
-      () => [...beats, ...neighborTimes],
-      [beats, neighborTimes],
+      () => [...beats, ...globalTimes, playheadTime],
+      [beats, globalTimes, playheadTime],
     )
 
     const findSnap = React.useCallback(
