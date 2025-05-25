@@ -136,6 +136,7 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
 
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
   const containerRef = React.useRef<HTMLDivElement>(null)
+  const tooltipRef = React.useRef<HTMLDivElement>(null)
 
   const [tooltip, setTooltip] = React.useState<{
     visible: boolean
@@ -241,12 +242,20 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
   /* --------------- tooltip handlers ----------------------------------- */
   const onMouseMove = React.useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      const rect = e.currentTarget.getBoundingClientRect()
+      const container = containerRef.current
+      if (!container) return
+      const rect = container.getBoundingClientRect()
       const localX = e.clientX - rect.left
       const absoluteX = localX + scrollLeft
+      const width = container.clientWidth
+      const tooltipW = tooltipRef.current?.clientWidth ?? 0
+      const clampedX = Math.min(
+        Math.max(localX, 0),
+        width - tooltipW,
+      )
       setTooltip({
         visible: true,
-        x: localX,
+        x: clampedX,
         time: absoluteX / pixelsPerSecond,
       })
     },
@@ -290,6 +299,7 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
       {/* hover timecode tooltip */}
       {tooltip.visible && (
         <div
+          ref={tooltipRef}
           className="pointer-events-none absolute -top-6 rounded bg-gray-800/90 px-1 py-0.5 font-mono text-[10px] text-white"
           style={{ left: tooltip.x }}
         >
