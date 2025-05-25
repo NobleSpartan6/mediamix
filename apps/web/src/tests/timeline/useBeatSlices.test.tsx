@@ -54,10 +54,10 @@ describe('useBeatSlices hook', () => {
     act(() => {
       useTimelineStore.setState({
         tracks: [
-          { id: 'track-0', type: 'video', label: 'V1' },
-          { id: 'track-1', type: 'audio', label: 'A1' },
-          { id: 'track-2', type: 'video', label: 'V2' },
-          { id: 'track-3', type: 'audio', label: 'A2' },
+          { id: 'track-0', type: 'video', label: 'V1', groupId: 'g1', locked: false, muted: false },
+          { id: 'track-1', type: 'audio', label: 'A1', groupId: 'g1', locked: false, muted: false },
+          { id: 'track-2', type: 'video', label: 'V2', groupId: 'g2', locked: false, muted: false },
+          { id: 'track-3', type: 'audio', label: 'A2', groupId: 'g2', locked: false, muted: false },
         ],
       })
       useTimelineStore.getState().setBeats([0, 1, 2, 3])

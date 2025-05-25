@@ -1,6 +1,7 @@
 import * as React from 'react'
-import type { Clip as ClipType } from '../../../state/timelineStore'
+import type { Clip as ClipType, Track } from '../../../state/timelineStore'
 import { useTimelineStore } from '../../../state/timelineStore'
+import { Lock, Unlock, Eye, EyeOff, Volume2, VolumeX } from 'lucide-react'
 import { nanoid } from '../../../utils/nanoid'
 import { useMediaStore } from '../../../state/mediaStore'
 import { InteractiveClip } from './InteractiveClip'
@@ -13,8 +14,8 @@ interface TrackRowProps {
   clips: ClipType[]
   /** Current zoom level in pixels per second */
   pixelsPerSecond: number
-  /** Track media type to control styling */
-  type: 'video' | 'audio'
+  /** Track metadata */
+  track: Track
 }
 
 /**
@@ -25,12 +26,33 @@ interface TrackRowProps {
  * @param pixelsPerSecond zoom level used for clip sizing
  * @param type video or audio row styling
  */
-export const TrackRow: React.FC<TrackRowProps> = React.memo(({ laneIndex, clips, pixelsPerSecond, type }) => {
+export const TrackRow: React.FC<TrackRowProps> = React.memo(({ laneIndex, clips, pixelsPerSecond, track }) => {
+  const type = track.type
   const height = type === 'video' ? 48 : 32
 
   const addClip = useTimelineStore((s) => s.addClip)
   const clipsById = useTimelineStore((s) => s.clipsById)
   const assets = useMediaStore((s) => s.assets)
+  const updateTrack = useTimelineStore((s) => s.updateTrack)
+
+  const isAudio = type === 'audio'
+
+  const toggleLock = React.useCallback(() => {
+    updateTrack(track.id, { locked: !track.locked })
+  }, [updateTrack, track])
+
+  const toggleMute = React.useCallback(() => {
+    updateTrack(track.id, { muted: !track.muted })
+  }, [updateTrack, track])
+
+  const LockIcon = track.locked ? Lock : Unlock
+  const MuteIcon = track.muted
+    ? isAudio
+      ? VolumeX
+      : EyeOff
+    : isAudio
+      ? Volume2
+      : Eye
 
   const renderedClips = React.useMemo(
     () =>
@@ -124,6 +146,26 @@ export const TrackRow: React.FC<TrackRowProps> = React.memo(({ laneIndex, clips,
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
+      <div className="absolute left-1 top-1 flex gap-1 z-10">
+        <button
+          type="button"
+          onClick={toggleLock}
+          aria-label={track.locked ? 'Unlock track' : 'Lock track'}
+          className={track.locked ? 'opacity-50' : ''}
+        >
+          <LockIcon className="w-4 h-4" />
+        </button>
+        <button
+          type="button"
+          onClick={toggleMute}
+          aria-label={
+            track.muted ? (isAudio ? 'Unmute track' : 'Show track') : isAudio ? 'Mute track' : 'Hide track'
+          }
+          className={track.muted ? 'opacity-50' : ''}
+        >
+          <MuteIcon className="w-4 h-4" />
+        </button>
+      </div>
       {renderedClips}
     </div>
   )
