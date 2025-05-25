@@ -10,6 +10,10 @@ interface PlayheadProps {
   height: number | string
   /** Scroll offset to subtract when overlaid */
   offsetX?: number
+  /** Pointer down handler for scrubbing */
+  onPointerDown?: (e: React.PointerEvent<HTMLDivElement>) => void
+  /** Enable pointer events when interactive */
+  interactive?: boolean
 }
 
 /**
@@ -22,14 +26,17 @@ interface PlayheadProps {
  * @param offsetX horizontal scroll offset when overlaid
  * @returns visual playhead line element
  */
-export const Playhead: React.FC<PlayheadProps> = React.memo(({ positionSeconds, pixelsPerSecond, height, offsetX = 0 }) => {
-  const x = positionSeconds * pixelsPerSecond - offsetX
-  return (
-    <div
-      className="absolute top-0 w-0.5 bg-accent pointer-events-none"
-      style={{ height, transform: `translateX(${x}px)` }}
-    />
-  )
-})
+export const Playhead: React.FC<PlayheadProps> = React.memo(
+  ({ positionSeconds, pixelsPerSecond, height, offsetX = 0, onPointerDown, interactive = false }) => {
+    const x = positionSeconds * pixelsPerSecond - offsetX
+    return (
+      <div
+        onPointerDown={interactive ? onPointerDown : undefined}
+        className={`absolute top-0 w-0.5 bg-accent ${interactive ? 'cursor-ew-resize' : 'pointer-events-none'}`}
+        style={{ height, transform: `translateX(${x}px)` }}
+      />
+    )
+  },
+)
 
 Playhead.displayName = 'Playhead' 

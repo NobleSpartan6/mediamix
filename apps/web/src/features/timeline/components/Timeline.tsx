@@ -68,6 +68,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
 
   const playheadFrame = useTransportStore((s) => s.playheadFrame)
   const playRate = useTransportStore((s) => s.playRate)
+  const playing = playRate !== 0
   const setCurrentTime = useTimelineStore((s) => s.setCurrentTime)
   const currentTime = useTimelineStore((s) => s.currentTime)
   const followPlayhead = useTimelineStore((s) => s.followPlayhead)
@@ -241,7 +242,14 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
                 ))}
               </div>
             </div>
-            <Playhead positionSeconds={playheadSeconds} pixelsPerSecond={zoom} height="100%" offsetX={scrollLeft} />
+            <Playhead
+              positionSeconds={playheadSeconds}
+              pixelsPerSecond={zoom}
+              height="100%"
+              offsetX={scrollLeft}
+              onPointerDown={startScrub}
+              interactive={!playing}
+            />
           </div>
         </div>
       </div>
