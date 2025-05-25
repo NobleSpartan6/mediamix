@@ -10,7 +10,7 @@ vi.mock('react-moveable', () => ({
   },
 }))
 
-import { render, act, waitFor } from '@testing-library/react'
+import { render, act, waitFor, cleanup } from '@testing-library/react'
 import React from 'react'
 
 import { InteractiveClip } from '../../features/timeline/components/InteractiveClip'
@@ -42,6 +42,7 @@ describe('InteractiveClip', () => {
   afterEach(() => {
     resetStore()
     moveableProps = null
+    cleanup()
   })
 
   it('updates clip start on drag end', async () => {
@@ -114,5 +115,72 @@ describe('InteractiveClip', () => {
     const updated = useTimelineStore.getState().clipsById[clip.id]
     expect(updated.end).toBeCloseTo(6)
     expect(updated.start).toBe(0)
+  })
+
+  it('snaps to the playhead time when dragging close', async () => {
+    const clip = { id: 'clip-3', start: 0, end: 5, lane: 0 }
+    act(() => {
+      useTimelineStore.setState({
+        clipsById: { [clip.id]: clip },
+        tracks: [],
+        durationSec: 5,
+        currentTime: 2.9,
+        followPlayhead: true,
+        inPoint: null,
+        outPoint: null,
+        beats: [],
+      })
+    })
+
+    const { rerender } = render(
+      <InteractiveClip clip={clip} pixelsPerSecond={100} type="video" />,
+    )
+    rerender(
+      <InteractiveClip clip={{ ...clip }} pixelsPerSecond={100} type="video" />,
+    )
+    await waitFor(() => moveableProps !== null)
+
+    act(() => {
+      moveableProps.onDragStart()
+      moveableProps.onDrag({ beforeTranslate: [295, 0] })
+      moveableProps.onDragEnd({})
+    })
+
+    const updated = useTimelineStore.getState().clipsById[clip.id]
+    expect(updated.start).toBeCloseTo(2.9)
+  })
+
+  it('snaps to clips on other lanes', async () => {
+    const clip = { id: 'clip-4', start: 0, end: 2, lane: 0 }
+    const other = { id: 'clip-5', start: 3, end: 4, lane: 1 }
+    act(() => {
+      useTimelineStore.setState({
+        clipsById: { [clip.id]: clip, [other.id]: other },
+        tracks: [],
+        durationSec: 4,
+        currentTime: 0,
+        followPlayhead: true,
+        inPoint: null,
+        outPoint: null,
+        beats: [],
+      })
+    })
+
+    const { rerender } = render(
+      <InteractiveClip clip={clip} pixelsPerSecond={100} type="video" />,
+    )
+    rerender(
+      <InteractiveClip clip={{ ...clip }} pixelsPerSecond={100} type="video" />,
+    )
+    await waitFor(() => moveableProps !== null)
+
+    act(() => {
+      moveableProps.onDragStart()
+      moveableProps.onDrag({ beforeTranslate: [295, 0] })
+      moveableProps.onDragEnd({})
+    })
+
+    const updated = useTimelineStore.getState().clipsById[clip.id]
+    expect(updated.start).toBeCloseTo(3)
   })
 })
