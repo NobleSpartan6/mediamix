@@ -20,11 +20,11 @@ async function getFFmpegInstance(): Promise<FFmpeg> {
       ? (ffmpegInstance as any).isLoaded()
       : (ffmpegInstance as any).loaded)
   ) {
-    console.log('Reusing existing FFmpeg instance.');
+    
     return ffmpegInstance;
   }
 
-  console.log('Initializing new FFmpeg instance...');
+  
   const ffmpegConfig: LocalCreateFFmpegOptions = {
     log: true,
     // Resolve core path relative to the current origin so it also works when the
@@ -47,7 +47,7 @@ async function getFFmpegInstance(): Promise<FFmpeg> {
   
   try {
     await (ffmpegInstance as any).load(ffmpegConfig);
-    console.log('FFmpeg loaded successfully.');
+    
   } catch (error) {
     console.error('Failed to load FFmpeg:', error);
     ffmpegInstance = null;
@@ -176,9 +176,7 @@ self.onmessage = async (event: MessageEvent<WorkerIncomingMessage>) => {
       const inputFileName = videoFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
       const outputFileName = `output.${outputFormat}`;
 
-      console.log(`Writing file ${inputFileName} to FFmpeg FS...`);
       await ffmpegWriteFile(ffmpeg, inputFileName, new Uint8Array(await videoFile.arrayBuffer()));
-      console.log(`File ${inputFileName} written to FFmpeg FS.`);
 
       // Mandatory flags from Media-Handling hard rule
       const ffmpegArgs = [
@@ -194,20 +192,17 @@ self.onmessage = async (event: MessageEvent<WorkerIncomingMessage>) => {
          ffmpegArgs.push('-acodec', 'pcm_s16le', '-ar', '44100', '-ac', '1', '-f', 's16le', outputFileName);
       }
       
-      console.log(`Running FFmpeg with args: ${ffmpegArgs.join(' ')}`);
       
       attachProgressHandler(ffmpeg, (ratio: number) => {
         workerSelf.postMessage({ type: 'PROGRESS', progress: Math.max(0, Math.min(1, ratio)) } as ProgressMessage);
       });
 
       await ffmpegExec(ffmpeg, ffmpegArgs);
-      console.log('FFmpeg run completed.');
 
       const data = await ffmpegReadFile(ffmpeg, outputFileName);
       if (!data) {
         throw new Error(`Unable to read ${outputFileName} from FFmpeg FS`);
       }
-      console.log(`File ${outputFileName} read from FFmpeg FS, size: ${data.byteLength}`);
 
       // Create a detached copy of the buffer to ensure it is structured-clonable
       const arrayBufferCopy = data.buffer.slice(0);
@@ -220,10 +215,8 @@ self.onmessage = async (event: MessageEvent<WorkerIncomingMessage>) => {
       };
       workerSelf.postMessage(message, [arrayBufferCopy]);
 
-      console.log('Cleaning up FFmpeg FS...');
       ffmpegUnlink(ffmpeg, inputFileName);
       ffmpegUnlink(ffmpeg, outputFileName);
-      console.log('FFmpeg FS cleanup complete.');
 
       if (ffmpeg) {
         ffmpegUnlink(ffmpeg, videoFile.name.replace(/[^a-zA-Z0-9._-]/g, '_'));
@@ -237,5 +230,3 @@ self.onmessage = async (event: MessageEvent<WorkerIncomingMessage>) => {
     }
   }
 };
-
-console.log('Audio extraction worker script loaded and ready.'); 

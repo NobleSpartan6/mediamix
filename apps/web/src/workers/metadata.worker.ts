@@ -15,7 +15,6 @@ const emptyMetadata: VideoMetadata = {
 
 self.onmessage = async (event) => {
   const handles: FileSystemFileHandle[] = event.data
-  console.log('metadata.worker received handles:', handles)
   const results: VideoMetadata[] = []
   for (const handle of handles) {
     try {
