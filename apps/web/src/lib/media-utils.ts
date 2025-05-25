@@ -53,6 +53,5 @@ export function terminateMediaWorker(): void {
   if (worker) {
     worker.terminate();
     worker = null;
-    console.log('Media processing worker terminated.');
   }
-} 
+}

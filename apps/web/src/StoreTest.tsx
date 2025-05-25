@@ -8,7 +8,6 @@ export function StoreTest() {
   const { isExporting, exportProgress } = useExportStatus()
 
   useEffect(() => {
-    console.log('Store hooks are working!')
   }, [])
 
   return (

@@ -20,7 +20,6 @@ class MockWorker {
   
   constructor(stringUrl: string) {
     // This is a minimal implementation that just records the URL
-    console.log(`MockWorker created with URL: ${stringUrl}`);
   }
   
   postMessage(data: any) {

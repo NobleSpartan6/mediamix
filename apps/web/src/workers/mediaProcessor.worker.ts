@@ -25,8 +25,4 @@ self.onmessage = async (event: MessageEvent<WorkerData>) => {
   }
 };
 
-// Actual generation functions would be defined here or imported
-// async function generateWaveformFromFile(file: File): Promise<number[]> { ... }
-// async function generateThumbnailFromFile(file: File): Promise<string> { ... }
-
-export {}; // Make it a module 
+export {}; // Make it a module

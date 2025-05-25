@@ -18,14 +18,10 @@ const createMockFFmpegInstance = () => {
     isLoaded: vi.fn().mockReturnValue(true),
     
     // v0.10.x API
-    run: vi.fn().mockImplementation((...args) => {
-      console.log('Mock FFmpeg run called with:', args);
-      return Promise.resolve();
-    }),
+    run: vi.fn().mockResolvedValue(undefined),
     
     // v0.12.x+ API
     exec: vi.fn().mockImplementation((args) => {
-      console.log('Mock FFmpeg exec called with:', args);
       
       // Add output.wav to the file system if requested
       if (args.includes('output.wav') || args.includes('output.raw')) {
@@ -38,7 +34,6 @@ const createMockFFmpegInstance = () => {
     
     // v0.10.x file system
     FS: vi.fn().mockImplementation((command, filename, data) => {
-      console.log(`Mock FFmpeg FS called: ${command} ${filename}`);
       
       switch (command) {
         case 'writeFile':
@@ -60,13 +55,11 @@ const createMockFFmpegInstance = () => {
     
     // v0.12.x+ file system
     writeFile: vi.fn().mockImplementation((filename, data) => {
-      console.log(`Mock FFmpeg writeFile called: ${filename}`);
       fileSystem.set(filename, data || createMockBuffer());
       return Promise.resolve();
     }),
     
     readFile: vi.fn().mockImplementation((filename) => {
-      console.log(`Mock FFmpeg readFile called: ${filename}`);
       if (!fileSystem.has(filename)) {
         fileSystem.set(filename, createMockBuffer());
       }
@@ -74,7 +67,6 @@ const createMockFFmpegInstance = () => {
     }),
     
     unlink: vi.fn().mockImplementation((filename) => {
-      console.log(`Mock FFmpeg unlink called: ${filename}`);
       fileSystem.delete(filename);
       return Promise.resolve();
     }),
