@@ -1,5 +1,6 @@
 import React from 'react'
 import type { MediaAsset } from '../../state/mediaStore'
+import { useSelectionStore } from '../../state/selectionStore'
 
 interface AssetCardProps {
   asset: MediaAsset
@@ -20,6 +21,9 @@ export function AssetCard({ asset }: AssetCardProps) {
       className="w-20 text-center text-xs select-none"
       draggable
       onDragStart={handleDragStart}
+      onClick={() =>
+        useSelectionStore.getState().setSelection({ type: 'asset', id: asset.id })
+      }
     >
       {isVideo ? (
         <img

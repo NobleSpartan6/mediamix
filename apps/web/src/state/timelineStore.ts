@@ -16,6 +16,18 @@ export interface Clip {
   assetId?: string
   /** identifier grouping paired audio/video clips */
   groupId?: string
+  /** horizontal position within preview canvas */
+  x: number
+  /** vertical position within preview canvas */
+  y: number
+  /** scale multiplier */
+  scale: number
+  /** rotation in degrees */
+  rotation: number
+  /** audio volume (0-1) */
+  volume: number
+  /** mute audio */
+  muted: boolean
 }
 
 export interface Track {
@@ -159,7 +171,17 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
    */
   addClip: (clipInput, opts) => {
     const id = generateId()
-    const newClip: Clip = { ...clipInput, id, groupId: opts?.groupId }
+    const newClip: Clip = {
+      x: 0,
+      y: 0,
+      scale: 1,
+      rotation: 0,
+      volume: 1,
+      muted: false,
+      ...clipInput,
+      id,
+      groupId: opts?.groupId,
+    }
     set((state) => {
       const clipsById = { ...state.clipsById, [id]: newClip }
       const durationSec = Math.max(state.durationSec, newClip.end)
@@ -186,6 +208,11 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
         delta.start !== undefined ? delta.start - existing.start : 0
       const endDiff = delta.end !== undefined ? delta.end - existing.end : 0
       const laneDiff = delta.lane !== undefined ? delta.lane - existing.lane : 0
+      const xDiff = delta.x !== undefined ? delta.x - existing.x : 0
+      const yDiff = delta.y !== undefined ? delta.y - existing.y : 0
+      const scaleDiff = delta.scale !== undefined ? delta.scale - existing.scale : 0
+      const rotDiff = delta.rotation !== undefined ? delta.rotation - existing.rotation : 0
+      const volDiff = delta.volume !== undefined ? delta.volume - existing.volume : 0
 
       const clipsById = { ...state.clipsById }
 
@@ -195,6 +222,12 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
           ...(delta.start !== undefined && { start: clip.start + startDiff }),
           ...(delta.end !== undefined && { end: clip.end + endDiff }),
           ...(delta.lane !== undefined && { lane: clip.lane + laneDiff }),
+          ...(delta.x !== undefined && { x: clip.x + xDiff }),
+          ...(delta.y !== undefined && { y: clip.y + yDiff }),
+          ...(delta.scale !== undefined && { scale: clip.scale + scaleDiff }),
+          ...(delta.rotation !== undefined && { rotation: clip.rotation + rotDiff }),
+          ...(delta.volume !== undefined && { volume: clip.volume + volDiff }),
+          ...(delta.muted !== undefined && { muted: delta.muted }),
         }
         clipsById[cid] = upd
       }
