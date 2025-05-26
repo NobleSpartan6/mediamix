@@ -61,6 +61,11 @@ export function VideoImportButton() {
           channelCount: metadata.channelCount ?? undefined,
         })
         setFileInfo({ videoSupported, audioSupported })
+        if (videoSupported === false || audioSupported === false) {
+          setFileError('This file\'s codecs are not supported.')
+        } else {
+          setFileError(null)
+        }
       } catch (codecErr: any) {
         console.warn('Codec support check failed', codecErr)
       }

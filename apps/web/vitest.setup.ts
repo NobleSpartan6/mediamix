@@ -1,4 +1,5 @@
 // vitest.setup.ts
+/* eslint-disable */
 import { vi } from 'vitest'
 
 // Ensure FFmpeg module is mocked correctly
