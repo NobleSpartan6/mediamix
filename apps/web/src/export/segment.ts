@@ -105,86 +105,84 @@ async function ffmpegExec(ffmpeg: any, args: string[]) {
 }
 
 import { useTimelineStore } from '../state/timelineStore'
+import { useTransportStore } from '../state/transportStore'
 import useMotifStore from '../lib/store'
+import { audioCtx } from '../audioCtx'
 
 /**
- * Export the entire timeline as a 1080p MP4 using ffmpeg.wasm.
- * Currently assumes all clips reference local assets with compatible codecs.
+ * Export the timeline preview + audio to a WebM file via MediaRecorder.
  */
 export const exportTimelineVideo = async (): Promise<void> => {
-  const { clipsById } = useTimelineStore.getState()
-  const { mediaAssets, setExportStatus } = useMotifStore.getState()
-  const clips = Object.values(clipsById).sort((a, b) => a.start - b.start)
-  if (clips.length === 0) return
+  const timeline = useTimelineStore.getState()
+  const transport = useTransportStore.getState()
+  const { setExportStatus } = useMotifStore.getState()
+
+  const canvas = document.querySelector('canvas') as HTMLCanvasElement | null
+  if (!canvas || !audioCtx) return
+
+  const canvasStream = canvas.captureStream(30)
+  const audioStream = audioCtx.destination.stream
+  const combined = new MediaStream([
+    ...canvasStream.getVideoTracks(),
+    ...audioStream.getAudioTracks(),
+  ])
+  const recorder = new MediaRecorder(combined, {
+    mimeType: 'video/webm;codecs=vp8,opus',
+  })
+
+  const chunks: BlobPart[] = []
+  recorder.ondataavailable = (e) => {
+    if (e.data.size > 0) chunks.push(e.data)
+  }
+
+  const { setCurrentTime, inPoint, outPoint, durationSec, currentTime } = timeline
+  const { setPlayRate } = transport
+  const originalFrame = transport.playheadFrame
+  const originalRate = transport.playRate
+  const originalTime = currentTime
+  const startTime = inPoint ?? 0
+  const endTime = outPoint ?? durationSec
+
+  useTransportStore.setState({ playheadFrame: Math.floor(startTime * 30) })
+  setCurrentTime(startTime)
 
   setExportStatus(true, 0, null)
 
-  try {
-    const ffmpeg = await getFFmpeg()
-    if (typeof ffmpeg.load === 'function') {
-      await ffmpeg.load()
-    }
+  recorder.start()
 
-    const segmentFiles: string[] = []
-    const assetInputs = new Map<string, string>()
-    let step = 0
+  setPlayRate(1)
 
-    for (const clip of clips) {
-      const asset = mediaAssets.find((a) => a.id === clip.assetId)
-      if (!asset?.fileHandle) continue
-      const inputName = assetInputs.get(asset.id) || `asset_${asset.id}.mp4`
-      if (!assetInputs.has(asset.id)) {
-        const file = await asset.fileHandle.getFile()
-        await ffmpegWriteFile(ffmpeg, inputName, new Uint8Array(await file.arrayBuffer()))
-        assetInputs.set(asset.id, inputName)
+  await new Promise<void>((resolve) => {
+    const interval = window.setInterval(() => {
+      const cur = useTimelineStore.getState().currentTime
+      const progress = (cur - startTime) / (endTime - startTime)
+      setExportStatus(true, Math.max(0, Math.min(progress, 1)), null)
+
+      if (useTransportStore.getState().playRate === 0 || cur >= endTime) {
+        clearInterval(interval)
+        recorder.stop()
       }
-      const segName = `seg_${segmentFiles.length}.mp4`
-      await ffmpegExec(ffmpeg, ['-ss', String(clip.start), '-to', String(clip.end), '-i', inputName, '-c', 'copy', segName])
-      segmentFiles.push(segName)
-      step += 1
-      setExportStatus(true, step / (clips.length + 1))
+    }, 200)
+
+    recorder.onstop = () => {
+      clearInterval(interval)
+      resolve()
     }
+  })
 
-    const listText = segmentFiles.map((f) => `file '${f}'`).join('\n')
-    await ffmpegWriteFile(ffmpeg, 'concat.txt', new TextEncoder().encode(listText))
+  setPlayRate(originalRate)
+  useTransportStore.setState({ playheadFrame: originalFrame })
+  setCurrentTime(originalTime)
 
-    attachProgressHandler(ffmpeg, (ratio) => {
-      setExportStatus(true, (clips.length + ratio) / (clips.length + 1))
-    })
+  const blob = new Blob(chunks, { type: 'video/webm' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'MediaMixExport.webm'
+  a.click()
+  URL.revokeObjectURL(url)
 
-    await ffmpegExec(ffmpeg, ['-f', 'concat', '-safe', '0', '-i', 'concat.txt', '-vf', 'scale=1920:1080', '-c:v', 'libx264', '-c:a', 'aac', '-movflags', 'faststart', 'output.mp4'])
-
-    const data = await ffmpegReadFile(ffmpeg, 'output.mp4')
-
-    ;['concat.txt', 'output.mp4', ...segmentFiles, ...assetInputs.values()].forEach((f) => ffmpegUnlink(ffmpeg, f))
-
-    const blob = new Blob([data], { type: 'video/mp4' })
-    if (typeof (window as any).showSaveFilePicker === 'function') {
-      try {
-        const handle = await (window as any).showSaveFilePicker({
-          suggestedName: 'export.mp4',
-          types: [{ description: 'MP4 Video', accept: { 'video/mp4': ['.mp4'] } }],
-        })
-        const writable = await handle.createWritable()
-        await writable.write(blob)
-        await writable.close()
-      } catch (err) {
-        console.warn('Save cancelled', err)
-      }
-    } else {
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'export.mp4'
-      a.click()
-      URL.revokeObjectURL(url)
-    }
-
-    setExportStatus(false, 1, null)
-  } catch (err: any) {
-    console.error('Export failed', err)
-    setExportStatus(false, 0, err?.message || 'Export failed')
-  }
+  setExportStatus(false, 1, null)
 }
 export interface SegmentRange {
   start: number
