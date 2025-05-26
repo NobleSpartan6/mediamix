@@ -15,6 +15,7 @@ export function useTimelineKeyboard() {
 
   const setInPoint    = useTimelineStore((s) => s.setInPoint)
   const setOutPoint   = useTimelineStore((s) => s.setOutPoint)
+  const setCurrentTime = useTimelineStore((s) => s.setCurrentTime)
   const splitClipAt   = useTimelineStore((s) => s.splitClipAt)
   const removeClip    = useTimelineStore((s) => s.removeClip)
   const selectedIds   = useTimelineStore((s) => s.selectedClipIds)
@@ -31,6 +32,7 @@ export function useTimelineKeyboard() {
   const removeRef   = useRef(removeClip)
   const selectedRef = useRef(selectedIds)
   const setSelRef   = useRef(setSelected)
+  const setCurrentRef = useRef(setCurrentTime)
 
   /* Keep refs fresh each render */
   useEffect(() => {
@@ -44,6 +46,7 @@ export function useTimelineKeyboard() {
     removeRef.current   = removeClip
     selectedRef.current = selectedIds
     setSelRef.current   = setSelected
+    setCurrentRef.current = setCurrentTime
   })
 
   useEffect(() => {
@@ -66,6 +69,15 @@ export function useTimelineKeyboard() {
           break
         case ' ': {
           const rate = useTransportStore.getState().playRate
+          if (rate === 0) {
+            const inPt = useTimelineStore.getState().inPoint
+            const cur = useTimelineStore.getState().currentTime
+            if (inPt !== null && cur < inPt) {
+              const frame = Math.floor(inPt * 30)
+              useTransportStore.setState({ playheadFrame: frame })
+              setCurrentRef.current(inPt)
+            }
+          }
           setRateRef.current(rate === 0 ? 1 : 0)
           e.preventDefault()
           break
@@ -81,14 +93,22 @@ export function useTimelineKeyboard() {
         case 'i':
         case 'I': {
           playheadRef.current = useTransportStore.getState().playheadFrame
-          inRef.current(playheadRef.current / 30)
+          if (e.shiftKey) {
+            inRef.current(null)
+          } else {
+            inRef.current(playheadRef.current / 30)
+          }
           e.preventDefault()
           break
         }
         case 'o':
         case 'O': {
           playheadRef.current = useTransportStore.getState().playheadFrame
-          outRef.current(playheadRef.current / 30)
+          if (e.shiftKey) {
+            outRef.current(null)
+          } else {
+            outRef.current(playheadRef.current / 30)
+          }
           e.preventDefault()
           break
         }

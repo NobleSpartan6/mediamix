@@ -83,5 +83,20 @@ describe('useTimelineKeyboard', () => {
 
     fireEvent.keyDown(window, { key: 'c' })
     expect(splitSpy).toHaveBeenCalledWith(45 / 30)
+
+    fireEvent.keyDown(window, { key: 'I', shiftKey: true })
+    expect(useTimelineStore.getState().inPoint).toBeNull()
+
+    fireEvent.keyDown(window, { key: 'O', shiftKey: true })
+    expect(useTimelineStore.getState().outPoint).toBeNull()
+
+    // seek to inPoint when starting playback
+    act(() => {
+      useTimelineStore.getState().setInPoint(1)
+      useTransportStore.setState({ playheadFrame: 0, playRate: 0 })
+    })
+    fireEvent.keyDown(window, { key: ' ' })
+    expect(useTransportStore.getState().playheadFrame).toBe(30)
+    expect(useTransportStore.getState().playRate).toBe(1)
   })
 })
