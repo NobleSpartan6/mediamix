@@ -135,3 +135,12 @@ export const ZoomOut = (props: React.SVGProps<SVGSVGElement>) => (
     <line x1="21" y1="21" x2="16.65" y2="16.65" />
   </svg>
 )
+
+export const Wand = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" {...iconProps} {...props}>
+    <rect x="14" y="2" width="4" height="4" />
+    <line x1="4" y1="20" x2="14" y2="10" />
+    <rect x="2" y="14" width="4" height="4" />
+    <rect x="18" y="8" width="4" height="4" />
+  </svg>
+)
