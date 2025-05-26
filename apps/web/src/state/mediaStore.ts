@@ -19,17 +19,30 @@ export interface MediaAsset {
   proxyUrl?: string
   /** Original file object, to be used by the worker, not stored long-term in state. */
   file?: File
+  /** optional parent folder id */
+  folderId?: string
+}
+
+export interface MediaFolder {
+  id: string
+  name: string
+  parentId: string | null
 }
 
 interface MediaState {
   assets: Record<string, MediaAsset>
+  folders: Record<string, MediaFolder>
   addAsset: (asset: Omit<MediaAsset, 'id'> & { id?: string; file?: File }) => string
+  /** Add multiple assets and return their ids */
+  addAssets: (assets: (Omit<MediaAsset, 'id'> & { id?: string; file?: File })[]) => string[]
   updateAsset: (id: string, delta: Partial<Omit<MediaAsset, 'id'>>) => void
   removeAsset: (id: string) => void
+  addFolder: (name: string, parentId?: string | null) => string
 }
 
-export const useMediaStore = create<MediaState>((set) => ({
+export const useMediaStore = create<MediaState>((set, get) => ({
   assets: {},
+  folders: { root: { id: 'root', name: 'All Media', parentId: null } },
 
   /**
    * Add a new media asset and return its generated id.
@@ -40,12 +53,28 @@ export const useMediaStore = create<MediaState>((set) => ({
     const { id: providedId, file, ...rest } = assetInput as Omit<MediaAsset, 'id'> & { id?: string; file?: File }
     const id = providedId ?? generateId()
     // Store asset metadata (excluding the file object itself from the state)
-    set((state) => ({ assets: { ...state.assets, [id]: { id, fileName: rest.fileName, duration: rest.duration } } }))
+    set((state) => ({
+      assets: {
+        ...state.assets,
+        [id]: {
+          id,
+          fileName: rest.fileName,
+          duration: rest.duration,
+          folderId: rest.folderId ?? 'root',
+        },
+      },
+    }))
 
     if (file) {
       processMediaAsset(id, file)
     }
     return id
+  },
+
+  /** Add multiple assets at once */
+  addAssets: (assets) => {
+    const add = get().addAsset
+    return assets.map((a) => add(a))
   },
 
   /** Update existing asset metadata */
@@ -62,9 +91,21 @@ export const useMediaStore = create<MediaState>((set) => ({
       const { [id]: _removed, ...rest } = state.assets
       return { assets: rest }
     }),
+
+  /** Create a new folder and return its id */
+  addFolder: (name, parentId = 'root') => {
+    const id = generateId()
+    set((state) => ({
+      folders: { ...state.folders, [id]: { id, name, parentId } },
+    }))
+    return id
+  },
 }))
 
 /** Retrieve assets as an array */
 export const selectMediaArray = (state: MediaState): MediaAsset[] =>
   Object.values(state.assets)
+
+export const selectFolderArray = (state: MediaState): MediaFolder[] =>
+  Object.values(state.folders)
 
