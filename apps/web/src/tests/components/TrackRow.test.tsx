@@ -50,8 +50,15 @@ describe('TrackRow', () => {
       })
     })
 
+    const timelineRef = React.createRef<HTMLDivElement>()
     const { rerender, getByLabelText } = render(
-      <TrackRow laneIndex={0} clips={[]} pixelsPerSecond={100} track={track} />,
+      <TrackRow
+        laneIndex={0}
+        clips={[]}
+        pixelsPerSecond={100}
+        track={track}
+        timelineRef={timelineRef}
+      />,
     )
 
     const lockBtn = getByLabelText('Lock track') as HTMLButtonElement
@@ -63,7 +70,13 @@ describe('TrackRow', () => {
     expect(updated.locked).toBe(true)
 
     rerender(
-      <TrackRow laneIndex={0} clips={[]} pixelsPerSecond={100} track={updated} />,
+      <TrackRow
+        laneIndex={0}
+        clips={[]}
+        pixelsPerSecond={100}
+        track={updated}
+        timelineRef={timelineRef}
+      />,
     )
     expect(getByLabelText('Unlock track').className).toContain('opacity-50')
   })
@@ -92,8 +105,15 @@ describe('TrackRow', () => {
       })
     })
 
+    const timelineRef = React.createRef<HTMLDivElement>()
     const { container } = render(
-      <TrackRow laneIndex={0} clips={[clip]} pixelsPerSecond={100} track={track} />,
+      <TrackRow
+        laneIndex={0}
+        clips={[clip]}
+        pixelsPerSecond={100}
+        track={track}
+        timelineRef={timelineRef}
+      />,
     )
 
     expect(container.querySelector('.pointer-events-none')).not.toBeNull()
