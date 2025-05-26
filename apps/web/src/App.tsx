@@ -8,7 +8,7 @@ import MediaLibrary from './features/import/MediaLibrary'
 import BeatMarkerBar from './features/timeline/BeatMarkerBar'
 import { TimelinePanel } from './features/timeline/TimelinePanel'
 import { CommandInput } from './features/timeline/components/CommandInput'
-import { VideoPreview } from './features/preview'
+import { PreviewPanel } from './features/preview'
 import Panel from './components/Panel'
 import InspectorPanel from './features/inspector/InspectorPanel'
 import { useUILayoutStore } from './state/uiLayoutStore'
@@ -78,7 +78,7 @@ export default function App() {
             <ResizablePanelGroup direction="vertical" className="contents" onLayout={handleVertical}>
               <ResizablePanel defaultSize={previewSize} minSize={20} className="preview-area">
                 <Panel title="Preview">
-                  <VideoPreview />
+                  <PreviewPanel />
                 </Panel>
               </ResizablePanel>
               <ResizableHandle />
