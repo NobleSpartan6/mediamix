@@ -5,6 +5,18 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --panel-bg: #101012;
+  --panel-bg-secondary: #18181b;
+  --accent: #4e8cff;
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
+}
+
+body {
+  @apply bg-panel-bg text-text-primary font-sans text-ui-body;
+}
+
 /* Fade keyframes (150ms default) */
 @layer utilities {
   .fade-in {

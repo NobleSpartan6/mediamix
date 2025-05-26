@@ -108,6 +108,7 @@ import { useTimelineStore } from '../state/timelineStore'
 import { useTransportStore } from '../state/transportStore'
 import useMotifStore from '../lib/store'
 import { audioCtx } from '../audioCtx'
+import { toast } from '../components/Toast'
 
 /**
  * Export the timeline preview + audio to a WebM file via MediaRecorder.
@@ -183,6 +184,7 @@ export const exportTimelineVideo = async (): Promise<void> => {
   URL.revokeObjectURL(url)
 
   setExportStatus(false, 1, null)
+  toast('Export complete')
 }
 export interface SegmentRange {
   start: number

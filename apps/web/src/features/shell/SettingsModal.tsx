@@ -11,7 +11,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 fade-in show">
-      <div className="bg-gray-800 rounded-md p-6 w-80">
+      <div className="bg-panel-bg-secondary rounded-md p-6 w-80">
         <h2 className="text-ui-heading font-ui-semibold mb-4">Settings</h2>
         <div className="space-y-2 text-ui-body">
           <label className="flex items-center gap-2">

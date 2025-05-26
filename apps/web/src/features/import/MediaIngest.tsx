@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { useToast } from '../../components/Toast'
 import useMotifStore from '../../lib/store'
 import { extractVideoMetadata } from '../../lib/file/extractVideoMetadata'
 import type { VideoMetadata } from '../../lib/file/extractVideoMetadata'
@@ -21,6 +22,7 @@ export default function MediaIngest() {
   const setFileInfo = useMotifStore((s) => s.setFileInfo)
   const setFileError = useMotifStore((s) => s.setFileError)
   const [loading, setLoading] = useState(false)
+  const toast = useToast()
 
   const handleFileHandles = useCallback(async (handles: FileSystemFileHandle[]) => {
     setLoading(true)
@@ -66,11 +68,13 @@ export default function MediaIngest() {
         } catch (err) {
           console.error('Error importing file:', err)
           setFileError('Failed to import file.')
+          toast('Failed to import file.')
         }
       }),
     )
     setLoading(false)
-  }, [addMediaAsset, setFileInfo, setFileError])
+    toast('Import complete')
+  }, [addMediaAsset, setFileInfo, setFileError, toast])
 
   const openPicker = async () => {
     try {

@@ -1,6 +1,9 @@
 export const colors = {
-  panelBg: '#101012',
-  accent: '#4E8CFF',
+  panelBg: 'var(--panel-bg)',
+  panelBgSecondary: 'var(--panel-bg-secondary)',
+  accent: 'var(--accent)',
+  textPrimary: 'var(--text-primary)',
+  textSecondary: 'var(--text-secondary)',
   clipVideo: 'rgba(30,144,255,.5)',
   clipAudio: 'rgba(255,64,128,.5)',
 }
@@ -11,6 +14,7 @@ export const fonts = {
   },
   size: {
     uiLabel: '11px',
+    uiCaption: '12px',
     uiBody: '14px',
     uiHeading: '24px',
   },

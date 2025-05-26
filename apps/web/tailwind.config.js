@@ -18,7 +18,10 @@ export default {
     extend: {
       colors: {
         'panel-bg': colors.panelBg,
+        'panel-bg-secondary': colors.panelBgSecondary,
         accent: colors.accent,
+        'text-primary': colors.textPrimary,
+        'text-secondary': colors.textSecondary,
         'clip-video': colors.clipVideo,
         'clip-audio': colors.clipAudio,
         ...trackColors,
@@ -26,6 +29,7 @@ export default {
       fontFamily: fonts.family,
       fontSize: {
         'ui-label': fonts.size.uiLabel,
+        'ui-caption': fonts.size.uiCaption,
         'ui-body': fonts.size.uiBody,
         'ui-heading': fonts.size.uiHeading,
       },
