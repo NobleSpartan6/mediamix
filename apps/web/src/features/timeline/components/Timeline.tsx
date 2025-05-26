@@ -115,6 +115,17 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
     [scrub, stopScrub],
   )
 
+  const handleBackgroundPointerDown = React.useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      const target = e.target as HTMLElement
+      if (!target.closest('.clip')) {
+        useTimelineStore.getState().setSelectedClips([])
+      }
+      startScrub(e)
+    },
+    [startScrub],
+  )
+
   // Track scroll position for playhead overlay
   const scrollRaf = React.useRef<number>()
   const handleScroll = React.useCallback(() => {
@@ -230,7 +241,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
             <div
               ref={scrollRef}
               className="relative h-full overflow-x-scroll bg-panel-bg cursor-grab"
-              onPointerDown={startScrub}
+              onPointerDown={handleBackgroundPointerDown}
               onScroll={handleScroll}
             >
               <div className="relative h-full flex flex-col" style={{ width: duration * zoom }}>
