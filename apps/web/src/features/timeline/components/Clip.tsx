@@ -105,7 +105,7 @@ export const Clip = React.memo(
         ref={localRef}
         // Container acts as `react-moveable` target. `group` enables hover state for handles.
         tabIndex={0}
-        className={`group absolute top-0 h-full select-none rounded-sm border border-white/10 ${colorClass} text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${isSelected ? 'ring-2 ring-accent' : ''}`}
+        className={`clip group absolute top-0 h-full select-none rounded-sm border border-white/10 ${colorClass} text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${isSelected ? 'ring-2 ring-accent' : ''}`}
         onPointerDown={handlePointerDown}
         style={{ width, transform: `translateX(${offset}px)`, willChange: 'transform', backgroundImage, backgroundSize: 'cover', backgroundPosition: 'center' }}
         aria-label={`Clip from ${clip.start.toFixed(2)}s to ${clip.end.toFixed(2)}s`}
