@@ -111,12 +111,12 @@ export function CommandPalette() {
       onClick={() => setOpen(false)}
     >
       <div
-        className="bg-gray-800 w-96 rounded shadow"
+        className="bg-panel-bg-secondary w-96 rounded-md shadow"
         onClick={(e) => e.stopPropagation()}
       >
         <input
           ref={inputRef}
-          className="w-full bg-gray-700 text-white px-3 py-2 outline-none"
+          className="w-full bg-panel-bg text-text-primary px-3 py-2 outline-none"
           placeholder="Type a command or ask AI..."
           value={query}
           onChange={(e) => {

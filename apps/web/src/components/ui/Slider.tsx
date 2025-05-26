@@ -14,10 +14,10 @@ export const Slider = React.forwardRef<HTMLSpanElement, SliderProps>(
   ({ className = '', ...props }, ref) => (
     <RadixSlider.Root
       ref={ref}
-      className={`relative flex items-center select-none touch-none w-full h-5 ${className}`}
+      className={`relative flex items-center select-none touch-none w-full h-6 ${className}`}
       {...props}
     >
-      <RadixSlider.Track className="bg-gray-700 relative grow rounded-full h-1">
+      <RadixSlider.Track className="bg-panel-bg-secondary relative grow rounded-full h-1">
         <RadixSlider.Range className="absolute bg-accent rounded-full h-full" />
       </RadixSlider.Track>
       <RadixSlider.Thumb

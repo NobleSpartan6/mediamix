@@ -21,7 +21,7 @@ export default function FileInfoCard() {
   }
 
   return (
-    <div className="p-4 rounded-lg bg-gray-800 text-white space-y-2">
+    <div className="p-4 rounded-lg bg-panel-bg-secondary text-text-primary space-y-2">
       <h3 className="text-ui-body font-ui-medium text-accent">Imported File</h3>
       <div className="text-ui-body font-ui-normal flex flex-col space-y-1">
         <div>

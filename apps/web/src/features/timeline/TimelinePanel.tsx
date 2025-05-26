@@ -177,7 +177,7 @@ export const TimelinePanel: React.FC<TimelinePanelProps> = React.memo(({ pixelsP
         </div>
       </div>
       {showZoomIndicator && (
-        <div className="absolute top-2 right-2 bg-gray-800/80 px-2 py-1 rounded text-xs font-ui-medium">
+        <div className="absolute top-2 right-2 bg-panel-bg-secondary/80 px-2 py-1 rounded text-xs font-ui-medium">
           {Math.round((zoom / pixelsPerSecond) * 100)}%
         </div>
       )}
@@ -189,3 +189,4 @@ export const TimelinePanel: React.FC<TimelinePanelProps> = React.memo(({ pixelsP
 })
 
 TimelinePanel.displayName = 'TimelinePanel'
+
