@@ -62,6 +62,8 @@ export interface TimelineState {
   /** array of beat timestamps in seconds (monotonically increasing) */
   beats: number[]
   setBeats: (beats: number[]) => void
+  /** Retrieve a clip by id */
+  getClip: (id: string) => Clip | undefined
   setCurrentTime: (time: number) => void
   setInPoint: (time: number | null) => void
   setOutPoint: (time: number | null) => void
@@ -111,7 +113,7 @@ const pruneTracks = (
   return needed.slice(0, maxLane + 1)
 }
 
-export const useTimelineStore = create<TimelineState>((set) => ({
+export const useTimelineStore = create<TimelineState>((set, get) => ({
   clipsById: {},
   tracks: [],
   durationSec: 0,
@@ -143,6 +145,9 @@ export const useTimelineStore = create<TimelineState>((set) => ({
 
   /** Store beat timestamps in seconds */
   setBeats: (beats) => set({ beats }),
+
+  /** Retrieve a clip by id */
+  getClip: (id) => get().clipsById[id],
 
   /**
    * Add a new clip and return its generated id.
