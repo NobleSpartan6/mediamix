@@ -169,6 +169,8 @@ export const useTimelineStore = create<TimelineState>((set) => ({
     set((state) => {
       const existing = state.clipsById[id]
       if (!existing) return {}
+      const track = state.tracks[existing.lane]
+      if (track?.locked) return {}
 
       const groupId = existing.groupId
       const startDiff =
@@ -229,6 +231,8 @@ export const useTimelineStore = create<TimelineState>((set) => ({
     set((state) => {
       const clip = state.clipsById[id]
       if (!clip) return {}
+      const track = state.tracks[clip.lane]
+      if (track?.locked) return {}
       const { ripple } = opts ?? {}
 
       const targetIds = Object.entries(state.clipsById)

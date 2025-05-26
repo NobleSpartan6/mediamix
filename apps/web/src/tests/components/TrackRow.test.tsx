@@ -67,4 +67,35 @@ describe('TrackRow', () => {
     )
     expect(getByLabelText('Unlock track').className).toContain('opacity-50')
   })
+
+  it('renders clips disabled when track locked', () => {
+    const track: Track = {
+      id: 't1',
+      type: 'video',
+      label: 'V1',
+      groupId: 'g1',
+      locked: true,
+      muted: false,
+    }
+    const clip = { id: 'c1', start: 0, end: 1, lane: 0 }
+    act(() => {
+      useTimelineStore.setState({
+        clipsById: { [clip.id]: clip },
+        tracks: [track as never],
+        durationSec: 1,
+        currentTime: 0,
+        followPlayhead: true,
+        inPoint: null,
+        outPoint: null,
+        beats: [],
+        selectedClipIds: [],
+      })
+    })
+
+    const { container } = render(
+      <TrackRow laneIndex={0} clips={[clip]} pixelsPerSecond={100} track={track} />,
+    )
+
+    expect(container.querySelector('.pointer-events-none')).not.toBeNull()
+  })
 })
