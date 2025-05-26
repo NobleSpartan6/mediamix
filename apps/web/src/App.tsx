@@ -1,5 +1,9 @@
 import { useCallback, useEffect } from 'react'
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from 'react-resizable-panels'
+import {
+  PanelGroup as ResizablePanelGroup,
+  Panel as ResizablePanel,
+  PanelResizeHandle as ResizableHandle,
+} from 'react-resizable-panels'
 import AppShell from './features/shell/AppShell'
 import MediaLibraryPanel from './features/library/MediaLibraryPanel'
 import { TimelinePanel } from './features/timeline/TimelinePanel'
