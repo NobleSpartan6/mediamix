@@ -3,6 +3,7 @@ import * as React from 'react'
 import type { Clip as ClipType } from '../../../state/timelineStore'
 import { useMediaStore } from '../../../state/mediaStore'
 import { useTimelineStore } from '../../../state/timelineStore'
+import { useSelectionStore } from '../../../state/selectionStore'
 
 /** Props for {@link Clip}. */
 interface ClipProps {
@@ -87,6 +88,7 @@ export const Clip = React.memo(
     const handlePointerDown = React.useCallback(
       (e: React.PointerEvent) => {
         e.stopPropagation()
+        useSelectionStore.getState().setSelection({ type: 'clip', id: clip.id })
         if (e.shiftKey || e.metaKey || e.ctrlKey) {
           if (isSelected) {
             setSelected(selectedIds.filter((id) => id !== clip.id))
