@@ -6,7 +6,7 @@ import FileInfoCard from './features/import/FileInfoCard'
 import AnalyzeBeatsButton from './features/import/AnalyzeBeatsButton'
 import MediaLibrary from './features/import/MediaLibrary'
 import BeatMarkerBar from './features/timeline/BeatMarkerBar'
-import { Timeline } from './features/timeline/components/Timeline'
+import { TimelinePanel } from './features/timeline/TimelinePanel'
 import { CommandInput } from './features/timeline/components/CommandInput'
 import { VideoPreview } from './features/preview'
 import Panel from './components/Panel'
@@ -84,7 +84,7 @@ export default function App() {
               <ResizableHandle />
               <ResizablePanel defaultSize={100 - previewSize} minSize={20} className="timeline-area">
                 <Panel title="Timeline">
-                  <Timeline pixelsPerSecond={120} />
+                  <TimelinePanel pixelsPerSecond={120} />
                   <CommandInput />
                 </Panel>
               </ResizablePanel>
