@@ -13,6 +13,7 @@ import { useTimelineKeyboard } from '../hooks/useTimelineKeyboard'
 import { useZoomScroll } from '../hooks/useZoomScroll'
 import { ZoomSlider } from './ZoomSlider'
 import { Button } from '../../../components/ui/Button'
+import { PlayPauseButton } from './PlayPauseButton'
 
 /** Props for the {@link Timeline} component. */
 interface TimelineProps {
@@ -284,8 +285,9 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
           {Math.round((zoom / initialZoom.current) * 100)}%
         </div>
       )}
-      {/* Zoom slider and follow toggle */}
+      {/* Transport and zoom controls */}
       <div className="absolute top-8 right-2 flex items-center space-x-2">
+        <PlayPauseButton />
         <ZoomSlider value={zoom} onChange={setZoom} />
         <Button variant="secondary" className="px-2 py-1 text-xs" onClick={handleSplit}>
           Split
