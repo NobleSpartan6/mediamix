@@ -9,7 +9,7 @@
     "lint": "eslint . --max-warnings=0",
     "format": "prettier --write .",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest run"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.12.10",
