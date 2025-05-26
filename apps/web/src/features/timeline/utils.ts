@@ -39,3 +39,14 @@ export function insertAssetToTimeline(assetId: string, startSec?: number) {
     durationSec: Math.max(s.durationSec, end),
   }))
 }
+
+/**
+ * Find the beat marker closest to the given time.
+ * Simple linear search as beat arrays are typically short.
+ */
+export function getNearestBeat(time: number, beats: number[]): number {
+  if (beats.length === 0) return time
+  return beats.reduce((prev, b) =>
+    Math.abs(b - time) < Math.abs(prev - time) ? b : prev,
+    beats[0])
+}

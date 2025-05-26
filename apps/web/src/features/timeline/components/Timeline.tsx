@@ -12,6 +12,7 @@ import { useClipsArray } from '../hooks/useClipsArray'
 import { useTimelineKeyboard } from '../hooks/useTimelineKeyboard'
 import { useZoomScroll } from '../hooks/useZoomScroll'
 import { ZoomSlider } from './ZoomSlider'
+import { AlignToBeatButton } from './AlignToBeatButton'
 import { Button } from '../../../components/ui/Button'
 import { PlayPauseButton } from './PlayPauseButton'
 
@@ -296,6 +297,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
         <Button variant="secondary" className="px-2 py-1 text-xs" onClick={handleDelete}>
           Delete
         </Button>
+        <AlignToBeatButton />
         <Button variant="secondary" className="px-2 py-1 text-xs" onClick={() => setFollowPlayhead(!followPlayhead)}>
           {followPlayhead ? 'Unfollow' : 'Follow'}
         </Button>
