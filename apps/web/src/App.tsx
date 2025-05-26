@@ -1,11 +1,7 @@
 import { useCallback, useEffect } from 'react'
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from 'react-resizable-panels'
 import AppShell from './features/shell/AppShell'
-import MediaIngest from './features/import/MediaIngest'
-import FileInfoCard from './features/import/FileInfoCard'
-import AnalyzeBeatsButton from './features/import/AnalyzeBeatsButton'
-import MediaLibrary from './features/import/MediaLibrary'
-import BeatMarkerBar from './features/timeline/BeatMarkerBar'
+import MediaLibraryPanel from './features/library/MediaLibraryPanel'
 import { TimelinePanel } from './features/timeline/TimelinePanel'
 import { CommandInput } from './features/timeline/components/CommandInput'
 import { PreviewPanel } from './features/preview'
@@ -63,13 +59,7 @@ export default function App() {
         <ResizablePanelGroup direction="horizontal" className="contents" onLayout={handleHorizontal}>
           {showLibrary && (
             <ResizablePanel defaultSize={librarySize} minSize={20} className="library-area row-span-2 min-w-[220px]">
-              <Panel title="Library" onCollapse={() => setShowLibrary(false)}>
-                <MediaIngest />
-                <FileInfoCard />
-                <AnalyzeBeatsButton />
-                <MediaLibrary />
-                <BeatMarkerBar />
-              </Panel>
+              <MediaLibraryPanel />
             </ResizablePanel>
           )}
           {showLibrary && <ResizableHandle className="row-span-2" />}
