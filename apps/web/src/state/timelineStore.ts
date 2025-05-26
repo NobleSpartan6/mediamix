@@ -76,6 +76,8 @@ export interface TimelineState {
   /** array of beat timestamps in seconds (monotonically increasing) */
   beats: number[]
   setBeats: (beats: number[]) => void
+  /** Snap selected clips to the nearest beat */
+  alignSelectedToBeat: () => void
   /** Retrieve a clip by id */
   getClip: (id: string) => Clip | undefined
   setCurrentTime: (time: number) => void
@@ -161,6 +163,20 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
 
   /** Store beat timestamps in seconds */
   setBeats: (beats) => set({ beats }),
+
+  alignSelectedToBeat: () => {
+    const { beats, selectedClipIds, clipsById } = get()
+    if (beats.length === 0) return
+    selectedClipIds.forEach((id) => {
+      const clip = clipsById[id]
+      if (!clip) return
+      const nearest = beats.reduce((prev, b) =>
+        Math.abs(b - clip.start) < Math.abs(prev - clip.start) ? b : prev,
+      beats[0])
+      const delta = nearest - clip.start
+      get().updateClip(id, { start: clip.start + delta, end: clip.end + delta })
+    })
+  },
 
   /** Retrieve a clip by id */
   getClip: (id) => get().clipsById[id],

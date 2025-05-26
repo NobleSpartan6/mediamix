@@ -3,7 +3,8 @@ import { Button } from '../../components/ui/Button'
 import { useTransportStore } from '../../state/transportStore'
 import { useTimelineStore } from '../../state/timelineStore'
 import { useViewStore } from '../../state/viewStore'
-import { Undo, Redo, Play, Pause, Scissors, Trash2, ZoomIn, ZoomOut, Magnet } from 'lucide-react'
+import { Undo, Redo, Play, Pause, Scissors, Trash2, ZoomIn, ZoomOut, Magnet, Wand } from 'lucide-react'
+import { useCommandPaletteStore } from './commandPaletteStore'
 
 export const MainToolbar: React.FC = () => {
   const playRate = useTransportStore((s) => s.playRate)
@@ -16,6 +17,7 @@ export const MainToolbar: React.FC = () => {
   const setSnapping = useTimelineStore((s) => s.setSnapping)
   const zoom = useViewStore((s) => s.timelineZoom)
   const setZoom = useViewStore((s) => s.setTimelineZoom)
+  const setPaletteOpen = useCommandPaletteStore((s) => s.setOpen)
 
   const handleDelete = React.useCallback(() => {
     selectedIds.forEach((id) => removeClip(id))
@@ -73,6 +75,14 @@ export const MainToolbar: React.FC = () => {
         onClick={() => setSnapping(!snapping)}
       >
         <Magnet className="w-4 h-4" />
+      </Button>
+      <Button
+        variant="secondary"
+        className="toolbar-button"
+        title="Command Palette (Ctrl+K)"
+        onClick={() => setPaletteOpen(true)}
+      >
+        <Wand className="w-4 h-4" />
       </Button>
     </div>
   )

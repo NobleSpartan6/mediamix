@@ -4,6 +4,7 @@ import AppShell from './features/shell/AppShell'
 import MediaLibraryPanel from './features/library/MediaLibraryPanel'
 import { TimelinePanel } from './features/timeline/TimelinePanel'
 import { CommandInput } from './features/timeline/components/CommandInput'
+import CommandPalette from './features/shell/CommandPalette'
 import { PreviewPanel } from './features/preview'
 import Panel from './components/Panel'
 import InspectorPanel from './features/inspector/InspectorPanel'
@@ -51,6 +52,7 @@ export default function App() {
 
   return (
     <AppShell>
+      <CommandPalette />
       <div className="editor-grid h-full">
         <header className="header-area p-4 text-center">
           <h1 className="text-accent text-ui-heading font-ui-semibold mb-1">Motif — Timeline MVP</h1>
