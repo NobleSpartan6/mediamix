@@ -41,3 +41,17 @@
 .editor-grid > .inspector-area {
   grid-area: inspector;
 }
+
+/* top menubar and toolbar */
+.menubar button {
+  @apply text-white rounded-sm focus-visible:outline-none;
+}
+.menubar-content {
+  @apply bg-gray-800 text-white;
+}
+.toolbar-button {
+  @apply p-1 rounded hover:bg-accent/30;
+}
+.toolbar-toggle-active {
+  @apply bg-accent/40;
+}

@@ -6,6 +6,7 @@ import { usePlaybackTicker } from '../../state/playbackTicker'
 import { useClipsArray } from './hooks/useClipsArray'
 import { useTimelineKeyboard } from './hooks/useTimelineKeyboard'
 import { useZoomScroll } from './hooks/useZoomScroll'
+import { useViewStore } from '../../state/viewStore'
 import { TimeRuler } from './components/TimeRuler'
 import { TracksContainer } from './TracksContainer'
 import { TimelineToolbar } from './TimelineToolbar'
@@ -15,9 +16,14 @@ interface TimelinePanelProps {
 }
 
 export const TimelinePanel: React.FC<TimelinePanelProps> = React.memo(({ pixelsPerSecond = 100 }) => {
-  const [zoom, setZoom] = React.useState(pixelsPerSecond)
+  const zoom = useViewStore((s) => s.timelineZoom)
+  const setZoom = useViewStore((s) => s.setTimelineZoom)
   const scrollRef = React.useRef<HTMLDivElement>(null)
   useZoomScroll(scrollRef, zoom, setZoom, { minZoom: 20, maxZoom: 500, zoomStep: 0.002 })
+  React.useEffect(() => {
+    setZoom(pixelsPerSecond)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [scrollLeft, setScrollLeft] = React.useState(0)
 
   const clips = useClipsArray()
