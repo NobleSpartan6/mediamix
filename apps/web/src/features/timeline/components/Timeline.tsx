@@ -77,6 +77,8 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
   const removeClip = useTimelineStore((s) => s.removeClip)
   const selectedIds = useTimelineStore((s) => s.selectedClipIds)
   const setSelected = useTimelineStore((s) => s.setSelectedClips)
+  const inPoint = useTimelineStore((s) => s.inPoint)
+  const outPoint = useTimelineStore((s) => s.outPoint)
   const playheadSeconds = React.useMemo(() => playheadFrame / 30, [playheadFrame])
   React.useEffect(() => {
     setCurrentTime(playheadSeconds)
@@ -240,6 +242,18 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
                     style={{ transform: `translateX(${b * zoom}px)` }}
                   />
                 ))}
+                {inPoint !== null && (
+                  <div
+                    className="absolute top-0 bottom-0 w-0.5 bg-green-400 pointer-events-none"
+                    style={{ transform: `translateX(${inPoint * zoom}px)` }}
+                  />
+                )}
+                {outPoint !== null && (
+                  <div
+                    className="absolute top-0 bottom-0 w-0.5 bg-red-400 pointer-events-none"
+                    style={{ transform: `translateX(${outPoint * zoom}px)` }}
+                  />
+                )}
               </div>
             </div>
             <Playhead
