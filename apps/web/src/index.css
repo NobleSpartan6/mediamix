@@ -14,3 +14,30 @@
     @apply opacity-100;
   }
 }
+
+/* Editor grid layout */
+.editor-grid {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto 1fr 1fr;
+  grid-template-areas:
+    'header header header'
+    'library preview inspector'
+    'library timeline inspector';
+  height: 100%;
+}
+.editor-grid > .header-area {
+  grid-area: header;
+}
+.editor-grid > .library-area {
+  grid-area: library;
+}
+.editor-grid > .preview-area {
+  grid-area: preview;
+}
+.editor-grid > .timeline-area {
+  grid-area: timeline;
+}
+.editor-grid > .inspector-area {
+  grid-area: inspector;
+}
