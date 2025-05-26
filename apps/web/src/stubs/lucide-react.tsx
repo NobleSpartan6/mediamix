@@ -104,3 +104,34 @@ export const Crosshair = (props: React.SVGProps<SVGSVGElement>) => (
     <line x1="18" y1="12" x2="22" y2="12" />
   </svg>
 )
+
+export const Undo = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" {...iconProps} {...props}>
+    <path d="M9 14H5v-4" />
+    <path d="M20 20a8 8 0 0 0-8-8H5" />
+  </svg>
+)
+
+export const Redo = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" {...iconProps} {...props}>
+    <path d="M15 10h4v4" />
+    <path d="M4 20a8 8 0 0 1 8-8h7" />
+  </svg>
+)
+
+export const ZoomIn = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" {...iconProps} {...props}>
+    <circle cx="11" cy="11" r="8" />
+    <line x1="11" y1="8" x2="11" y2="14" />
+    <line x1="8" y1="11" x2="14" y2="11" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+)
+
+export const ZoomOut = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" {...iconProps} {...props}>
+    <circle cx="11" cy="11" r="8" />
+    <line x1="8" y1="11" x2="14" y2="11" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+)

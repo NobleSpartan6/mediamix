@@ -28,7 +28,8 @@
     "paths": {
       "lucide-react": ["./src/stubs/lucide-react.tsx"],
       "yjs": ["./src/stubs/yjs.ts"],
-      "y-protocols/awareness": ["./src/stubs/awareness.ts"]
+      "y-protocols/awareness": ["./src/stubs/awareness.ts"],
+      "@radix-ui/react-menubar": ["./src/stubs/radix-menubar.tsx"]
     }
   },
   "include": ["src"]
