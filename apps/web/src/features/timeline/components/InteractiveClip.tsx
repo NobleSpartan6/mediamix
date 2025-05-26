@@ -8,6 +8,7 @@ import {
   useTimelineStore,
   selectLaneClips,
   selectClipsArray,
+  laneHasCollision,
 } from '../../../state/timelineStore'
 import { useMediaStore } from '../../../state/mediaStore'
 import { useLaneClips } from '../hooks/useLaneClips'
@@ -255,12 +256,58 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(
         laneTypes[lane] === clipTrackType ? lane : clip.lane
       laneRef.current = finalLane
 
-      // commit the change
+      const timeShift = finalStart - origin.current.startSec
+      const state = useTimelineStore.getState()
+      const selectedIds = state.selectedClipIds
+
+      if (selectedIds.length > 1) {
+        let invalid = collision
+        for (const id of selectedIds) {
+          if (id === clip.id) continue
+          const c = state.clipsById[id]
+          if (!c) continue
+          const track = state.tracks[c.lane]
+          if (track?.locked) continue
+          const newStart = c.start + timeShift
+          const newEnd = c.end + timeShift
+          if (
+            newStart < 0 ||
+            laneHasCollision(c.lane, newStart, newEnd, id)(state)
+          ) {
+            invalid = true
+            break
+          }
+        }
+
+        if (invalid) {
+          applyTransform(origin.current.startSec * pixelsPerSecond, 0)
+          flashInvalid()
+          setSnapTime(null)
+          return
+        }
+      }
+
+      // commit the change for dragged clip
       updateClip(clip.id, {
         start: finalStart,
         end: finalStart + duration,
         lane: finalLane,
       })
+
+      // move other selected clips horizontally
+      if (selectedIds.length > 1) {
+        selectedIds.forEach((id) => {
+          if (id === clip.id) return
+          const c = state.clipsById[id]
+          if (!c) return
+          const track = state.tracks[c.lane]
+          if (track?.locked) return
+          updateClip(id, {
+            start: c.start + timeShift,
+            end: c.end + timeShift,
+          })
+        })
+      }
 
       if (collision) flashInvalid()
       setSnapTime(null)
