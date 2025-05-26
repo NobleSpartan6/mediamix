@@ -16,6 +16,8 @@ interface TrackRowProps {
   pixelsPerSecond: number
   /** Track metadata */
   track: Track
+  /** Reference to the scrollable timeline container */
+  timelineRef: React.RefObject<HTMLDivElement>
 }
 
 /**
@@ -26,7 +28,13 @@ interface TrackRowProps {
  * @param pixelsPerSecond zoom level used for clip sizing
  * @param type video or audio row styling
  */
-export const TrackRow: React.FC<TrackRowProps> = React.memo(({ laneIndex, clips, pixelsPerSecond, track }) => {
+export const TrackRow: React.FC<TrackRowProps> = React.memo(({
+  laneIndex,
+  clips,
+  pixelsPerSecond,
+  track,
+  timelineRef,
+}) => {
   const type = track.type
   const height = type === 'video' ? 48 : 32
 
@@ -83,11 +91,20 @@ export const TrackRow: React.FC<TrackRowProps> = React.memo(({ laneIndex, clips,
     (e: React.DragEvent<HTMLDivElement>) => {
       const assetId = e.dataTransfer.getData('text/x-mediamix-asset')
       if (assetId) {
-        insertAssetToTimeline(assetId)
+        const timelineEl = timelineRef.current
+        if (timelineEl) {
+          const bounds = timelineEl.getBoundingClientRect()
+          const scrollLeft = timelineEl.scrollLeft
+          const dropX = e.clientX + scrollLeft - bounds.left
+          const startSec = Math.max(0, dropX / pixelsPerSecond)
+          insertAssetToTimeline(assetId, startSec)
+        } else {
+          insertAssetToTimeline(assetId)
+        }
         e.preventDefault()
       }
     },
-    []
+    [pixelsPerSecond, timelineRef]
   )
 
   return (

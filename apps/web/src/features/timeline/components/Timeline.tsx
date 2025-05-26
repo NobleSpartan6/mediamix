@@ -179,6 +179,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
           clips={laneMap.get(laneIndex) ?? []}
           pixelsPerSecond={zoom}
           track={track}
+          timelineRef={scrollRef}
         />
       )),
     [tracks, laneMap, zoom],
