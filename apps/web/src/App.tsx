@@ -1,7 +1,8 @@
-import { useEffect, useRef, useMemo, useCallback } from 'react'
+import { useCallback } from 'react'
 import { Button } from './components/ui/Button'
 import MediaIngest from './features/import/MediaIngest'
 import FileInfoCard from './features/import/FileInfoCard'
+import AnalyzeBeatsButton from './features/import/AnalyzeBeatsButton'
 import MediaLibrary from './features/import/MediaLibrary'
 import BeatMarkerBar from './features/timeline/BeatMarkerBar'
 import { Timeline } from './features/timeline/components/Timeline'
@@ -12,15 +13,9 @@ import './App.css'
 import { exportTimelineVideo } from './export/segment'
 import { useExportStatus } from './lib/store/hooks'
 import ExportProgress from './features/export/ExportProgress'
-import { useTimelineStore } from './state/timelineStore'
 
 function App() {
-  // Demo beats & clips for showcasing the timeline MVP
-  const clipsById = useTimelineStore((s) => s.clipsById)
-  const clips = useMemo(() => Object.values(clipsById), [clipsById])
-  const addClip = useTimelineStore((s) => s.addClip)
-  const beats = useTimelineStore((s) => s.beats)
-  const setBeats = useTimelineStore((s) => s.setBeats)
+  // Access timeline state
 
 
   const { isExporting } = useExportStatus()
@@ -28,20 +23,7 @@ function App() {
     exportTimelineVideo()
   }, [])
 
-  // Populate demo data once on mount if store is empty
-  useEffect(() => {
-    if (clips.length === 0) {
-      addClip({ start: 0, end: 5, lane: 0 })
-      addClip({ start: 6, end: 12, lane: 1 })
-    }
-
-    if (beats.length === 0) {
-      // simple 1-second beat grid for demo purposes
-      const demoBeats = Array.from({ length: 21 }, (_, i) => i) // 0s → 20s
-      setBeats(demoBeats)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  // Initial demo setup removed
 
   return (
     <AppShell>
@@ -58,6 +40,7 @@ function App() {
           <div className="flex-1 space-y-4">
             <MediaIngest />
             <FileInfoCard />
+            <AnalyzeBeatsButton />
             <MediaLibrary />
             <BeatMarkerBar />
           </div>
