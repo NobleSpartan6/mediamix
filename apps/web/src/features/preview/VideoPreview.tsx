@@ -14,6 +14,7 @@ import { useClipsArray } from '../timeline/hooks/useClipsArray'
  */
 export const VideoPreview: React.FC = React.memo(() => {
   const currentTime = useTimelineStore((s) => s.currentTime)
+  const tracks = useTimelineStore((s) => s.tracks)
   const playRate = useTransportStore((s) => s.playRate)
   const mediaAssets = useMotifStore((s) => s.mediaAssets)
   const clips = useClipsArray()
@@ -34,9 +35,9 @@ export const VideoPreview: React.FC = React.memo(() => {
   const sortedClips = React.useMemo(
     () =>
       clips
-        .filter((c) => c.lane % 2 === 0)
+        .filter((c) => c.lane % 2 === 0 && !tracks[c.lane]?.muted)
         .sort((a, b) => a.start - b.start),
-    [clips],
+    [clips, tracks],
   )
 
   // Determine active clip for the current time
@@ -46,6 +47,16 @@ export const VideoPreview: React.FC = React.memo(() => {
       null,
     [sortedClips, currentTime],
   )
+
+  React.useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    if (!activeClip) {
+      video.pause()
+      video.removeAttribute('src')
+      video.load()
+    }
+  }, [activeClip])
 
   // Load the clip's media into the video element and render via GPU pipeline
   React.useEffect(() => {

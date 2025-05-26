@@ -100,4 +100,31 @@ describe('timelineStore', () => {
     expect(useTimelineStore.getState().clipsById[videoId]).toBeUndefined()
     expect(useTimelineStore.getState().clipsById[audioId]).toBeUndefined()
   })
+
+  it('updateClip is ignored when track locked', () => {
+    let id = ''
+    act(() => {
+      id = useTimelineStore.getState().addClip({ id: undefined as never, start: 0, end: 1, lane: 0 })
+    })
+    const trackId = useTimelineStore.getState().tracks[0].id
+    act(() => {
+      useTimelineStore.getState().updateTrack(trackId, { locked: true })
+      useTimelineStore.getState().updateClip(id, { start: 1 })
+    })
+    const clip = useTimelineStore.getState().clipsById[id]
+    expect(clip.start).toBe(0)
+  })
+
+  it('removeClip is ignored when track locked', () => {
+    let id = ''
+    act(() => {
+      id = useTimelineStore.getState().addClip({ id: undefined as never, start: 0, end: 1, lane: 0 })
+    })
+    const trackId = useTimelineStore.getState().tracks[0].id
+    act(() => {
+      useTimelineStore.getState().updateTrack(trackId, { locked: true })
+      useTimelineStore.getState().removeClip(id)
+    })
+    expect(useTimelineStore.getState().clipsById[id]).toBeDefined()
+  })
 })

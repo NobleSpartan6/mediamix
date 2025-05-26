@@ -4,6 +4,7 @@ import { useTimelineStore } from '../../../state/timelineStore'
 import { Lock, Unlock, Eye, EyeOff, Volume2, VolumeX } from 'lucide-react'
 import { insertAssetToTimeline } from '../utils'
 import { InteractiveClip } from './InteractiveClip'
+import { Clip } from './Clip'
 
 /** Props for {@link TrackRow}. */
 interface TrackRowProps {
@@ -52,15 +53,24 @@ export const TrackRow: React.FC<TrackRowProps> = React.memo(({ laneIndex, clips,
 
   const renderedClips = React.useMemo(
     () =>
-      clips.map((clip) => (
-        <InteractiveClip
-          key={clip.id}
-          clip={clip}
-          pixelsPerSecond={pixelsPerSecond}
-          type={type}
-        />
-      )),
-    [clips, pixelsPerSecond, type],
+      clips.map((clip) =>
+        track.locked ? (
+          <Clip
+            key={clip.id}
+            clip={clip}
+            pixelsPerSecond={pixelsPerSecond}
+            type={type}
+          />
+        ) : (
+          <InteractiveClip
+            key={clip.id}
+            clip={clip}
+            pixelsPerSecond={pixelsPerSecond}
+            type={type}
+          />
+        ),
+      ),
+    [clips, pixelsPerSecond, type, track.locked],
   )
 
   const handleDragOver = React.useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -107,7 +117,11 @@ export const TrackRow: React.FC<TrackRowProps> = React.memo(({ laneIndex, clips,
           <MuteIcon className="w-4 h-4" />
         </button>
       </div>
-      {renderedClips}
+      {track.locked ? (
+        <div className="pointer-events-none opacity-50">{renderedClips}</div>
+      ) : (
+        renderedClips
+      )}
     </div>
   )
 })
