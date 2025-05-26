@@ -4,6 +4,7 @@ import { useTransportStore } from '../../state/transportStore'
 import useMotifStore from '../../lib/store'
 import { GPUEffectPipeline } from '../../gpu/effectsPipeline'
 import { useClipsArray } from '../timeline/hooks/useClipsArray'
+import { audioCtx } from '../../audioCtx'
 
 /**
  * Video preview synchronized with the timeline playhead.
@@ -116,6 +117,83 @@ export const VideoPreview: React.FC = React.memo(() => {
       void video.play()
     }
   }, [playRate, activeClip])
+
+  const audioRefs = React.useRef(
+    new Map<
+      string,
+      { audio: HTMLAudioElement; node: MediaElementAudioSourceNode; url: string }
+    >(),
+  )
+
+  React.useEffect(() => {
+    const ctx = audioCtx
+    if (!ctx) return
+    let cancelled = false
+
+    if (playRate !== 0 && ctx.state === 'suspended') {
+      void ctx.resume()
+    }
+
+    const activeAudio: typeof clips = []
+    if (activeClip) activeAudio.push(activeClip)
+    activeAudio.push(
+      ...clips.filter(
+        (c) =>
+          c.lane % 2 === 1 &&
+          currentTime >= c.start &&
+          currentTime < c.end &&
+          !tracks[c.lane]?.muted,
+      ),
+    )
+
+    const ids = new Set(activeAudio.map((c) => c.id))
+
+    audioRefs.current.forEach((info, id) => {
+      if (!ids.has(id)) {
+        info.audio.pause()
+        info.node.disconnect()
+        URL.revokeObjectURL(info.url)
+        audioRefs.current.delete(id)
+      }
+    })
+
+    if (playRate <= 0 || Math.abs(playRate) > 2) {
+      audioRefs.current.forEach((info) => info.audio.pause())
+      return
+    }
+
+    activeAudio.forEach((clip) => {
+      const existing = audioRefs.current.get(clip.id)
+      const local = currentTime - clip.start
+      if (existing) {
+        existing.audio.playbackRate = playRate
+        if (Math.abs(existing.audio.currentTime - local) > 0.05) {
+          existing.audio.currentTime = local
+        }
+        if (existing.audio.paused) void existing.audio.play()
+        return
+      }
+      const asset = mediaAssets.find((a) => a.id === clip.assetId)
+      if (!asset?.fileHandle) return
+      asset.fileHandle.getFile().then((file) => {
+        if (cancelled) return
+        const url = URL.createObjectURL(file)
+        const audio = new Audio(url)
+        audio.muted = true
+        const node = ctx.createMediaElementSource(audio)
+        node.connect(ctx.destination)
+        audio.onloadedmetadata = () => {
+          audio.currentTime = local
+          audio.playbackRate = playRate
+          void audio.play()
+        }
+        audioRefs.current.set(clip.id, { audio, node, url })
+      })
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [currentTime, playRate, tracks])
 
   return (
     <div className="w-full bg-black aspect-video mb-4 relative">
