@@ -1,3 +1,3 @@
-export { Timeline } from './components/Timeline'
+export { TimelinePanel } from './TimelinePanel'
 export { useBeatSlices } from './hooks/useBeatSlices'
-export * from './hooks/useTimelineKeyboard' 
+export * from './hooks/useTimelineKeyboard'

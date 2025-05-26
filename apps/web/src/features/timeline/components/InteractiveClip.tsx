@@ -39,6 +39,7 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(
         [clip.assetId],
       ),
     )
+    const snapping = useTimelineStore((s) => s.snapping)
     const ref = React.useRef<HTMLDivElement>(null)
 
     // ------------------------------------------------------------------------
@@ -167,7 +168,7 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(
       // --- horizontal movement / snapping ----------------------------------
       let newStart =
         origin.current.startSec + translateX / pixelsPerSecond
-      const snap = findSnap(newStart)
+      const snap = snapping ? findSnap(newStart) : null
       if (snap !== null) {
         newStart = snap
         translateXRef.current =
@@ -331,7 +332,7 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(
           newStart,
           origin.current.endSec - maxDuration,
         )
-        const snap = findSnap(newStart)
+        const snap = snapping ? findSnap(newStart) : null
         if (snap !== null) {
           newStart = snap
           newWidthPx =
@@ -362,7 +363,7 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(
           newEnd,
           origin.current.startSec + maxDuration,
         )
-        const snap = findSnap(newEnd)
+        const snap = snapping ? findSnap(newEnd) : null
         if (snap !== null) {
           newEnd = snap
           newWidthPx =

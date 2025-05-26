@@ -43,6 +43,8 @@ export interface TimelineState {
   currentTime: number
   /** Auto-scroll timeline to keep playhead in view */
   followPlayhead: boolean
+  /** Enable snap-to references when dragging clips */
+  snapping: boolean
   /** Ids of currently selected clips */
   selectedClipIds: string[]
   /** Optional in/out points in seconds */
@@ -68,6 +70,7 @@ export interface TimelineState {
   setInPoint: (time: number | null) => void
   setOutPoint: (time: number | null) => void
   setFollowPlayhead: (follow: boolean) => void
+  setSnapping: (value: boolean) => void
   setSelectedClips: (ids: string[]) => void
 }
 
@@ -122,6 +125,7 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
   outPoint: null,
   beats: [],
   followPlayhead: true,
+  snapping: true,
   selectedClipIds: [],
 
   /**
@@ -320,6 +324,8 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
   setOutPoint: (time) => set({ outPoint: time }),
   /** Enable or disable auto-follow behavior */
   setFollowPlayhead: (follow) => set({ followPlayhead: follow }),
+  /** Toggle snapping during clip edits */
+  setSnapping: (value) => set({ snapping: value }),
   /** Replace current selection */
   setSelectedClips: (ids) => set({ selectedClipIds: ids }),
 }))
