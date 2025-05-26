@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import useMotifStore from '../../lib/store'
 import { extractVideoMetadata } from '../../lib/file/extractVideoMetadata'
 import type { VideoMetadata } from '../../lib/file/extractVideoMetadata'
+import { checkCodecSupport } from '../../lib/file/checkCodecSupport'
 import { useMediaStore } from '../../state/mediaStore'
 
 const defaultMetadata: VideoMetadata = {
@@ -17,6 +18,8 @@ const defaultMetadata: VideoMetadata = {
 
 export default function MediaIngest() {
   const addMediaAsset = useMotifStore((s) => s.addMediaAsset)
+  const setFileInfo = useMotifStore((s) => s.setFileInfo)
+  const setFileError = useMotifStore((s) => s.setFileError)
   const [loading, setLoading] = useState(false)
 
   const handleFileHandles = useCallback(async (handles: FileSystemFileHandle[]) => {
@@ -26,6 +29,28 @@ export default function MediaIngest() {
         try {
           const file = await handle.getFile()
           const metadata = (await extractVideoMetadata(file)) ?? defaultMetadata
+
+          const { videoSupported, audioSupported } = await checkCodecSupport({
+            width: metadata.width ?? undefined,
+            height: metadata.height ?? undefined,
+            sampleRate: metadata.sampleRate ?? undefined,
+            channelCount: metadata.channelCount ?? undefined,
+          })
+
+          setFileInfo({
+            fileName: file.name,
+            fileSize: file.size,
+            ...metadata,
+            videoSupported,
+            audioSupported,
+          })
+
+          if (videoSupported === false || audioSupported === false) {
+            setFileError('This file\'s codecs are not supported.')
+          } else {
+            setFileError(null)
+          }
+
           addMediaAsset({ fileName: file.name, fileHandle: handle, metadata })
 
           const assets = useMotifStore.getState().mediaAssets
@@ -40,11 +65,12 @@ export default function MediaIngest() {
           }
         } catch (err) {
           console.error('Error importing file:', err)
+          setFileError('Failed to import file.')
         }
       }),
     )
     setLoading(false)
-  }, [addMediaAsset])
+  }, [addMediaAsset, setFileInfo, setFileError])
 
   const openPicker = async () => {
     try {

@@ -70,10 +70,25 @@ export default function FileInfoCard() {
             )}
           </div>
         )}
+        {typeof fileInfo.sampleRate === 'number' && fileInfo.sampleRate > 0 && (
+          <div>
+            <span className="text-gray-400">Sample Rate:</span> {fileInfo.sampleRate} Hz
+          </div>
+        )}
+        {typeof fileInfo.channelCount === 'number' && fileInfo.channelCount > 0 && (
+          <div>
+            <span className="text-gray-400">Channels:</span> {fileInfo.channelCount}
+          </div>
+        )}
         {typeof fileInfo.frameRate === 'number' && fileInfo.frameRate > 0 && (
           <div>
             <span className="text-gray-400">Frame Rate:</span> {fileInfo.frameRate.toFixed(2)} fps
           </div>
+        )}
+        {(fileInfo.videoSupported === false || fileInfo.audioSupported === false) && (
+          <p className="text-red-500 text-xs font-ui-normal">
+            This file&apos;s codecs are not supported in this browser.
+          </p>
         )}
       </div>
     </div>
