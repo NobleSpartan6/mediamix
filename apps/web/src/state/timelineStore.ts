@@ -57,6 +57,7 @@ export interface TimelineState {
   updateClip: (id: string, delta: Partial<Omit<Clip, 'id'>>) => void
   updateTrack: (id: string, delta: Partial<Omit<Track, 'id'>>) => void
   removeClip: (id: string, opts?: { ripple?: boolean }) => void
+  removeClipsByAsset: (assetId: string) => void
   splitClipAt: (time: number) => string | null
   /** array of beat timestamps in seconds (monotonically increasing) */
   beats: number[]
@@ -255,6 +256,22 @@ export const useTimelineStore = create<TimelineState>((set) => ({
           )
         }
       })
+
+      const durationSec = Math.max(
+        0,
+        ...Object.values(clipsById).map((c) => c.end),
+      )
+
+      const tracks = pruneTracks(state.tracks, clipsById)
+      return { clipsById, durationSec, tracks }
+    }),
+
+  /** Remove all clips that reference the given asset id */
+  removeClipsByAsset: (assetId) =>
+    set((state) => {
+      const clipsById = Object.fromEntries(
+        Object.entries(state.clipsById).filter(([, c]) => c.assetId !== assetId),
+      )
 
       const durationSec = Math.max(
         0,
