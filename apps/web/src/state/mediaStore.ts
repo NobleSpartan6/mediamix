@@ -73,8 +73,28 @@ export const useMediaStore = create<MediaState>((set, get) => ({
 
   /** Add multiple assets at once */
   addAssets: (assets) => {
-    const add = get().addAsset
-    return assets.map((a) => add(a))
+    const ids: string[] = []
+    const toProcess: { id: string; file: File }[] = []
+    set((state) => {
+      const next = { ...state.assets }
+      assets.forEach((assetInput) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id: providedId, file, ...rest } =
+          assetInput as Omit<MediaAsset, 'id'> & { id?: string; file?: File }
+        const id = providedId ?? generateId()
+        next[id] = {
+          id,
+          fileName: rest.fileName,
+          duration: rest.duration,
+          folderId: rest.folderId ?? 'root',
+        }
+        ids.push(id)
+        if (file) toProcess.push({ id, file })
+      })
+      return { assets: next }
+    })
+    toProcess.forEach(({ id, file }) => processMediaAsset(id, file))
+    return ids
   },
 
   /** Update existing asset metadata */

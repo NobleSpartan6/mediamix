@@ -1,7 +1,7 @@
 export const colors = {
   panelBg: 'var(--panel-bg)',
   panelBgSecondary: 'var(--panel-bg-secondary)',
-  accent: 'var(--accent)',
+  accent: 'rgb(var(--accent) / <alpha-value>)',
   textPrimary: 'var(--text-primary)',
   textSecondary: 'var(--text-secondary)',
   clipVideo: 'rgba(30,144,255,.5)',
