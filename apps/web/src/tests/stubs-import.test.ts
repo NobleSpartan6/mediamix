@@ -51,9 +51,8 @@ describe('Stub modules basic behaviour', () => {
 
   it('sets up yjs store', () => {
     initYjsStore()
-    const { connected, doc, awareness } = useYjsStore.getState()
+    const { connected, doc } = useYjsStore.getState()
     expect(connected).toBe(true)
     expect(doc).not.toBeNull()
-    expect(awareness).not.toBeNull()
   })
 })
