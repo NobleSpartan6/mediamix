@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button } from '../../components/ui/Button'
 import Panel from '../../components/Panel'
-import { useMediaStore, selectMediaArray, selectFolderArray } from '../../state/mediaStore'
+import { useMediaStore } from '../../state/mediaStore'
 import AssetCard from './AssetCard'
 import { extractVideoMetadata } from '../../lib/file/extractVideoMetadata'
 import { useUILayoutStore } from '../../state/uiLayoutStore'
@@ -30,8 +30,10 @@ async function pickFiles(): Promise<File[]> {
 }
 
 export default function MediaLibraryPanel() {
-  const assets = useMediaStore(selectMediaArray)
-  const folders = useMediaStore(selectFolderArray)
+  const assetsObj = useMediaStore((s) => s.assets)
+  const foldersObj = useMediaStore((s) => s.folders)
+  const assets = React.useMemo(() => Object.values(assetsObj), [assetsObj])
+  const folders = React.useMemo(() => Object.values(foldersObj), [foldersObj])
   const addAssets = useMediaStore((s) => s.addAssets)
   const addFolder = useMediaStore((s) => s.addFolder)
   const setShowLibrary = useUILayoutStore((s) => s.setShowLibrary)
@@ -71,7 +73,6 @@ export default function MediaLibraryPanel() {
     if (name) addFolder(name)
   }
 
-
   const assetsByFolder = React.useMemo(() => {
     const map: Record<string, any[]> = {}
     assets.forEach((a) => {
@@ -104,11 +105,7 @@ export default function MediaLibraryPanel() {
       <div className="mb-2">
         <Button onClick={handleImport}>Import Media</Button>
       </div>
-      <div
-        className="space-y-2"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={handleDrop}
-      >
+      <div className="space-y-2" onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
         {renderFolder('root', 0)}
       </div>
     </Panel>

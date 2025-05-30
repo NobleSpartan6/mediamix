@@ -34,6 +34,7 @@ export const TracksContainer: React.FC<TracksContainerProps> = React.memo(
     playing,
     scrollLeft,
     onBackgroundPointerDown,
+    onScrubStart,
     onScroll,
   }) => {
     const renderedTracks = React.useMemo(
@@ -64,10 +65,7 @@ export const TracksContainer: React.FC<TracksContainerProps> = React.memo(
           onPointerDown={onBackgroundPointerDown}
           onScroll={onScroll}
         >
-          <div
-            className="relative h-full flex flex-col"
-            style={{ width: duration * pixelsPerSecond }}
-          >
+          <div className="relative h-full flex flex-col" style={{ width: duration * pixelsPerSecond }}>
             {renderedTracks}
             {beats.map((b) => (
               <div
