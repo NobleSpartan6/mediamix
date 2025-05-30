@@ -1,0 +1,45 @@
+import { useState } from 'react'
+import { Button } from '../../components/ui/Button'
+import { useCollabStore } from '../../state/collabStore'
+
+interface ShareDialogProps {
+  onClose: () => void
+}
+
+export function ShareDialog({ onClose }: ShareDialogProps) {
+  const [sessionIdInput, setSessionIdInput] = useState('')
+  const createSession = useCollabStore((s) => s.createSession)
+  const joinSession = useCollabStore((s) => s.joinSession)
+  const [createdId, setCreatedId] = useState<string | null>(null)
+
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+      <div className="bg-panel-bg-secondary rounded-md p-6 w-80 space-y-4">
+        {createdId ? (
+          <div>
+            <p className="mb-2">Session ID:</p>
+            <p className="font-mono break-all">{createdId}</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <Button onClick={() => setCreatedId(createSession())}>Create Session</Button>
+            <div className="flex gap-2 items-center">
+              <input
+                value={sessionIdInput}
+                onChange={(e) => setSessionIdInput(e.target.value)}
+                className="flex-1 text-black px-1"
+                placeholder="Session ID"
+              />
+              <Button onClick={() => joinSession(sessionIdInput)}>Join</Button>
+            </div>
+          </div>
+        )}
+        <div className="text-right">
+          <Button onClick={onClose}>Close</Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default ShareDialog

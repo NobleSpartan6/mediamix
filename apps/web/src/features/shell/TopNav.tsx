@@ -2,6 +2,8 @@ import * as React from 'react'
 import * as Menubar from '@radix-ui/react-menubar'
 import { useResetStore } from '../../lib/store/hooks'
 import { useUILayoutStore } from '../../state/uiLayoutStore'
+import { useState } from 'react'
+import ShareDialog from '../collab/ShareDialog'
 
 export const TopNav: React.FC = () => {
   const reset = useResetStore()
@@ -9,6 +11,7 @@ export const TopNav: React.FC = () => {
   const setShowLibrary = useUILayoutStore((s) => s.setShowLibrary)
   const showInspector = useUILayoutStore((s) => s.showInspector)
   const setShowInspector = useUILayoutStore((s) => s.setShowInspector)
+  const [showShare, setShowShare] = useState(false)
 
   return (
     <Menubar.Root className="menubar bg-gray-900 text-ui-body font-ui-medium px-2">
@@ -19,6 +22,7 @@ export const TopNav: React.FC = () => {
           <Menubar.Item onClick={() => alert('Open not implemented')}>Open</Menubar.Item>
           <Menubar.Item onClick={() => alert('Save not implemented')}>Save</Menubar.Item>
           <Menubar.Item onClick={() => alert('Export not implemented')}>Export</Menubar.Item>
+          <Menubar.Item onClick={() => setShowShare(true)}>Share…</Menubar.Item>
         </Menubar.Content>
       </Menubar.Menu>
       <Menubar.Menu>
@@ -52,6 +56,7 @@ export const TopNav: React.FC = () => {
           <Menubar.Item onClick={() => alert('MediaMix prototype')}>About</Menubar.Item>
         </Menubar.Content>
       </Menubar.Menu>
+      {showShare && <ShareDialog onClose={() => setShowShare(false)} />}
     </Menubar.Root>
   )
 }
