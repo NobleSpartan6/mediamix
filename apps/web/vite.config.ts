@@ -10,6 +10,7 @@ export default defineConfig({
       'lucide-react': new URL('./src/stubs/lucide-react.tsx', import.meta.url).pathname,
       'yjs': new URL('./src/stubs/yjs.ts', import.meta.url).pathname,
       'y-protocols/awareness': new URL('./src/stubs/awareness.ts', import.meta.url).pathname,
+      '@radix-ui/react-menubar': new URL('./src/stubs/radix-menubar.tsx', import.meta.url).pathname,
     },
   },
   optimizeDeps: {
