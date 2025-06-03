@@ -3,7 +3,7 @@ import { PlayPauseButton } from './components/PlayPauseButton'
 import { ZoomSlider } from './components/ZoomSlider'
 import { Button } from '../../components/ui/Button'
 import { useTimelineStore } from '../../state/timelineStore'
-import { Scissors, Trash2, Magnet, Crosshair } from '../../stubs/lucide-react'
+import { Scissors, Trash2, Magnet, Crosshair } from 'lucide-react'
 
 interface TimelineToolbarProps {
   zoom: number

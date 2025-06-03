@@ -14,14 +14,18 @@
   "dependencies": {
     "@ffmpeg/core": "^0.12.10",
     "@ffmpeg/ffmpeg": "^0.12.15",
+    "@radix-ui/react-menubar": "^1.1.15",
     "@radix-ui/react-slider": "^1.1.2",
     "@radix-ui/react-slot": "^1.0.2",
     "@tanstack/react-virtual": "^3.0.0-alpha.41",
     "classnames": "^2.5.1",
+    "lucide-react": "^0.512.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-moveable": "^0.56.0",
     "react-resizable-panels": "^1.0.0",
+    "y-protocols": "^1.0.6",
+    "yjs": "^13.6.27",
     "zustand": "^5.0.4"
   },
   "devDependencies": {
