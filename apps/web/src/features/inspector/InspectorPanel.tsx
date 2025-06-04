@@ -92,10 +92,12 @@ export default function InspectorPanel() {
           <Switch checked={muted} onChange={(e) => setMuted(e.target.checked)} />
         </label>
       </section>
-      <section>
-        <h3 className="font-ui-medium text-accent mb-1">Effects</h3>
-        <div className="text-xs text-gray-400">No effects</div>
-      </section>
+      {clip.effects.length > 0 && (
+        <section>
+          <h3 className="font-ui-medium text-accent mb-1">Effects</h3>
+          <div className="text-xs text-gray-400">No effects</div>
+        </section>
+      )}
     </div>
   )
 }
