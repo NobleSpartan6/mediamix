@@ -14,7 +14,7 @@ const defaultMetadata: VideoMetadata = {
   audioCodec: null,
   frameRate: null,
   sampleRate: null,
-  channelCount: null
+  channelCount: null,
 }
 
 export default function MediaIngest() {
@@ -24,57 +24,60 @@ export default function MediaIngest() {
   const [loading, setLoading] = useState(false)
   const toast = useToast()
 
-  const handleFileHandles = useCallback(async (handles: FileSystemFileHandle[]) => {
-    setLoading(true)
-    await Promise.all(
-      handles.map(async (handle) => {
-        try {
-          const file = await handle.getFile()
-          const metadata = (await extractVideoMetadata(file)) ?? defaultMetadata
+  const handleFileHandles = useCallback(
+    async (handles: FileSystemFileHandle[]) => {
+      setLoading(true)
+      await Promise.all(
+        handles.map(async (handle) => {
+          try {
+            const file = await handle.getFile()
+            const metadata = (await extractVideoMetadata(file)) ?? defaultMetadata
 
-          const { videoSupported, audioSupported } = await checkCodecSupport({
-            width: metadata.width ?? undefined,
-            height: metadata.height ?? undefined,
-            sampleRate: metadata.sampleRate ?? undefined,
-            channelCount: metadata.channelCount ?? undefined,
-          })
-
-          setFileInfo({
-            fileName: file.name,
-            fileSize: file.size,
-            ...metadata,
-            videoSupported,
-            audioSupported,
-          })
-
-          if (videoSupported === false || audioSupported === false) {
-            setFileError('This file\'s codecs are not supported.')
-          } else {
-            setFileError(null)
-          }
-
-          addMediaAsset({ fileName: file.name, fileHandle: handle, metadata })
-
-          const assets = useMotifStore.getState().mediaAssets
-          const assetId = assets[assets.length - 1]?.id
-          if (assetId) {
-            useMediaStore.getState().addAsset({
-              id: assetId,
-              fileName: file.name,
-              duration: metadata.duration ?? 0,
-              file,
+            const { videoSupported, audioSupported } = await checkCodecSupport({
+              width: metadata.width ?? undefined,
+              height: metadata.height ?? undefined,
+              sampleRate: metadata.sampleRate ?? undefined,
+              channelCount: metadata.channelCount ?? undefined,
             })
+
+            setFileInfo({
+              fileName: file.name,
+              fileSize: file.size,
+              ...metadata,
+              videoSupported,
+              audioSupported,
+            })
+
+            if (videoSupported === false || audioSupported === false) {
+              setFileError("This file's codecs are not supported.")
+            } else {
+              setFileError(null)
+            }
+
+            addMediaAsset({ fileName: file.name, fileHandle: handle, metadata })
+
+            const assets = useMotifStore.getState().mediaAssets
+            const assetId = assets[assets.length - 1]?.id
+            if (assetId) {
+              useMediaStore.getState().addAsset({
+                id: assetId,
+                fileName: file.name,
+                duration: metadata.duration ?? 0,
+                file,
+              })
+            }
+          } catch (err) {
+            console.error('Error importing file:', err)
+            setFileError('Failed to import file.')
+            toast('Failed to import file.')
           }
-        } catch (err) {
-          console.error('Error importing file:', err)
-          setFileError('Failed to import file.')
-          toast('Failed to import file.')
-        }
-      }),
-    )
-    setLoading(false)
-    toast('Import complete')
-  }, [addMediaAsset, setFileInfo, setFileError, toast])
+        }),
+      )
+      setLoading(false)
+      toast('Import complete')
+    },
+    [addMediaAsset, setFileInfo, setFileError, toast],
+  )
 
   const openPicker = async () => {
     try {
@@ -85,10 +88,10 @@ export default function MediaIngest() {
             description: 'Video Files',
             accept: {
               'video/mp4': ['.mp4'],
-              'video/quicktime': ['.mov']
-            }
-          }
-        ]
+              'video/quicktime': ['.mov'],
+            },
+          },
+        ],
       })
       await handleFileHandles(handles)
     } catch (err) {
@@ -128,13 +131,17 @@ export default function MediaIngest() {
 
   return (
     <div
-      className="p-4 border-2 border-dashed border-gray-600 rounded"
+      className="p-4 border-2 border-dashed border-white/10 rounded"
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleDrop}
     >
-      <button onClick={openPicker} className="px-4 py-2 bg-accent text-white rounded hover:bg-accent/90 disabled:opacity-50" disabled={loading}>
+      <button
+        onClick={openPicker}
+        className="px-4 py-2 bg-accent text-white rounded hover:bg-accent/90 disabled:opacity-50"
+        disabled={loading}
+      >
         {loading ? 'Importing...' : 'Import Media'}
       </button>
     </div>
   )
-} 
+}

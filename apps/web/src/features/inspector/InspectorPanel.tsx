@@ -10,26 +10,20 @@ export default function InspectorPanel() {
   const selection = useSelectionStore((s) => s.currentSelection)
 
   const clip = useTimelineStore(
-    React.useCallback(
-      (s) => (selection?.type === 'clip' ? s.clipsById[selection.id] : null),
-      [selection],
-    ),
+    React.useCallback((s) => (selection?.type === 'clip' ? s.clipsById[selection.id] : null), [selection]),
   )
   const asset = useMediaStore(
-    React.useCallback(
-      (s) => (selection?.type === 'asset' ? s.assets[selection.id] : null),
-      [selection],
-    ),
+    React.useCallback((s) => (selection?.type === 'asset' ? s.assets[selection.id] : null), [selection]),
   )
   const updateClip = useTimelineStore((s) => s.updateClip)
 
   if (!selection) {
-    return <div className="text-ui-body text-gray-300">Select a clip to edit properties</div>
+    return <div className="text-ui-body text-text-secondary">Select a clip to edit properties</div>
   }
 
   if (selection.type === 'asset' && asset) {
     return (
-      <div className="text-ui-body text-gray-300 space-y-2">
+      <div className="text-ui-body text-text-secondary space-y-2">
         <div className="font-ui-medium text-accent">Asset</div>
         <div>{asset.fileName}</div>
         <div>Duration: {asset.duration.toFixed(2)}s</div>
@@ -38,7 +32,7 @@ export default function InspectorPanel() {
   }
 
   if (!clip) {
-    return <div className="text-ui-body text-gray-300">Select a clip to edit properties</div>
+    return <div className="text-ui-body text-text-secondary">Select a clip to edit properties</div>
   }
 
   const [x, setX] = React.useState(clip.x)
@@ -65,7 +59,7 @@ export default function InspectorPanel() {
   }, [clip.id, x, y, scale, rotation, volume, muted, updateClip])
 
   return (
-    <div className="text-ui-body text-gray-300 space-y-4">
+    <div className="text-ui-body text-text-secondary space-y-4">
       <section>
         <h3 className="font-ui-medium text-accent mb-1">Transform</h3>
         <div className="space-y-2">

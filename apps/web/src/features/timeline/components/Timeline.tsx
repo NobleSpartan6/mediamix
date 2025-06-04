@@ -232,7 +232,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
               return (
                 <div
                   key={track.id}
-                  className={`${heightClass} flex items-center justify-center border-b border-white/10 text-xs text-gray-300 font-ui-medium`}
+                  className={`${heightClass} flex items-center justify-center border-b border-white/10 text-xs text-text-secondary font-ui-medium`}
                 >
                   {track.label}
                 </div>
