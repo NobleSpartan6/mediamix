@@ -31,7 +31,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {children}
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 space-y-2 z-50">
           {toasts.map((t) => (
-            <div key={t.id} className="bg-panel-bg-secondary text-text-primary px-4 py-2 rounded-md shadow">
+            <div key={t.id} className="bg-panel-bg-secondary text-text-primary px-4 py-2 rounded shadow">
               {t.message}
             </div>
           ))}

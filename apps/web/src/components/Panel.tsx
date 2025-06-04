@@ -9,7 +9,7 @@ interface PanelProps {
 
 export default function Panel({ title, onCollapse, children, className }: PanelProps) {
   return (
-    <div className={`flex flex-col h-full ${className ?? ''}`.trim()}>
+    <div className={`flex flex-col h-full rounded ${className ?? ''}`.trim()}>
       <div className="flex items-center justify-between px-2 py-2 bg-panel-bg-secondary border-b border-panel-bg">
         <span className="text-ui-body font-ui-semibold">{title}</span>
         {onCollapse && (
