@@ -15,18 +15,21 @@ export function AssetCard({ asset }: AssetCardProps) {
   )
 
   const isVideo = asset.thumbnail !== undefined
+  const isSelected = useSelectionStore(
+    (s) => s.currentSelection?.type === 'asset' && s.currentSelection.id === asset.id,
+  )
 
   return (
     <div
-      className="w-20 text-center text-xs select-none"
+      className={`w-20 box-border text-center text-xs select-none rounded cursor-pointer hover:bg-panel-bg-secondary ${isSelected ? 'border-2 border-accent' : 'border-2 border-transparent'}`}
       draggable
       onDragStart={handleDragStart}
       onClick={() => useSelectionStore.getState().setSelection({ type: 'asset', id: asset.id })}
     >
       {isVideo ? (
-        <img src={asset.thumbnail} alt="thumbnail" className="w-20 h-12 object-cover rounded mb-1" />
+        <img src={asset.thumbnail} alt="thumbnail" className="w-full h-12 object-cover rounded mb-1" />
       ) : (
-        <div className="w-20 h-12 flex items-center justify-center bg-panel-bg-secondary rounded mb-1">
+        <div className="w-full h-12 flex items-center justify-center bg-panel-bg-secondary rounded mb-1">
           <span className="text-text-secondary">🎵</span>
         </div>
       )}
