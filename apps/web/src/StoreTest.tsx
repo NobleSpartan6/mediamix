@@ -11,7 +11,7 @@ export function StoreTest() {
 
   return (
     <div className="p-4 bg-panel-bg-secondary rounded-lg">
-      <h2 className="text-ui-body font-ui-medium text-text-secondary mb-3">Store Test</h2>
+      <h2 className="text-ui-body font-ui-medium text-text-secondary mb-2">Store Test</h2>
       <pre className="text-xs bg-panel-bg p-2 rounded">
         {JSON.stringify(
           {

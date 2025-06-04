@@ -23,7 +23,7 @@ export default function FileInfoCard() {
   return (
     <div className="p-4 rounded-lg bg-panel-bg-secondary text-text-primary space-y-2">
       <h3 className="text-ui-body font-ui-medium text-accent">Imported File</h3>
-      <div className="text-ui-body font-ui-normal flex flex-col space-y-1">
+      <div className="text-ui-body font-ui-normal flex flex-col space-y-2">
         <div>
           <span className="text-gray-400">Name:</span> {fileInfo.fileName}
         </div>
@@ -41,7 +41,7 @@ export default function FileInfoCard() {
           </div>
         )}
         {fileInfo.videoCodec && (
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-2">
             <span className="text-gray-400">Video:</span>
             <span>{fileInfo.videoCodec}</span>
             {fileInfo.videoSupported !== null && (
@@ -56,7 +56,7 @@ export default function FileInfoCard() {
           </div>
         )}
         {fileInfo.audioCodec && (
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-2">
             <span className="text-gray-400">Audio:</span>
             <span>{fileInfo.audioCodec}</span>
             {fileInfo.audioSupported !== null && (
