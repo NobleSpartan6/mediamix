@@ -25,8 +25,15 @@ export function ShareDialog({ onClose }: ShareDialogProps) {
   }
 
   return (
-    <div className={`fixed inset-0 bg-black/60 flex items-center justify-center z-50 fade-in ${visible ? 'show' : ''}`}> 
-      <div className={`bg-panel-bg-secondary rounded p-6 w-80 space-y-4 fade-in ${visible ? 'show' : ''}`}>
+    <div
+      className={`fixed inset-0 bg-black/60 flex items-center justify-center z-50 fade-in ${visible ? 'show' : ''}`}
+    >
+      <div
+        className={`bg-panel-bg-secondary rounded p-6 w-80 space-y-4 fade-in ${visible ? 'show' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Collaboration Options"
+      >
         {createdId ? (
           <div>
             <p className="mb-2">Session ID:</p>
@@ -34,7 +41,9 @@ export function ShareDialog({ onClose }: ShareDialogProps) {
           </div>
         ) : (
           <div className="space-y-2">
-            <Button onClick={() => setCreatedId(createSession())}>Create Session</Button>
+            <Button autoFocus onClick={() => setCreatedId(createSession())}>
+              Create Session
+            </Button>
             <div className="flex gap-2 items-center">
               <Input
                 value={sessionIdInput}
