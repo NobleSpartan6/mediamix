@@ -31,16 +31,16 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({ zoom, onZoomCh
     <div className="flex items-center space-x-2">
       <PlayPauseButton />
       <ZoomSlider value={zoom} onChange={onZoomChange} />
-      <Button variant="secondary" className="px-2 py-1" onClick={handleSplit}>
+      <Button variant="secondary" className="toolbar-button" onClick={handleSplit}>
         <Scissors className="w-4 h-4" />
       </Button>
-      <Button variant="secondary" className="px-2 py-1" onClick={handleDelete}>
+      <Button variant="secondary" className="toolbar-button" onClick={handleDelete}>
         <Trash2 className="w-4 h-4" />
       </Button>
-      <Button variant="secondary" className="px-2 py-1" onClick={() => setSnapping(!snapping)}>
+      <Button variant="secondary" className="toolbar-button" onClick={() => setSnapping(!snapping)}>
         <Magnet className="w-4 h-4" />
       </Button>
-      <Button variant="secondary" className="px-2 py-1" onClick={() => setFollowPlayhead(!followPlayhead)}>
+      <Button variant="secondary" className="toolbar-button" onClick={() => setFollowPlayhead(!followPlayhead)}>
         <Crosshair className="w-4 h-4" />
       </Button>
     </div>

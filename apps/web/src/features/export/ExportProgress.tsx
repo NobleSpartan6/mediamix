@@ -6,7 +6,7 @@ export function ExportProgress() {
   if (!isExporting) return null
 
   return (
-    <div className="w-full space-y-1">
+    <div className="w-full space-y-2">
       <span className="block text-xs text-gray-400 font-ui-normal" role="status">
         Exporting…
       </span>

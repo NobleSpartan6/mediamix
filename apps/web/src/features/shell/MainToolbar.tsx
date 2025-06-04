@@ -26,7 +26,7 @@ export const MainToolbar: React.FC = () => {
   const handleSplit = React.useCallback(() => splitClipAt(currentTime), [splitClipAt, currentTime])
 
   return (
-    <div className="toolbar bg-panel-bg-secondary px-2 py-1 flex items-center space-x-1">
+    <div className="toolbar bg-panel-bg-secondary px-2 py-1 flex items-center space-x-2">
       <Button
         variant="secondary"
         className="toolbar-button"

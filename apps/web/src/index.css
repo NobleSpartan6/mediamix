@@ -59,10 +59,10 @@ body {
   @apply text-text-primary rounded focus-visible:outline-none;
 }
 .menubar-content {
-  @apply bg-panel-bg-secondary text-text-primary;
+  @apply bg-panel-bg-secondary text-text-primary py-1;
 }
 .toolbar-button {
-  @apply p-1 rounded;
+  @apply px-2 py-1 rounded;
 }
 .toolbar-button:hover {
   @apply bg-accent/30;
