@@ -28,6 +28,8 @@ export interface Clip {
   volume: number
   /** mute audio */
   muted: boolean
+  /** clip effects pipeline */
+  effects: unknown[]
 }
 
 export interface Track {
@@ -194,6 +196,7 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
       rotation: 0,
       volume: 1,
       muted: false,
+      effects: [],
       ...clipInput,
       id,
       groupId: opts?.groupId,
