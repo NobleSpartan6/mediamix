@@ -20,11 +20,7 @@ export function BeatMarkerBar() {
 
   return (
     <div className="w-full select-none">
-      <svg
-        className="w-full h-8 bg-gray-800 rounded-md"
-        viewBox="0 0 100 8"
-        preserveAspectRatio="none"
-      >
+      <svg className="w-full h-8 bg-panel-bg-secondary rounded-md" viewBox="0 0 100 8" preserveAspectRatio="none">
         {/* Baseline */}
         <line x1="0" y1="4" x2="100" y2="4" stroke="#3f3f46" strokeWidth="0.2" />
         {/* Beat markers */}
@@ -45,4 +41,4 @@ export function BeatMarkerBar() {
   )
 }
 
-export default BeatMarkerBar 
+export default BeatMarkerBar

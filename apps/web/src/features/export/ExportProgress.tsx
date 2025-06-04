@@ -13,7 +13,7 @@ export function ExportProgress() {
       <progress
         value={exportProgress}
         max={1}
-        className="w-full h-1 [appearance:none] bg-gray-700 rounded overflow-hidden [&::-webkit-progress-bar]:bg-gray-700 [&::-webkit-progress-value]:bg-accent [&::-moz-progress-bar]:bg-accent"
+        className="w-full h-1 [appearance:none] bg-panel-bg-secondary rounded overflow-hidden [&::-webkit-progress-bar]:bg-panel-bg-secondary [&::-webkit-progress-value]:bg-accent [&::-moz-progress-bar]:bg-accent"
       />
     </div>
   )

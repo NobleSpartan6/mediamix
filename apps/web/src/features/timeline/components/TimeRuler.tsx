@@ -82,9 +82,7 @@ export interface TickSettings {
  * Calculate tick spacing values based on the zoom level.
  * Exposed for testing.
  */
-export function calculateTickSettings(
-  pixelsPerSecond: number,
-): TickSettings {
+export function calculateTickSettings(pixelsPerSecond: number): TickSettings {
   const targetPx = 80
   const labelMin = 20
   const options = [1 / 30, 0.1, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60]
@@ -103,10 +101,7 @@ export function calculateTickSettings(
   else if (pixelsPerSecond >= 20) minor = major / 2
   if (minor && minor * pixelsPerSecond < 5) minor = null
 
-  const labelEvery = Math.max(
-    1,
-    Math.ceil(labelMin / (major * pixelsPerSecond)),
-  )
+  const labelEvery = Math.max(1, Math.ceil(labelMin / (major * pixelsPerSecond)))
 
   return { major, minor, labelEvery }
 }
@@ -123,11 +118,7 @@ export function calculateTickSettings(
  * @param duration total timeline duration in seconds
  * @returns React element with a canvas ruler
  */
-export const TimeRuler: React.FC<TimeRulerProps> = ({
-  scrollContainerRef,
-  pixelsPerSecond,
-  duration,
-}) => {
+export const TimeRuler: React.FC<TimeRulerProps> = ({ scrollContainerRef, pixelsPerSecond, duration }) => {
   /* --------------- state & refs --------------------------------------- */
   const beats = useTimelineStore((s: TimelineState) => s.beats, shallow)
   const inPoint = useTimelineStore((s: TimelineState) => s.inPoint)
@@ -144,8 +135,7 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
     time: number
   }>({ visible: false, x: 0, time: 0 })
 
-  const showRange =
-    inPoint !== null && outPoint !== null && outPoint > inPoint
+  const showRange = inPoint !== null && outPoint !== null && outPoint > inPoint
   const rangeStyle = React.useMemo(() => {
     if (!showRange) return undefined
     const left = inPoint! * pixelsPerSecond - scrollLeft
@@ -249,10 +239,7 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
       const absoluteX = localX + scrollLeft
       const width = container.clientWidth
       const tooltipW = tooltipRef.current?.clientWidth ?? 0
-      const clampedX = Math.min(
-        Math.max(localX, 0),
-        width - tooltipW,
-      )
+      const clampedX = Math.min(Math.max(localX, 0), width - tooltipW)
       setTooltip({
         visible: true,
         x: clampedX,
@@ -280,9 +267,7 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
       className="relative h-6 select-none border-b border-white/10 bg-panel-bg"
       onMouseMove={onMouseMove}
       onClick={onClick}
-      onMouseLeave={() =>
-        setTooltip((prev) => ({ ...prev, visible: false }))
-      }
+      onMouseLeave={() => setTooltip((prev) => ({ ...prev, visible: false }))}
     >
       {/* spacer gives canvas its scrollable width */}
       <div style={{ width: duration * pixelsPerSecond }}>
@@ -300,7 +285,7 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({
       {tooltip.visible && (
         <div
           ref={tooltipRef}
-          className="pointer-events-none absolute -top-6 rounded bg-gray-800/90 px-1 py-0.5 font-mono text-[10px] text-white"
+          className="pointer-events-none absolute -top-6 rounded bg-panel-bg-secondary/90 px-1 py-0.5 font-mono text-[10px] text-text-primary"
           style={{ left: tooltip.x }}
         >
           {formatTimecode(tooltip.time)}

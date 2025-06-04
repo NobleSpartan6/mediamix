@@ -3,6 +3,7 @@ import SettingsModal from './SettingsModal'
 import { useUILayoutStore } from '../../state/uiLayoutStore'
 import TopNav from './TopNav'
 import MainToolbar from './MainToolbar'
+import { Button } from '../../components/ui/Button'
 
 interface AppShellProps {
   children: ReactNode
@@ -12,16 +13,17 @@ export function AppShell({ children }: AppShellProps) {
   const [showSettings, setShowSettings] = useState(false)
 
   return (
-    <div className="min-h-screen flex flex-col bg-panel-bg text-white">
+    <div className="min-h-screen flex flex-col bg-panel-bg text-text-primary">
       <TopNav />
       <MainToolbar />
-      <button
+      <Button
         type="button"
+        variant="secondary"
         onClick={() => setShowSettings(true)}
-        className="self-end m-2 px-2 py-1 text-sm bg-gray-700 rounded hover:bg-gray-600"
+        className="self-end m-2 px-2 py-1 text-sm"
       >
         Settings
-      </button>
+      </Button>
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
       <div className="flex-1 overflow-hidden">{children}</div>
     </div>
@@ -29,4 +31,3 @@ export function AppShell({ children }: AppShellProps) {
 }
 
 export default AppShell
-

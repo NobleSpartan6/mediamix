@@ -14,7 +14,7 @@ export const TopNav: React.FC = () => {
   const [showShare, setShowShare] = useState(false)
 
   return (
-    <Menubar.Root className="menubar bg-gray-900 text-ui-body font-ui-medium px-2">
+    <Menubar.Root className="menubar bg-panel-bg text-ui-body font-ui-medium px-2">
       <Menubar.Menu>
         <Menubar.Trigger className="menubar-trigger">File</Menubar.Trigger>
         <Menubar.Content className="menubar-content">

@@ -56,10 +56,10 @@ body {
 
 /* top menubar and toolbar */
 .menubar button {
-  @apply text-white rounded-sm focus-visible:outline-none;
+  @apply text-text-primary rounded-sm focus-visible:outline-none;
 }
 .menubar-content {
-  @apply bg-gray-800 text-white;
+  @apply bg-panel-bg-secondary text-text-primary;
 }
 .toolbar-button {
   @apply p-1 rounded;

@@ -54,16 +54,13 @@ export const TimelinePanel: React.FC<TimelinePanelProps> = React.memo(({ pixelsP
     return map
   }, [clips])
 
-  const handleBackgroundPointerDown = React.useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      const target = e.target as HTMLElement
-      if (!target.closest('.clip')) {
-        useTimelineStore.getState().setSelectedClips([])
-      }
-      startScrub(e)
-    },
-    [],
-  )
+  const handleBackgroundPointerDown = React.useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement
+    if (!target.closest('.clip')) {
+      useTimelineStore.getState().setSelectedClips([])
+    }
+    startScrub(e)
+  }, [])
 
   // scrubbing logic
   const scrubRef = React.useRef(false)
@@ -151,7 +148,7 @@ export const TimelinePanel: React.FC<TimelinePanelProps> = React.memo(({ pixelsP
               return (
                 <div
                   key={track.id}
-                  className={`${heightClass} flex items-center justify-center border-b border-white/10 text-xs text-gray-300 font-ui-medium`}
+                  className={`${heightClass} flex items-center justify-center border-b border-white/10 text-xs text-text-secondary font-ui-medium`}
                 >
                   {track.label}
                 </div>
@@ -189,4 +186,3 @@ export const TimelinePanel: React.FC<TimelinePanelProps> = React.memo(({ pixelsP
 })
 
 TimelinePanel.displayName = 'TimelinePanel'
-

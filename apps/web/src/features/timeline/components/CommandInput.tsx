@@ -17,7 +17,7 @@ export const CommandInput: React.FC = () => {
   return (
     <form onSubmit={handleSubmit} className="mt-2 flex items-center gap-2">
       <input
-        className="flex-1 rounded bg-gray-700 text-white text-sm px-2 py-1"
+        className="flex-1 rounded bg-panel-bg-secondary text-text-primary text-sm px-2 py-1"
         placeholder="Enter command..."
         value={text}
         onChange={(e) => setText(e.currentTarget.value)}
@@ -26,11 +26,7 @@ export const CommandInput: React.FC = () => {
         Run
       </Button>
       {result && (
-        <span
-          className={`text-sm ${
-            result === 'success' ? 'text-green-400' : 'text-red-400'
-          }`}
-        >
+        <span className={`text-sm ${result === 'success' ? 'text-green-400' : 'text-red-400'}`}>
           {result === 'success' ? 'Success' : 'Invalid command'}
         </span>
       )}
