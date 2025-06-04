@@ -3,6 +3,7 @@ import React from 'react'
 interface Toast {
   id: number
   message: string
+  visible: boolean
 }
 
 const ToastContext = React.createContext<(msg: string) => void>(() => {})
@@ -13,9 +14,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const addToast = React.useCallback((message: string) => {
     const id = Date.now()
-    setToasts((t) => [...t, { id, message }])
+    setToasts((t) => [...t, { id, message, visible: true }])
     setTimeout(() => {
-      setToasts((t) => t.filter((toast) => toast.id !== id))
+      setToasts((t) => t.map((toast) => (toast.id === id ? { ...toast, visible: false } : toast)))
+      setTimeout(() => {
+        setToasts((t) => t.filter((toast) => toast.id !== id))
+      }, 150)
     }, 3000)
   }, [])
 
@@ -31,7 +35,10 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {children}
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 space-y-2 z-50">
           {toasts.map((t) => (
-            <div key={t.id} className="bg-panel-bg-secondary text-text-primary px-4 py-2 rounded shadow">
+            <div
+              key={t.id}
+              className={`toast-message fade-in ${t.visible ? 'show' : ''} bg-panel-bg-secondary text-text-primary px-4 py-2 rounded shadow`}
+            >
               {t.message}
             </div>
           ))}
