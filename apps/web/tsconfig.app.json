@@ -25,11 +25,7 @@
 
     "types": ["vitest", "vite/client"],
     "baseUrl": ".",
-    "paths": {
-      "lucide-react": ["./src/stubs/lucide-react.tsx"],
-      "yjs": ["./src/stubs/yjs.ts"],
-      "@radix-ui/react-menubar": ["./src/stubs/radix-menubar.tsx"]
-    }
+    "paths": {}
   },
   "include": ["src"]
 }
