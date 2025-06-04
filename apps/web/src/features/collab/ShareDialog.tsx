@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button } from '../../components/ui/Button'
+import { Input } from '../../components/ui/Input'
 import { useCollabStore } from '../../state/collabStore'
 
 interface ShareDialogProps {
@@ -24,10 +25,10 @@ export function ShareDialog({ onClose }: ShareDialogProps) {
           <div className="space-y-2">
             <Button onClick={() => setCreatedId(createSession())}>Create Session</Button>
             <div className="flex gap-2 items-center">
-              <input
+              <Input
                 value={sessionIdInput}
                 onChange={(e) => setSessionIdInput(e.target.value)}
-                className="flex-1 text-black px-1"
+                className="flex-1 placeholder:text-text-secondary"
                 placeholder="Session ID"
               />
               <Button onClick={() => joinSession(sessionIdInput)}>Join</Button>
@@ -35,7 +36,7 @@ export function ShareDialog({ onClose }: ShareDialogProps) {
           </div>
         )}
         <div className="text-right">
-          <Button onClick={onClose}>Close</Button>
+          <Button variant="secondary" onClick={onClose}>Close</Button>
         </div>
       </div>
     </div>
