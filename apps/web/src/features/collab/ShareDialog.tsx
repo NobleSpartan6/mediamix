@@ -14,7 +14,7 @@ export function ShareDialog({ onClose }: ShareDialogProps) {
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-      <div className="bg-panel-bg-secondary rounded-md p-6 w-80 space-y-4">
+      <div className="bg-panel-bg-secondary rounded p-6 w-80 space-y-4">
         {createdId ? (
           <div>
             <p className="mb-2">Session ID:</p>

@@ -111,7 +111,7 @@ export function CommandPalette() {
       onClick={() => setOpen(false)}
     >
       <div
-        className="bg-panel-bg-secondary w-96 rounded-md shadow"
+        className="bg-panel-bg-secondary w-96 rounded shadow"
         onClick={(e) => e.stopPropagation()}
       >
         <input
