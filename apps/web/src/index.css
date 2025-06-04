@@ -79,7 +79,7 @@ body {
   @apply text-text-secondary;
 }
 .menubar-content [role='separator'] {
-  @apply my-1 border-t border-text-secondary/20;
+  @apply my-1 border-t border-text-secondary border-opacity-20;
 }
 .toolbar-button {
   @apply px-2 py-1 rounded;
