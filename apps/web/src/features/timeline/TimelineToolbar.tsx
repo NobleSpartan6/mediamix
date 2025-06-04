@@ -37,10 +37,22 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({ zoom, onZoomCh
       <Button variant="secondary" className="toolbar-button" onClick={handleDelete}>
         <Trash2 className="w-4 h-4" />
       </Button>
-      <Button variant="secondary" className="toolbar-button" onClick={() => setSnapping(!snapping)}>
+      <Button
+        variant="secondary"
+        className="toolbar-button"
+        onClick={() => setSnapping(!snapping)}
+        aria-pressed={snapping}
+        aria-label="Toggle snapping"
+      >
         <Magnet className="w-4 h-4" />
       </Button>
-      <Button variant="secondary" className="toolbar-button" onClick={() => setFollowPlayhead(!followPlayhead)}>
+      <Button
+        variant="secondary"
+        className="toolbar-button"
+        onClick={() => setFollowPlayhead(!followPlayhead)}
+        aria-pressed={followPlayhead}
+        aria-label="Toggle follow playhead"
+      >
         <Crosshair className="w-4 h-4" />
       </Button>
     </div>
