@@ -137,7 +137,7 @@ export default function MediaIngest() {
     >
       <button
         onClick={openPicker}
-        className="px-4 py-2 bg-accent text-white rounded hover:bg-accent/90 disabled:opacity-50"
+        className="px-4 py-2 bg-accent text-white rounded hover:bg-accent/90 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel-bg"
         disabled={loading}
       >
         {loading ? 'Importing...' : 'Import Media'}

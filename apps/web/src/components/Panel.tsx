@@ -13,7 +13,11 @@ export default function Panel({ title, onCollapse, children, className }: PanelP
       <div className="flex items-center justify-between px-2 py-2 bg-panel-bg-secondary border-b border-panel-bg">
         <span className="text-ui-body font-ui-semibold">{title}</span>
         {onCollapse && (
-          <button type="button" onClick={onCollapse} className="text-xs hover:text-accent">
+          <button
+            type="button"
+            onClick={onCollapse}
+            className="text-xs hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel-bg"
+          >
             &laquo;
           </button>
         )}
