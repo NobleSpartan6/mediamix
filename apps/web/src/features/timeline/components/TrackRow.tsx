@@ -119,7 +119,9 @@ export const TrackRow: React.FC<TrackRowProps> = React.memo(({
           type="button"
           onClick={toggleLock}
           aria-label={track.locked ? 'Unlock track' : 'Lock track'}
-          className={track.locked ? 'opacity-50' : ''}
+          className={`${
+            track.locked ? 'opacity-50' : ''
+          } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel-bg`}
         >
           <LockIcon className="w-4 h-4" />
         </button>
@@ -129,7 +131,9 @@ export const TrackRow: React.FC<TrackRowProps> = React.memo(({
           aria-label={
             track.muted ? (isAudio ? 'Unmute track' : 'Show track') : isAudio ? 'Mute track' : 'Hide track'
           }
-          className={track.muted ? 'opacity-50' : ''}
+          className={`${
+            track.muted ? 'opacity-50' : ''
+          } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel-bg`}
         >
           <MuteIcon className="w-4 h-4" />
         </button>

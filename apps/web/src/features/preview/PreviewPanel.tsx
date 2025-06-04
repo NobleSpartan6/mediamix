@@ -151,14 +151,26 @@ export const PreviewPanel: React.FC = React.memo(() => {
       <video ref={videoRef} className="w-full h-full object-contain" playsInline />
       {showControls && (
         <div className="absolute bottom-2 left-0 right-0 flex items-center justify-center gap-4 text-xs bg-black/60 px-2 py-1 fade-in show">
-          <button type="button" onClick={togglePlay} className="px-2">
+          <button
+            type="button"
+            onClick={togglePlay}
+            className="px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel-bg"
+          >
             {playing ? '❚❚' : '▶'}
           </button>
           <span className="font-mono">{formatTimecode(currentTime)}</span>
-          <button type="button" onClick={toggleMute} className="px-2">
+          <button
+            type="button"
+            onClick={toggleMute}
+            className="px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel-bg"
+          >
             {muted ? '🔇' : '🔊'}
           </button>
-          <button type="button" onClick={enterFullscreen} className="px-2">
+          <button
+            type="button"
+            onClick={enterFullscreen}
+            className="px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel-bg"
+          >
             ⛶
           </button>
         </div>
