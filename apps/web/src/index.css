@@ -56,10 +56,30 @@ body {
 
 /* top menubar and toolbar */
 .menubar button {
-  @apply text-text-primary rounded focus-visible:outline-none;
+  @apply text-text-primary rounded focus-visible:outline-none px-2 py-1;
 }
 .menubar-content {
   @apply bg-panel-bg-secondary text-text-primary py-1;
+}
+.menubar-trigger:hover,
+.menubar-trigger[data-state='open'] {
+  @apply bg-panel-bg-secondary text-text-primary;
+}
+.menubar-trigger:focus-visible {
+  @apply outline-none bg-panel-bg-secondary text-text-primary;
+}
+.menubar-content [role^='menuitem'],
+.menubar-content .radix-menubar-item {
+  @apply cursor-default px-4 py-1 text-text-primary text-sm;
+}
+.menubar-content [data-highlighted] {
+  @apply bg-accent text-white;
+}
+.menubar-content [data-disabled] {
+  @apply text-text-secondary;
+}
+.menubar-content [role='separator'] {
+  @apply my-1 border-t border-text-secondary/20;
 }
 .toolbar-button {
   @apply px-2 py-1 rounded;

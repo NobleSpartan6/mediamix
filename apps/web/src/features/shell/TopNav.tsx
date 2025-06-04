@@ -14,10 +14,10 @@ export const TopNav: React.FC = () => {
   const [showShare, setShowShare] = useState(false)
 
   return (
-    <Menubar.Root className="menubar bg-panel-bg text-ui-body font-ui-medium px-2">
+    <Menubar.Root className="menubar bg-panel-bg text-ui-body font-ui-medium px-2 py-1">
       <Menubar.Menu>
         <Menubar.Trigger className="menubar-trigger">File</Menubar.Trigger>
-        <Menubar.Content className="menubar-content">
+        <Menubar.Content className="menubar-content z-50 shadow-md">
           <Menubar.Item onClick={reset}>New</Menubar.Item>
           <Menubar.Item onClick={() => alert('Open not implemented')}>Open</Menubar.Item>
           <Menubar.Item onClick={() => alert('Save not implemented')}>Save</Menubar.Item>
@@ -27,7 +27,7 @@ export const TopNav: React.FC = () => {
       </Menubar.Menu>
       <Menubar.Menu>
         <Menubar.Trigger className="menubar-trigger">Edit</Menubar.Trigger>
-        <Menubar.Content className="menubar-content">
+        <Menubar.Content className="menubar-content z-50 shadow-md">
           <Menubar.Item onClick={() => alert('Undo not implemented')}>Undo</Menubar.Item>
           <Menubar.Item onClick={() => alert('Redo not implemented')}>Redo</Menubar.Item>
           <Menubar.Item onClick={() => alert('Cut not implemented')}>Cut</Menubar.Item>
@@ -37,7 +37,7 @@ export const TopNav: React.FC = () => {
       </Menubar.Menu>
       <Menubar.Menu>
         <Menubar.Trigger className="menubar-trigger">View</Menubar.Trigger>
-        <Menubar.Content className="menubar-content">
+        <Menubar.Content className="menubar-content z-50 shadow-md">
           <Menubar.CheckboxItem checked={showLibrary} onClick={() => setShowLibrary(!showLibrary)}>
             Library Panel
           </Menubar.CheckboxItem>
@@ -52,7 +52,7 @@ export const TopNav: React.FC = () => {
       </Menubar.Menu>
       <Menubar.Menu>
         <Menubar.Trigger className="menubar-trigger">Help</Menubar.Trigger>
-        <Menubar.Content className="menubar-content">
+        <Menubar.Content className="menubar-content z-50 shadow-md">
           <Menubar.Item onClick={() => alert('MediaMix prototype')}>About</Menubar.Item>
         </Menubar.Content>
       </Menubar.Menu>
