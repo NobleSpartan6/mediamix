@@ -45,11 +45,7 @@ export default function FileInfoCard() {
             <span className="text-gray-400">Video:</span>
             <span>{fileInfo.videoCodec}</span>
             {fileInfo.videoSupported !== null && (
-              <span
-                className={
-                  fileInfo.videoSupported ? 'text-green-400' : 'text-red-400'
-                }
-              >
+              <span className={fileInfo.videoSupported ? 'text-green-400' : 'text-red-400'}>
                 {fileInfo.videoSupported ? '✓' : '✕'}
               </span>
             )}
@@ -60,11 +56,7 @@ export default function FileInfoCard() {
             <span className="text-gray-400">Audio:</span>
             <span>{fileInfo.audioCodec}</span>
             {fileInfo.audioSupported !== null && (
-              <span
-                className={
-                  fileInfo.audioSupported ? 'text-green-400' : 'text-red-400'
-                }
-              >
+              <span className={fileInfo.audioSupported ? 'text-green-400' : 'text-red-400'}>
                 {fileInfo.audioSupported ? '✓' : '✕'}
               </span>
             )}
@@ -93,4 +85,4 @@ export default function FileInfoCard() {
       </div>
     </div>
   )
-} 
+}

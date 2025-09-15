@@ -34,18 +34,13 @@ export const VideoPreview: React.FC = React.memo(() => {
 
   // Sort video clips by start time (lane even => video)
   const sortedClips = React.useMemo(
-    () =>
-      clips
-        .filter((c) => c.lane % 2 === 0 && !tracks[c.lane]?.muted)
-        .sort((a, b) => a.start - b.start),
+    () => clips.filter((c) => c.lane % 2 === 0 && !tracks[c.lane]?.muted).sort((a, b) => a.start - b.start),
     [clips, tracks],
   )
 
   // Determine active clip for the current time
   const activeClip = React.useMemo(
-    () =>
-      sortedClips.find((c) => currentTime >= c.start && currentTime < c.end) ||
-      null,
+    () => sortedClips.find((c) => currentTime >= c.start && currentTime < c.end) || null,
     [sortedClips, currentTime],
   )
 
@@ -119,10 +114,7 @@ export const VideoPreview: React.FC = React.memo(() => {
   }, [playRate, activeClip])
 
   const audioRefs = React.useRef(
-    new Map<
-      string,
-      { audio: HTMLAudioElement; node: MediaElementAudioSourceNode; url: string }
-    >(),
+    new Map<string, { audio: HTMLAudioElement; node: MediaElementAudioSourceNode; url: string }>(),
   )
 
   React.useEffect(() => {
@@ -138,11 +130,7 @@ export const VideoPreview: React.FC = React.memo(() => {
     if (activeClip) activeAudio.push(activeClip)
     activeAudio.push(
       ...clips.filter(
-        (c) =>
-          c.lane % 2 === 1 &&
-          currentTime >= c.start &&
-          currentTime < c.end &&
-          !tracks[c.lane]?.muted,
+        (c) => c.lane % 2 === 1 && currentTime >= c.start && currentTime < c.end && !tracks[c.lane]?.muted,
       ),
     )
 

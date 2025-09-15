@@ -39,7 +39,7 @@ const actions: Action[] = [
   },
 ]
 
-export function CommandPalette() {
+export const CommandPalette = () => {
   const open = useCommandPaletteStore((s) => s.open)
   const setOpen = useCommandPaletteStore((s) => s.setOpen)
   const [query, setQuery] = useState('')
@@ -48,9 +48,7 @@ export function CommandPalette() {
   const inputRef = useRef<HTMLInputElement>(null)
   const toast = useToast()
 
-  const filtered = actions.filter((a) =>
-    a.label.toLowerCase().includes(query.toLowerCase()),
-  )
+  const filtered = actions.filter((a) => a.label.toLowerCase().includes(query.toLowerCase()))
 
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
@@ -106,14 +104,8 @@ export function CommandPalette() {
   if (!open) return null
 
   return (
-    <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
-      onClick={() => setOpen(false)}
-    >
-      <div
-        className="bg-panel-bg-secondary w-96 rounded shadow"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={() => setOpen(false)}>
+      <div className="bg-panel-bg-secondary w-96 rounded shadow" onClick={(e) => e.stopPropagation()}>
         <input
           ref={inputRef}
           className="w-full bg-panel-bg text-text-primary px-3 py-2 outline-none"
@@ -129,9 +121,7 @@ export function CommandPalette() {
           {filtered.map((a, i) => (
             <li
               key={a.id}
-              className={`px-3 py-2 cursor-pointer ${
-                i === index ? 'bg-accent text-white' : 'text-gray-200'
-              }`}
+              className={`px-3 py-2 cursor-pointer ${i === index ? 'bg-accent text-white' : 'text-gray-200'}`}
               onMouseEnter={() => setIndex(i)}
               onClick={() => {
                 a.run()
@@ -141,9 +131,7 @@ export function CommandPalette() {
               {a.label}
             </li>
           ))}
-          {running && (
-            <li className="px-3 py-2 text-gray-400">Thinking...</li>
-          )}
+          {running && <li className="px-3 py-2 text-gray-400">Thinking...</li>}
         </ul>
       </div>
     </div>

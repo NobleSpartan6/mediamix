@@ -5,7 +5,7 @@ interface TooltipProps {
   children: React.ReactNode
 }
 
-export function Tooltip({ content, children }: TooltipProps) {
+export const Tooltip = ({ content, children }: TooltipProps) => {
   return (
     <span className="relative group inline-flex">
       {children}
@@ -15,4 +15,3 @@ export function Tooltip({ content, children }: TooltipProps) {
     </span>
   )
 }
-

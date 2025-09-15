@@ -66,10 +66,7 @@ export interface TimelineState {
   outPoint: number | null
   /** Replace all clips (normalised input) */
   setClips: (clips: Clip[]) => void
-  addClip: (
-    clip: Omit<Clip, 'id'>,
-    opts?: { trackType?: 'video' | 'audio'; groupId?: string },
-  ) => string
+  addClip: (clip: Omit<Clip, 'id'>, opts?: { trackType?: 'video' | 'audio'; groupId?: string }) => string
   updateClip: (id: string, delta: Partial<Omit<Clip, 'id'>>) => void
   updateTrack: (id: string, delta: Partial<Omit<Track, 'id'>>) => void
   removeClip: (id: string, opts?: { ripple?: boolean }) => void
@@ -120,14 +117,8 @@ const ensureTracks = (
   return next
 }
 
-const pruneTracks = (
-  tracks: Track[],
-  clipsById: Record<string, Clip>,
-): Track[] => {
-  const maxLane = Object.values(clipsById).reduce(
-    (m, c) => Math.max(m, c.lane),
-    -1,
-  )
+const pruneTracks = (tracks: Track[], clipsById: Record<string, Clip>): Track[] => {
+  const maxLane = Object.values(clipsById).reduce((m, c) => Math.max(m, c.lane), -1)
   const needed = ensureTracks(tracks, maxLane)
   return needed.slice(0, maxLane + 1)
 }
@@ -152,10 +143,7 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
     set((state) => {
       const dict = toDict(clips)
       const maxLane = clips.reduce((m, c) => Math.max(m, c.lane), -1)
-      const tracks = pruneTracks(
-        ensureTracks(state.tracks, maxLane),
-        dict,
-      )
+      const tracks = pruneTracks(ensureTracks(state.tracks, maxLane), dict)
       return {
         clipsById: dict,
         durationSec: clips.reduce((m, c) => Math.max(m, c.end), 0),
@@ -172,9 +160,10 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
     selectedClipIds.forEach((id) => {
       const clip = clipsById[id]
       if (!clip) return
-      const nearest = beats.reduce((prev, b) =>
-        Math.abs(b - clip.start) < Math.abs(prev - clip.start) ? b : prev,
-      beats[0])
+      const nearest = beats.reduce(
+        (prev, b) => (Math.abs(b - clip.start) < Math.abs(prev - clip.start) ? b : prev),
+        beats[0],
+      )
       const delta = nearest - clip.start
       get().updateClip(id, { start: clip.start + delta, end: clip.end + delta })
     })
@@ -204,10 +193,7 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
     set((state) => {
       const clipsById = { ...state.clipsById, [id]: newClip }
       const durationSec = Math.max(state.durationSec, newClip.end)
-      const tracks = pruneTracks(
-        ensureTracks(state.tracks, newClip.lane, opts),
-        clipsById,
-      )
+      const tracks = pruneTracks(ensureTracks(state.tracks, newClip.lane, opts), clipsById)
       return { clipsById, durationSec, tracks }
     })
     return id
@@ -223,8 +209,7 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
       if (track?.locked) return {}
 
       const groupId = existing.groupId
-      const startDiff =
-        delta.start !== undefined ? delta.start - existing.start : 0
+      const startDiff = delta.start !== undefined ? delta.start - existing.start : 0
       const endDiff = delta.end !== undefined ? delta.end - existing.end : 0
       const laneDiff = delta.lane !== undefined ? delta.lane - existing.lane : 0
       const xDiff = delta.x !== undefined ? delta.x - existing.x : 0
@@ -260,14 +245,9 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
         })
       }
 
-      const durationSec = Math.max(
-        ...Object.values(clipsById).map((c) => c.end),
-      )
+      const durationSec = Math.max(...Object.values(clipsById).map((c) => c.end))
 
-      const maxLane = Object.values(clipsById).reduce(
-        (m, c) => Math.max(m, c.lane),
-        -1,
-      )
+      const maxLane = Object.values(clipsById).reduce((m, c) => Math.max(m, c.lane), -1)
       const tracks = pruneTracks(ensureTracks(state.tracks, maxLane), clipsById)
 
       return { clipsById, durationSec, tracks }
@@ -322,10 +302,7 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
         }
       })
 
-      const durationSec = Math.max(
-        0,
-        ...Object.values(clipsById).map((c) => c.end),
-      )
+      const durationSec = Math.max(0, ...Object.values(clipsById).map((c) => c.end))
 
       const tracks = pruneTracks(state.tracks, clipsById)
       return { clipsById, durationSec, tracks }
@@ -334,14 +311,9 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
   /** Remove all clips that reference the given asset id */
   removeClipsByAsset: (assetId) =>
     set((state) => {
-      const clipsById = Object.fromEntries(
-        Object.entries(state.clipsById).filter(([, c]) => c.assetId !== assetId),
-      )
+      const clipsById = Object.fromEntries(Object.entries(state.clipsById).filter(([, c]) => c.assetId !== assetId))
 
-      const durationSec = Math.max(
-        0,
-        ...Object.values(clipsById).map((c) => c.end),
-      )
+      const durationSec = Math.max(0, ...Object.values(clipsById).map((c) => c.end))
 
       const tracks = pruneTracks(state.tracks, clipsById)
       return { clipsById, durationSec, tracks }
@@ -384,13 +356,11 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
 
 // ---- Selectors -----------------------------------------------------------
 
-export const selectClipsArray = (state: TimelineState): Clip[] =>
-  Object.values(state.clipsById)
+export const selectClipsArray = (state: TimelineState): Clip[] => Object.values(state.clipsById)
 
 export const selectTracks = (state: TimelineState): Track[] => state.tracks
 
-export const selectSelectedClipIds = (state: TimelineState): string[] =>
-  state.selectedClipIds
+export const selectSelectedClipIds = (state: TimelineState): string[] => state.selectedClipIds
 
 /** Return clips occupying the given lane, sorted by start time */
 export const selectLaneClips =
@@ -402,14 +372,6 @@ export const selectLaneClips =
 
 /** Determine if a time range collides with any clip on the lane */
 export const laneHasCollision =
-  (
-    lane: number,
-    start: number,
-    end: number,
-    excludeId?: string,
-  ) =>
+  (lane: number, start: number, end: number, excludeId?: string) =>
   (state: TimelineState): boolean =>
-    selectLaneClips(lane)(state).some(
-      (c) => c.id !== excludeId && start < c.end && end > c.start,
-    )
-
+    selectLaneClips(lane)(state).some((c) => c.id !== excludeId && start < c.end && end > c.start)

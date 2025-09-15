@@ -59,4 +59,4 @@ export async function selectVideoFile(): Promise<SelectedVideo | null> {
     document.body.appendChild(input)
     input.click()
   })
-} 
+}

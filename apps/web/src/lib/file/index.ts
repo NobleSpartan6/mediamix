@@ -1,2 +1,2 @@
-export { generateWaveform } from './generateWaveform';
-export { captureThumbnail } from './captureThumbnail';
+export { generateWaveform } from './generateWaveform'
+export { captureThumbnail } from './captureThumbnail'

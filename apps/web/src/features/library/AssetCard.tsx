@@ -6,7 +6,7 @@ interface AssetCardProps {
   asset: MediaAsset
 }
 
-export function AssetCard({ asset }: AssetCardProps) {
+export const AssetCard = ({ asset }: AssetCardProps) => {
   const handleDragStart = React.useCallback(
     (e: React.DragEvent<HTMLButtonElement>) => {
       e.dataTransfer.setData('text/x-mediamix-asset', asset.id)
@@ -25,9 +25,7 @@ export function AssetCard({ asset }: AssetCardProps) {
       className={`w-20 box-border text-center text-xs select-none rounded cursor-pointer hover:bg-panel-bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${isSelected ? 'border-2 border-accent' : 'border-2 border-transparent'}`}
       draggable
       onDragStart={handleDragStart}
-      onClick={() =>
-        useSelectionStore.getState().setSelection({ type: 'asset', id: asset.id })
-      }
+      onClick={() => useSelectionStore.getState().setSelection({ type: 'asset', id: asset.id })}
     >
       {isVideo ? (
         <img src={asset.thumbnail} alt="thumbnail" className="w-full h-12 object-cover rounded mb-1" />

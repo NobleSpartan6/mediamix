@@ -5,7 +5,7 @@ interface SettingsModalProps {
   onClose: () => void
 }
 
-export function SettingsModal({ onClose }: SettingsModalProps) {
+export const SettingsModal = ({ onClose }: SettingsModalProps) => {
   const [gpuEnabled, setGpuEnabled] = useState(false)
   const [collabEnabled, setCollabEnabled] = useState(false)
 

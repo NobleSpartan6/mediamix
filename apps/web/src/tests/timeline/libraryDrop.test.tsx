@@ -63,9 +63,7 @@ describe.skip('TrackRow drop', () => {
     })
 
     const { container } = render(<Timeline pixelsPerSecond={100} />)
-    const row = container.querySelectorAll(
-      '.relative.w-full.border-b',
-    )[0] as HTMLDivElement
+    const row = container.querySelectorAll('.relative.w-full.border-b')[0] as HTMLDivElement
     Object.defineProperty(row, 'getBoundingClientRect', {
       value: () => ({ left: 0, top: 0, width: 200, height: 48, right: 200, bottom: 48 }),
     })
@@ -84,9 +82,7 @@ describe.skip('TrackRow drop', () => {
       expect(clips.length).toBe(4)
     })
 
-    const added = Object.values(useTimelineStore.getState().clipsById).filter(
-      (c) => c.assetId === 'asset1',
-    )
+    const added = Object.values(useTimelineStore.getState().clipsById).filter((c) => c.assetId === 'asset1')
     expect(added.length).toBe(2)
     expect(added[0].start).toBeCloseTo(1)
   })

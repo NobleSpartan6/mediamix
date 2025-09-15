@@ -5,7 +5,6 @@ import { nanoid } from '../utils/nanoid'
 import { generateId } from '../utils/id'
 import { processMediaAsset } from '../lib/media-utils'
 
-
 export interface MediaAsset {
   id: string
   fileName: string
@@ -79,8 +78,7 @@ export const useMediaStore = create<MediaState>((set, get) => ({
       const next = { ...state.assets }
       assets.forEach((assetInput) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { id: providedId, file, ...rest } =
-          assetInput as Omit<MediaAsset, 'id'> & { id?: string; file?: File }
+        const { id: providedId, file, ...rest } = assetInput as Omit<MediaAsset, 'id'> & { id?: string; file?: File }
         const id = providedId ?? generateId()
         next[id] = {
           id,
@@ -123,9 +121,6 @@ export const useMediaStore = create<MediaState>((set, get) => ({
 }))
 
 /** Retrieve assets as an array */
-export const selectMediaArray = (state: MediaState): MediaAsset[] =>
-  Object.values(state.assets)
+export const selectMediaArray = (state: MediaState): MediaAsset[] => Object.values(state.assets)
 
-export const selectFolderArray = (state: MediaState): MediaFolder[] =>
-  Object.values(state.folders)
-
+export const selectFolderArray = (state: MediaState): MediaFolder[] => Object.values(state.folders)

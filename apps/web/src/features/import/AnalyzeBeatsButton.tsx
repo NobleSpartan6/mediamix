@@ -8,13 +8,9 @@ import { useMediaStore } from '../../state/mediaStore'
 import { useCallback } from 'react'
 import { useTimelineStore } from '../../state/timelineStore'
 
-export function AnalyzeBeatsButton() {
-  const {
-    isBeatDetectionRunning,
-    setIsBeatDetectionRunning,
-    setBeatDetectionProgress,
-    setBeatDetectionStage,
-  } = useBeatDetection()
+export const AnalyzeBeatsButton = () => {
+  const { isBeatDetectionRunning, setIsBeatDetectionRunning, setBeatDetectionProgress, setBeatDetectionStage } =
+    useBeatDetection()
 
   const handleAnalyze = useCallback(async () => {
     const { mediaAssets } = useMotifStore.getState()

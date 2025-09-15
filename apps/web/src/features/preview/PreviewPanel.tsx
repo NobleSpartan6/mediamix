@@ -51,8 +51,7 @@ export const PreviewPanel: React.FC = React.memo(() => {
     [clips],
   )
   const activeClip = React.useMemo(
-    () =>
-      sortedClips.find((c) => currentTime >= c.start && currentTime < c.end) || null,
+    () => sortedClips.find((c) => currentTime >= c.start && currentTime < c.end) || null,
     [sortedClips, currentTime],
   )
 

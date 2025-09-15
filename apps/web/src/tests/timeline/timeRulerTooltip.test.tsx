@@ -28,7 +28,7 @@ describe('TimeRuler tooltip clamping', () => {
       <>
         <div ref={scrollRef} />
         <TimeRuler scrollContainerRef={scrollRef} pixelsPerSecond={100} duration={10} />
-      </>
+      </>,
     )
 
     const rulerDiv = container.querySelector('canvas')!.parentElement!.parentElement as HTMLDivElement

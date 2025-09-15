@@ -24,7 +24,7 @@ self.onmessage = async (event: MessageEvent<GenerateMsg>) => {
   if (type !== 'GEN_WAVEFORM') return
   try {
     const { samples, sampleRate, peakCount } = payload
-    let floatSamples = int16ToFloat32(samples)
+    const floatSamples = int16ToFloat32(samples)
     let processed = floatSamples
     if (typeof OfflineAudioContext !== 'undefined') {
       try {

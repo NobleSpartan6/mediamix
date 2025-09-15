@@ -39,4 +39,4 @@ export const Playhead: React.FC<PlayheadProps> = React.memo(
   },
 )
 
-Playhead.displayName = 'Playhead' 
+Playhead.displayName = 'Playhead'

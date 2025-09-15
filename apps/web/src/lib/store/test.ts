@@ -6,4 +6,4 @@ const testStoreImport = (): void => {
   const resetState = useMotifStore.getState().resetState
 }
 
-export default testStoreImport 
+export default testStoreImport

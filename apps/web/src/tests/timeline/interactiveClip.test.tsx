@@ -60,13 +60,9 @@ describe('InteractiveClip', () => {
       })
     })
 
-    const { rerender } = render(
-      <InteractiveClip clip={clip} pixelsPerSecond={100} type="video" />,
-    )
+    const { rerender } = render(<InteractiveClip clip={clip} pixelsPerSecond={100} type="video" />)
     // Rerender so Moveable mounts once ref is set
-    rerender(
-      <InteractiveClip clip={{ ...clip }} pixelsPerSecond={100} type="video" />,
-    )
+    rerender(<InteractiveClip clip={{ ...clip }} pixelsPerSecond={100} type="video" />)
     await waitFor(() => moveableProps !== null)
 
     act(() => {
@@ -95,12 +91,8 @@ describe('InteractiveClip', () => {
       })
     })
 
-    const { rerender } = render(
-      <InteractiveClip clip={clip} pixelsPerSecond={100} type="video" />,
-    )
-    rerender(
-      <InteractiveClip clip={{ ...clip }} pixelsPerSecond={100} type="video" />,
-    )
+    const { rerender } = render(<InteractiveClip clip={clip} pixelsPerSecond={100} type="video" />)
+    rerender(<InteractiveClip clip={{ ...clip }} pixelsPerSecond={100} type="video" />)
     await waitFor(() => moveableProps !== null)
 
     act(() => {
@@ -132,12 +124,8 @@ describe('InteractiveClip', () => {
       })
     })
 
-    const { rerender } = render(
-      <InteractiveClip clip={clip} pixelsPerSecond={100} type="video" />,
-    )
-    rerender(
-      <InteractiveClip clip={{ ...clip }} pixelsPerSecond={100} type="video" />,
-    )
+    const { rerender } = render(<InteractiveClip clip={clip} pixelsPerSecond={100} type="video" />)
+    rerender(<InteractiveClip clip={{ ...clip }} pixelsPerSecond={100} type="video" />)
     await waitFor(() => moveableProps !== null)
 
     act(() => {
@@ -166,12 +154,8 @@ describe('InteractiveClip', () => {
       })
     })
 
-    const { rerender } = render(
-      <InteractiveClip clip={clip} pixelsPerSecond={100} type="video" />,
-    )
-    rerender(
-      <InteractiveClip clip={{ ...clip }} pixelsPerSecond={100} type="video" />,
-    )
+    const { rerender } = render(<InteractiveClip clip={clip} pixelsPerSecond={100} type="video" />)
+    rerender(<InteractiveClip clip={{ ...clip }} pixelsPerSecond={100} type="video" />)
     await waitFor(() => moveableProps !== null)
 
     act(() => {

@@ -7,7 +7,7 @@ interface ShareDialogProps {
   onClose: () => void
 }
 
-export function ShareDialog({ onClose }: ShareDialogProps) {
+export const ShareDialog = ({ onClose }: ShareDialogProps) => {
   const [sessionIdInput, setSessionIdInput] = useState('')
   const createSession = useCollabStore((s) => s.createSession)
   const joinSession = useCollabStore((s) => s.joinSession)
@@ -25,9 +25,7 @@ export function ShareDialog({ onClose }: ShareDialogProps) {
   }
 
   return (
-    <div
-      className={`fixed inset-0 bg-black/60 flex items-center justify-center z-50 fade-in ${visible ? 'show' : ''}`}
-    >
+    <div className={`fixed inset-0 bg-black/60 flex items-center justify-center z-50 fade-in ${visible ? 'show' : ''}`}>
       <div
         className={`bg-panel-bg-secondary rounded p-6 w-80 space-y-4 fade-in ${visible ? 'show' : ''}`}
         role="dialog"
@@ -56,7 +54,9 @@ export function ShareDialog({ onClose }: ShareDialogProps) {
           </div>
         )}
         <div className="text-right">
-          <Button variant="secondary" onClick={handleClose}>Close</Button>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
         </div>
       </div>
     </div>

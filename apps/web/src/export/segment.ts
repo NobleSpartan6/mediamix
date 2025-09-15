@@ -22,9 +22,8 @@ export const segmentVideo = async (file: File, start: number, end: number): Prom
   }
   const inputName = 'input.mp4'
   const outputName = 'segment.mp4'
-  const buffer = typeof (file as any).arrayBuffer === 'function'
-    ? await (file as any).arrayBuffer()
-    : new ArrayBuffer(0)
+  const buffer =
+    typeof (file as any).arrayBuffer === 'function' ? await (file as any).arrayBuffer() : new ArrayBuffer(0)
   const data = new Uint8Array(buffer)
   if (ffmpeg.writeFile) {
     await ffmpeg.writeFile(inputName, data)
@@ -51,7 +50,6 @@ export const segmentVideo = async (file: File, start: number, end: number): Prom
   }
   return output
 }
-
 
 // Helpers adapted from the audio extraction worker for cross-version support
 async function ffmpegWriteFile(ffmpeg: any, name: string, data: Uint8Array) {
@@ -123,10 +121,7 @@ export const exportTimelineVideo = async (): Promise<void> => {
 
   const canvasStream = canvas.captureStream(30)
   const audioStream = audioCtx.destination.stream
-  const combined = new MediaStream([
-    ...canvasStream.getVideoTracks(),
-    ...audioStream.getAudioTracks(),
-  ])
+  const combined = new MediaStream([...canvasStream.getVideoTracks(), ...audioStream.getAudioTracks()])
   const recorder = new MediaRecorder(combined, {
     mimeType: 'video/webm;codecs=vp8,opus',
   })
@@ -195,10 +190,7 @@ export interface SegmentRange {
  * Encode multiple segments sequentially and concatenate the results.
  * This helps keep memory usage in check for long videos.
  */
-export const encodeWithSegments = async (
-  file: File,
-  ranges: SegmentRange[],
-): Promise<Uint8Array> => {
+export const encodeWithSegments = async (file: File, ranges: SegmentRange[]): Promise<Uint8Array> => {
   const ffmpeg = await getFFmpeg()
   if (typeof ffmpeg.load === 'function') {
     await ffmpeg.load()
@@ -257,5 +249,4 @@ export const encodeWithSegments = async (
   }
 
   return output
-
 }

@@ -15,10 +15,7 @@ export interface ProxyErrorMessage {
   error: string
 }
 
-type ProxyWorkerMessage =
-  | ProxyProgressMessage
-  | ProxyDoneMessage
-  | ProxyErrorMessage
+type ProxyWorkerMessage = ProxyProgressMessage | ProxyDoneMessage | ProxyErrorMessage
 
 let worker: WorkerWrapper | null = null
 
@@ -33,10 +30,7 @@ export const initProxyWorker = (): WorkerWrapper => {
   return worker
 }
 
-export const generateProxy = (
-  file: File,
-  onProgress?: (p: number) => void,
-): Promise<Uint8Array> => {
+export const generateProxy = (file: File, onProgress?: (p: number) => void): Promise<Uint8Array> => {
   return new Promise((resolve, reject) => {
     const w = initProxyWorker()
 

@@ -8,8 +8,7 @@ export const AlignToBeatButton: React.FC = () => {
   const selectedIds = useTimelineStore((s) => s.selectedClipIds)
 
   const handleAlign = React.useCallback(() => {
-    const { selectedClipIds, beats, updateClip, getClip, tracks } =
-      useTimelineStore.getState()
+    const { selectedClipIds, beats, updateClip, getClip, tracks } = useTimelineStore.getState()
     const processed = new Set<string>()
     selectedClipIds.forEach((id) => {
       const clip = getClip(id)

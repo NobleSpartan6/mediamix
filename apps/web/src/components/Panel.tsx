@@ -26,4 +26,3 @@ export default function Panel({ title, onCollapse, children, className }: PanelP
     </div>
   )
 }
-

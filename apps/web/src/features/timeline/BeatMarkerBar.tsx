@@ -5,7 +5,7 @@ import { useBeatDetection, useFileState } from '../../lib/store/hooks'
  * BeatMarkerBar – renders detected beat timestamps as vertical lines along an SVG timeline.
  * Complies with hard rule: no inline style objects.
  */
-export function BeatMarkerBar() {
+export const BeatMarkerBar = () => {
   const { beatMarkers } = useBeatDetection()
   const { fileInfo } = useFileState()
 

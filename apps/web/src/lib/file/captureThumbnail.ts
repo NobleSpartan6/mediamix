@@ -1,10 +1,7 @@
 import { cacheKeyForFile } from './cacheKey'
 import { getCachedAnalysis, setCachedAnalysis } from '../cache'
 
-export async function captureThumbnail(
-  videoFile: File,
-  ratio = 0.5,
-): Promise<string> {
+export async function captureThumbnail(videoFile: File, ratio = 0.5): Promise<string> {
   const key = `${cacheKeyForFile(videoFile)}-thumb-${ratio}`
   const cached = await getCachedAnalysis<string>(key)
   if (cached) return cached

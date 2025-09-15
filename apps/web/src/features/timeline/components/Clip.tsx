@@ -39,10 +39,7 @@ export const Clip = React.memo(
 
     // Lookup associated media asset (fallback to first asset if none specified)
     const asset = useMediaStore(
-      React.useCallback(
-        (s) => (clip.assetId ? s.assets[clip.assetId] : Object.values(s.assets)[0]),
-        [clip.assetId],
-      ),
+      React.useCallback((s) => (clip.assetId ? s.assets[clip.assetId] : Object.values(s.assets)[0]), [clip.assetId]),
     )
 
     // Draw waveform for audio clips when peaks or size change
@@ -82,8 +79,7 @@ export const Clip = React.memo(
       return () => ro.disconnect()
     }, [asset?.waveform, type])
 
-    const backgroundImage =
-      type === 'video' && asset?.thumbnail ? `url(${asset.thumbnail})` : undefined
+    const backgroundImage = type === 'video' && asset?.thumbnail ? `url(${asset.thumbnail})` : undefined
 
     const handlePointerDown = React.useCallback(
       (e: React.PointerEvent) => {
@@ -109,7 +105,14 @@ export const Clip = React.memo(
         tabIndex={0}
         className={`clip group absolute top-0 h-full select-none rounded border border-white/10 ${colorClass} text-xs text-white hover:border-accent/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${isSelected ? 'ring-2 ring-accent' : ''}`}
         onPointerDown={handlePointerDown}
-        style={{ width, transform: `translateX(${offset}px)`, willChange: 'transform', backgroundImage, backgroundSize: 'cover', backgroundPosition: 'center' }}
+        style={{
+          width,
+          transform: `translateX(${offset}px)`,
+          willChange: 'transform',
+          backgroundImage,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
         aria-label={`Clip from ${clip.start.toFixed(2)}s to ${clip.end.toFixed(2)}s`}
       >
         {type === 'audio' && <canvas ref={canvasRef} className="w-full h-full" />}

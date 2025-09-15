@@ -9,7 +9,7 @@ interface AppShellProps {
   children: ReactNode
 }
 
-export function AppShell({ children }: AppShellProps) {
+export const AppShell = ({ children }: AppShellProps) => {
   const [showSettings, setShowSettings] = useState(false)
 
   return (

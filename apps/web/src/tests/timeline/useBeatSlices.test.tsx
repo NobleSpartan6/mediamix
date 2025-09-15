@@ -24,7 +24,6 @@ import { useTimelineStore } from '../../state/timelineStore'
 // Stub complex drag/resize library which requires React runtime during tests
 vi.mock('react-moveable', () => ({ default: () => null }))
 
-
 // Helper: reset Zustand store between tests for deterministic state
 const resetStore = () => {
   useTimelineStore.setState({

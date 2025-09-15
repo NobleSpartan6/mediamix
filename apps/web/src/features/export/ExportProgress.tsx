@@ -1,6 +1,6 @@
 import { useExportStatus } from '../../lib/store/hooks'
 
-export function ExportProgress() {
+export const ExportProgress = () => {
   const { isExporting, exportProgress } = useExportStatus()
 
   if (!isExporting) return null

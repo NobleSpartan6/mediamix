@@ -4,7 +4,7 @@ import { useBeatDetection } from '../../lib/store/hooks'
  * BeatDetectionProgress – shows current stage & percentage of the beat-detection pipeline.
  * Uses native <progress> element to avoid inline style objects (hard rule compliance).
  */
-export function BeatDetectionProgress() {
+export const BeatDetectionProgress = () => {
   const { isBeatDetectionRunning, beatDetectionProgress, beatDetectionStage } = useBeatDetection()
 
   if (!isBeatDetectionRunning) return null

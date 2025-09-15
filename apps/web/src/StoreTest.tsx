@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useFileState, useBeatDetection, useTimeline, useExportStatus } from './lib/store/hooks'
 
-export function StoreTest() {
+export const StoreTest = () => {
   const { fileInfo } = useFileState()
   const { beatMarkers } = useBeatDetection()
   const { clips } = useTimeline()

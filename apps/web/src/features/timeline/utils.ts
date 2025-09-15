@@ -16,23 +16,14 @@ export function insertAssetToTimeline(assetId: string, startSec?: number) {
   const start = startSec ?? 0
   const end = start + duration
 
-  let baseLane = tracks.length
+  const baseLane = tracks.length
   const groupId = nanoid()
 
   if (audioOnly) {
-    addClip(
-      { start, end, lane: baseLane, assetId },
-      { trackType: 'audio', groupId },
-    )
+    addClip({ start, end, lane: baseLane, assetId }, { trackType: 'audio', groupId })
   } else {
-    addClip(
-      { start, end, lane: baseLane, assetId },
-      { trackType: 'video', groupId },
-    )
-    addClip(
-      { start, end, lane: baseLane + 1, assetId },
-      { trackType: 'audio', groupId },
-    )
+    addClip({ start, end, lane: baseLane, assetId }, { trackType: 'video', groupId })
+    addClip({ start, end, lane: baseLane + 1, assetId }, { trackType: 'audio', groupId })
   }
 
   useTimelineStore.setState((s) => ({
@@ -46,7 +37,5 @@ export function insertAssetToTimeline(assetId: string, startSec?: number) {
  */
 export function getNearestBeat(time: number, beats: number[]): number {
   if (beats.length === 0) return time
-  return beats.reduce((prev, b) =>
-    Math.abs(b - time) < Math.abs(prev - time) ? b : prev,
-    beats[0])
+  return beats.reduce((prev, b) => (Math.abs(b - time) < Math.abs(prev - time) ? b : prev), beats[0])
 }
