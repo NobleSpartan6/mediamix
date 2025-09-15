@@ -1,6 +1,5 @@
-import { ReactNode, useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import SettingsModal from './SettingsModal'
-import { useUILayoutStore } from '../../state/uiLayoutStore'
 import TopNav from './TopNav'
 import MainToolbar from './MainToolbar'
 import { Button } from '../../components/ui/Button'

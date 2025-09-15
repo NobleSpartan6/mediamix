@@ -60,20 +60,18 @@ export const PreviewPanel: React.FC = React.memo(() => {
     const video = videoRef.current
     if (!video || !activeClip) return
     const asset = assets[activeClip.assetId ?? '']
-    if (!asset?.fileHandle) return
+    if (!asset?.file) return
     let url: string | null = null
-    asset.fileHandle.getFile().then((file) => {
-      url = URL.createObjectURL(file)
-      video.src = url
-      video.onloadedmetadata = () => {
-        video.currentTime = currentTime - activeClip.start
-        if (playing) {
-          video.playbackRate = Math.abs(playRate)
-          void video.play()
-        }
-        video.muted = muted
+    url = URL.createObjectURL(asset.file)
+    video.src = url
+    video.onloadedmetadata = () => {
+      video.currentTime = currentTime - activeClip.start
+      if (playing) {
+        video.playbackRate = Math.abs(playRate)
+        void video.play()
       }
-    })
+      video.muted = muted
+    }
     return () => {
       if (url) URL.revokeObjectURL(url)
     }
