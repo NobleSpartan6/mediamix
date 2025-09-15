@@ -36,6 +36,5 @@ export const useTransportStore = create<TransportState>((set) => ({
     }),
 
   /** Move the playhead by the given number of frames */
-  nudgeFrames: (delta) =>
-    set((state) => ({ playheadFrame: Math.max(0, state.playheadFrame + delta) })),
-})) 
+  nudgeFrames: (delta) => set((state) => ({ playheadFrame: Math.max(0, state.playheadFrame + delta) })),
+}))

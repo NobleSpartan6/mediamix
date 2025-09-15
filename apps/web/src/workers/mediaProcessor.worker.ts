@@ -3,13 +3,13 @@
 import { generateWaveform, captureThumbnail } from '../lib/file'
 
 interface WorkerData {
-  file: File;
-  assetId: string;
-  type: 'generateWaveform' | 'generateThumbnail';
+  file: File
+  assetId: string
+  type: 'generateWaveform' | 'generateThumbnail'
 }
 
 self.onmessage = async (event: MessageEvent<WorkerData>) => {
-  const { file, assetId, type } = event.data;
+  const { file, assetId, type } = event.data
 
   try {
     if (type === 'generateWaveform') {
@@ -20,9 +20,9 @@ self.onmessage = async (event: MessageEvent<WorkerData>) => {
       self.postMessage({ assetId, thumbnail, type: 'thumbnailResult' })
     }
   } catch (error) {
-    console.error(`[Worker] Error processing ${assetId} (${type}):`, error);
-    self.postMessage({ assetId, error: (error as Error).message, type: 'processingError' });
+    console.error(`[Worker] Error processing ${assetId} (${type}):`, error)
+    self.postMessage({ assetId, error: (error as Error).message, type: 'processingError' })
   }
-};
+}
 
-export {}; // Make it a module
+export {} // Make it a module

@@ -70,9 +70,7 @@ describe('useTimelineKeyboard', () => {
     })
 
     fireEvent.keyDown(window, { key: 'i' })
-    expect(useTimelineStore.getState().inPoint).toBeCloseTo(
-      useTransportStore.getState().playheadFrame / 30,
-    )
+    expect(useTimelineStore.getState().inPoint).toBeCloseTo(useTransportStore.getState().playheadFrame / 30)
 
     useTransportStore.setState({ playheadFrame: 45 })
     await waitFor(() => {

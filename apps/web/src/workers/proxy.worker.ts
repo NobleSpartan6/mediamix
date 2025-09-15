@@ -8,9 +8,18 @@ interface TranscodeMsg {
     file: File
   }
 }
-interface ProgressMsg { type: 'PROGRESS'; progress: number }
-interface DoneMsg { type: 'DONE'; data: ArrayBuffer }
-interface ErrorMsg { type: 'ERROR'; error: string }
+interface ProgressMsg {
+  type: 'PROGRESS'
+  progress: number
+}
+interface DoneMsg {
+  type: 'DONE'
+  data: ArrayBuffer
+}
+interface ErrorMsg {
+  type: 'ERROR'
+  error: string
+}
 
 type WorkerMsg = TranscodeMsg
 
@@ -78,13 +87,20 @@ self.onmessage = async (e: MessageEvent<WorkerMsg>) => {
     await writeFile(ff, input, new Uint8Array(await file.arrayBuffer()))
 
     const args = [
-      '-i', input,
-      '-vf', 'scale=-2:720',
-      '-c:v', 'libx264',
-      '-preset', 'fast',
-      '-crf', '28',
-      '-c:a', 'aac',
-      '-b:a', '128k',
+      '-i',
+      input,
+      '-vf',
+      'scale=-2:720',
+      '-c:v',
+      'libx264',
+      '-preset',
+      'fast',
+      '-crf',
+      '28',
+      '-c:a',
+      'aac',
+      '-b:a',
+      '128k',
       output,
     ]
 

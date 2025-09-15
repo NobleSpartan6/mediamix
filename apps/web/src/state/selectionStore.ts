@@ -1,9 +1,6 @@
 import { create } from 'zustand'
 
-export type Selection =
-  | { type: 'clip'; id: string }
-  | { type: 'asset'; id: string }
-  | null
+export type Selection = { type: 'clip'; id: string } | { type: 'asset'; id: string } | null
 
 interface SelectionState {
   currentSelection: Selection

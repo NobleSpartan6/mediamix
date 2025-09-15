@@ -55,4 +55,3 @@ describe('extractMetadataFromHandles', () => {
     expect(mockWorkerInstance.terminate).toHaveBeenCalledTimes(1)
   })
 })
-

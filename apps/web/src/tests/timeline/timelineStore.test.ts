@@ -57,14 +57,12 @@ describe('timelineStore', () => {
     let videoId = ''
     let audioId = ''
     act(() => {
-      videoId = useTimelineStore.getState().addClip(
-        { id: undefined as never, start: 0, end: 1, lane: 0 },
-        { trackType: 'video', groupId: 'g1' },
-      )
-      audioId = useTimelineStore.getState().addClip(
-        { id: undefined as never, start: 0, end: 1, lane: 1 },
-        { trackType: 'audio', groupId: 'g1' },
-      )
+      videoId = useTimelineStore
+        .getState()
+        .addClip({ id: undefined as never, start: 0, end: 1, lane: 0 }, { trackType: 'video', groupId: 'g1' })
+      audioId = useTimelineStore
+        .getState()
+        .addClip({ id: undefined as never, start: 0, end: 1, lane: 1 }, { trackType: 'audio', groupId: 'g1' })
     })
 
     act(() => {
@@ -83,14 +81,12 @@ describe('timelineStore', () => {
     let videoId = ''
     let audioId = ''
     act(() => {
-      videoId = useTimelineStore.getState().addClip(
-        { id: undefined as never, start: 0, end: 1, lane: 0 },
-        { trackType: 'video', groupId: 'g2' },
-      )
-      audioId = useTimelineStore.getState().addClip(
-        { id: undefined as never, start: 0, end: 1, lane: 1 },
-        { trackType: 'audio', groupId: 'g2' },
-      )
+      videoId = useTimelineStore
+        .getState()
+        .addClip({ id: undefined as never, start: 0, end: 1, lane: 0 }, { trackType: 'video', groupId: 'g2' })
+      audioId = useTimelineStore
+        .getState()
+        .addClip({ id: undefined as never, start: 0, end: 1, lane: 1 }, { trackType: 'audio', groupId: 'g2' })
     })
 
     act(() => {

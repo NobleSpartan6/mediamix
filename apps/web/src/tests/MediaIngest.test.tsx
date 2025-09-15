@@ -74,9 +74,7 @@ describe('MediaIngest', () => {
     type WithPicker = Window & {
       showOpenFilePicker: () => Promise<{ getFile: () => Promise<File> }[]>
     }
-    ;(window as unknown as WithPicker).showOpenFilePicker = vi
-      .fn()
-      .mockResolvedValue([handle])
+    ;(window as unknown as WithPicker).showOpenFilePicker = vi.fn().mockResolvedValue([handle])
 
     render(<MediaIngest />)
     fireEvent.click(screen.getByRole('button', { name: /import media/i }))
@@ -101,17 +99,11 @@ describe('MediaIngest', () => {
     const videoClip = clips.find((c) => c.lane % 2 === 0)!
     const audioClip = clips.find((c) => c.lane % 2 === 1)!
 
-    const { container: vCont } = render(
-      <Clip clip={videoClip} pixelsPerSecond={100} type="video" />,
-    )
+    const { container: vCont } = render(<Clip clip={videoClip} pixelsPerSecond={100} type="video" />)
     const videoDiv = vCont.querySelector('div') as HTMLDivElement
-    expect(videoDiv.style.backgroundImage).toContain(
-      'data:image/png;base64,mock',
-    )
+    expect(videoDiv.style.backgroundImage).toContain('data:image/png;base64,mock')
 
-    const { container: aCont } = render(
-      <Clip clip={audioClip} pixelsPerSecond={100} type="audio" />,
-    )
+    const { container: aCont } = render(<Clip clip={audioClip} pixelsPerSecond={100} type="audio" />)
     expect(aCont.querySelector('canvas')).not.toBeNull()
   })
 
@@ -129,9 +121,7 @@ describe('MediaIngest', () => {
     } as unknown as DataTransfer
 
     render(<MediaIngest />)
-    const dropZone = screen
-      .getByRole('button', { name: /import media/i })
-      .parentElement as HTMLElement
+    const dropZone = screen.getByRole('button', { name: /import media/i }).parentElement as HTMLElement
 
     fireEvent.drop(dropZone, { dataTransfer })
 

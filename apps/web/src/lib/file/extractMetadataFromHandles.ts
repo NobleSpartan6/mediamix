@@ -15,4 +15,3 @@ export function extractMetadataFromHandles(handles: FileSystemFileHandle[]): Pro
     worker.postMessage(handles)
   })
 }
-

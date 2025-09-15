@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 
 interface PanelProps {
   title: string
@@ -7,7 +7,7 @@ interface PanelProps {
   className?: string
 }
 
-export default function Panel({ title, onCollapse, children, className }: PanelProps) {
+const Panel = ({ title, onCollapse, children, className }: PanelProps) => {
   return (
     <div className={`flex flex-col h-full rounded ${className ?? ''}`.trim()}>
       <div className="flex items-center justify-between px-2 py-2 bg-panel-bg-secondary border-b border-panel-bg">
@@ -27,3 +27,4 @@ export default function Panel({ title, onCollapse, children, className }: PanelP
   )
 }
 
+export default Panel

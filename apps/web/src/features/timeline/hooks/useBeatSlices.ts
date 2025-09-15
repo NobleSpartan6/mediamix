@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { useTimelineStore } from '../../../state/timelineStore'
+import { useTimelineStore, type Clip } from '../../../state/timelineStore'
 
 /**
  * Convert the globally stored `beats` array into an array of *clip slice* objects.
@@ -12,17 +12,14 @@ import { useTimelineStore } from '../../../state/timelineStore'
  * NOTE:  For the MVP we place all generated clips on **lane 0** (video lane).
  *        Subsequent subtasks may distribute slices across multiple lanes.
  */
-export const useBeatSlices = () => {
+export const useBeatSlices = (): Clip[] => {
   const beats = useTimelineStore((state) => state.beats)
   const tracks = useTimelineStore((state) => state.tracks)
 
   return useMemo(() => {
     if (!beats || beats.length < 2) return []
 
-    const videoLaneCount = Math.max(
-      1,
-      tracks.filter((t) => t.type === 'video').length,
-    )
+    const videoLaneCount = Math.max(1, tracks.filter((t) => t.type === 'video').length)
 
     const slices = []
     for (let i = 0; i < beats.length - 1; i += 1) {
@@ -35,13 +32,19 @@ export const useBeatSlices = () => {
       const lane = (i % videoLaneCount) * 2
 
       slices.push({
-        id:
-          typeof crypto !== 'undefined' && crypto.randomUUID
-            ? crypto.randomUUID()
-            : `${start}-${end}`,
+        id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${start}-${end}`,
         start,
         end,
         lane,
+        assetId: undefined,
+        groupId: undefined,
+        x: 0,
+        y: 0,
+        scale: 1,
+        rotation: 0,
+        volume: 1,
+        muted: false,
+        effects: [],
       })
     }
 

@@ -100,4 +100,4 @@ export async function checkCodecSupport({
   }
 
   return { videoSupported, audioSupported }
-} 
+}

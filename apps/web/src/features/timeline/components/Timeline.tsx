@@ -176,7 +176,6 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
       tracks.map((track, laneIndex) => (
         <TrackRow
           key={track.id}
-          laneIndex={laneIndex}
           clips={laneMap.get(laneIndex) ?? []}
           pixelsPerSecond={zoom}
           track={track}
@@ -227,7 +226,7 @@ export const Timeline: React.FC<TimelineProps> = React.memo(({ pixelsPerSecond =
           {/* Left gutter: spacer for ruler then track labels */}
           <div className="flex flex-col shrink-0">
             <div className="h-6" />
-            {tracks.map((track, laneIndex) => {
+            {tracks.map((track) => {
               const heightClass = track.type === 'video' ? 'h-12' : 'h-8'
               return (
                 <div

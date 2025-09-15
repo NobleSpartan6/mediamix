@@ -40,10 +40,7 @@ export async function getCachedAnalysis<T>(key: string): Promise<T | null> {
   })
 }
 
-export async function setCachedAnalysis<T>(
-  key: string,
-  value: T,
-): Promise<void> {
+export async function setCachedAnalysis<T>(key: string, value: T): Promise<void> {
   const db = await getDb()
   if (!db) return
   return new Promise((resolve, reject) => {

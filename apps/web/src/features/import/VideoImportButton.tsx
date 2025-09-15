@@ -8,7 +8,7 @@ import { useFileState, useResetStore } from '../../lib/store/hooks'
 import { useBeatDetection } from '../../lib/store/hooks'
 import { useMediaStore } from '../../state/mediaStore'
 
-export function VideoImportButton() {
+export const VideoImportButton = () => {
   const { isFileLoading, fileError, setFileInfo } = useFileState()
   const resetStore = useResetStore()
   const setIsFileLoading = useMotifStore((s) => s.setIsFileLoading)
@@ -35,7 +35,7 @@ export function VideoImportButton() {
       const metadata = await extractVideoMetadata(file)
       if (!metadata) {
         throw new Error(
-          'Unable to read video metadata. The file might be corrupted or its format is not supported by this browser.'
+          'Unable to read video metadata. The file might be corrupted or its format is not supported by this browser.',
         )
       }
 
@@ -62,7 +62,7 @@ export function VideoImportButton() {
         })
         setFileInfo({ videoSupported, audioSupported })
         if (videoSupported === false || audioSupported === false) {
-          setFileError('This file\'s codecs are not supported.')
+          setFileError("This file's codecs are not supported.")
         } else {
           setFileError(null)
         }
@@ -73,23 +73,27 @@ export function VideoImportButton() {
       resetStore()
       console.error('Video import failed:', err)
       const userMessage =
-        typeof err?.message === 'string'
-          ? err.message
-          : 'An unexpected error occurred while importing the video.'
+        typeof err?.message === 'string' ? err.message : 'An unexpected error occurred while importing the video.'
       setFileError(userMessage)
     } finally {
       setIsFileLoading(false)
     }
-  }, [setFileError, setFileInfo, setIsFileLoading, resetStore, addMediaAsset, setBeatDetectionProgress, setBeatDetectionStage])
+  }, [
+    setFileError,
+    setFileInfo,
+    setIsFileLoading,
+    resetStore,
+    addMediaAsset,
+    setBeatDetectionProgress,
+    setBeatDetectionStage,
+  ])
 
   return (
     <div className="flex flex-col items-start space-y-2">
       <Button onClick={handleImport} disabled={isFileLoading}>
         {isFileLoading ? 'Loading…' : 'Import Video'}
       </Button>
-      {fileError && (
-        <p className="text-red-500 text-xs font-ui-normal">{fileError}</p>
-      )}
+      {fileError && <p className="text-red-500 text-xs font-ui-normal">{fileError}</p>}
     </div>
   )
 }

@@ -115,4 +115,4 @@ export type MediaAsset = {
   fileName: string
   fileHandle: FileSystemFileHandle | null
   metadata: VideoMetadata
-} 
+}

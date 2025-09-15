@@ -48,7 +48,7 @@ export async function extractVideoMetadata(file: File): Promise<VideoMetadata | 
         audioCodec: null, // Browser APIs do not expose this without parsing – left null for now.
         frameRate: null,
         sampleRate: null,
-        channelCount: null
+        channelCount: null,
       }
       cleanUp()
       resolve(metadata)
@@ -64,4 +64,4 @@ export async function extractVideoMetadata(file: File): Promise<VideoMetadata | 
     // We add to body to ensure stable behaviour across browsers.
     document.body.appendChild(video)
   })
-} 
+}

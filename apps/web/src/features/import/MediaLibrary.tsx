@@ -30,37 +30,19 @@ export default function MediaLibrary() {
             key={asset.id}
             className="flex items-center gap-2 p-2 bg-panel-bg rounded"
             draggable
-            onDragStart={(e) =>
-              e.dataTransfer.setData('text/x-mediamix-asset', asset.id)
-            }
+            onDragStart={(e) => e.dataTransfer.setData('text/x-mediamix-asset', asset.id)}
           >
             {asset.thumbnail && (
-              <img
-                src={asset.thumbnail}
-                alt="thumbnail"
-                className="w-10 h-10 object-cover rounded"
-              />
+              <img src={asset.thumbnail} alt="thumbnail" className="w-10 h-10 object-cover rounded" />
             )}
             <div className="flex-1 overflow-hidden">
-              <div className="text-xs text-gray-200 truncate">
-                {asset.fileName}
-              </div>
-              <div className="text-xs text-gray-400">
-                {asset.duration.toFixed(2)}s
-              </div>
+              <div className="text-xs text-gray-200 truncate">{asset.fileName}</div>
+              <div className="text-xs text-gray-400">{asset.duration.toFixed(2)}s</div>
             </div>
-            <Button
-              variant="secondary"
-              className="px-2 py-1 text-xs"
-              onClick={() => handleAdd(asset.id)}
-            >
+            <Button variant="secondary" className="px-2 py-1 text-xs" onClick={() => handleAdd(asset.id)}>
               Add
             </Button>
-            <Button
-              variant="secondary"
-              className="px-2 py-1 text-xs"
-              onClick={() => handleRemove(asset.id)}
-            >
+            <Button variant="secondary" className="px-2 py-1 text-xs" onClick={() => handleRemove(asset.id)}>
               Remove
             </Button>
           </li>

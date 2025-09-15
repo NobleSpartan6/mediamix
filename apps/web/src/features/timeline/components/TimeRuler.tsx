@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { useTimelineStore } from '../../../state/timelineStore'
 import type { TimelineState } from '../../../state/timelineStore'
-import { shallow } from 'zustand/shallow'
 
 /* -------------------------------------------------------------------------- */
 /* Types                                                                      */
@@ -120,7 +119,7 @@ export function calculateTickSettings(pixelsPerSecond: number): TickSettings {
  */
 export const TimeRuler: React.FC<TimeRulerProps> = ({ scrollContainerRef, pixelsPerSecond, duration }) => {
   /* --------------- state & refs --------------------------------------- */
-  const beats = useTimelineStore((s: TimelineState) => s.beats, shallow)
+  const beats = useTimelineStore((s: TimelineState) => s.beats)
   const inPoint = useTimelineStore((s: TimelineState) => s.inPoint)
   const outPoint = useTimelineStore((s: TimelineState) => s.outPoint)
   const scrollLeft = useScrollLeft(scrollContainerRef)

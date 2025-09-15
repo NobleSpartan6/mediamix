@@ -6,9 +6,10 @@ import { extractVideoMetadata } from '../../lib/file/extractVideoMetadata'
 import { checkCodecSupport } from '../../lib/file/checkCodecSupport'
 
 // Helper: create a fresh File object for each test
-const createTestFile = () => new File(['dummy'], 'sample.mp4', {
-  type: 'video/mp4'
-})
+const createTestFile = () =>
+  new File(['dummy'], 'sample.mp4', {
+    type: 'video/mp4',
+  })
 
 // Reset any globals patched during tests
 afterEach(() => {
@@ -94,4 +95,4 @@ describe('checkCodecSupport', () => {
     expect(result.videoSupported).toBeNull()
     expect(result.audioSupported).toBeNull()
   })
-}) 
+})

@@ -42,7 +42,6 @@ export const TracksContainer: React.FC<TracksContainerProps> = React.memo(
         tracks.map((track, laneIndex) => (
           <TrackRow
             key={track.id}
-            laneIndex={laneIndex}
             clips={laneMap.get(laneIndex) ?? []}
             pixelsPerSecond={pixelsPerSecond}
             track={track}

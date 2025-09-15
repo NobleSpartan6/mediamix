@@ -8,44 +8,44 @@ import { useTimelineStore } from '../../../state/timelineStore'
  * Call inside the Timeline component – it automatically cleans up on unmount.
  */
 export function useTimelineKeyboard() {
-  const stepShuttle   = useTransportStore((s) => s.stepShuttle)
-  const setPlayRate   = useTransportStore((s) => s.setPlayRate)
-  const nudgeFrames   = useTransportStore((s) => s.nudgeFrames)
+  const stepShuttle = useTransportStore((s) => s.stepShuttle)
+  const setPlayRate = useTransportStore((s) => s.setPlayRate)
+  const nudgeFrames = useTransportStore((s) => s.nudgeFrames)
   const playheadFrame = useTransportStore((s) => s.playheadFrame)
 
-  const setInPoint    = useTimelineStore((s) => s.setInPoint)
-  const setOutPoint   = useTimelineStore((s) => s.setOutPoint)
+  const setInPoint = useTimelineStore((s) => s.setInPoint)
+  const setOutPoint = useTimelineStore((s) => s.setOutPoint)
   const setCurrentTime = useTimelineStore((s) => s.setCurrentTime)
-  const splitClipAt   = useTimelineStore((s) => s.splitClipAt)
-  const removeClip    = useTimelineStore((s) => s.removeClip)
-  const selectedIds   = useTimelineStore((s) => s.selectedClipIds)
-  const setSelected   = useTimelineStore((s) => s.setSelectedClips)
+  const splitClipAt = useTimelineStore((s) => s.splitClipAt)
+  const removeClip = useTimelineStore((s) => s.removeClip)
+  const selectedIds = useTimelineStore((s) => s.selectedClipIds)
+  const setSelected = useTimelineStore((s) => s.setSelectedClips)
 
   /** Refs prevent stale closures during rapid key-repeat */
-  const stepRef     = useRef(stepShuttle)
-  const setRateRef  = useRef(setPlayRate)
-  const nudgeRef    = useRef(nudgeFrames)
+  const stepRef = useRef(stepShuttle)
+  const setRateRef = useRef(setPlayRate)
+  const nudgeRef = useRef(nudgeFrames)
   const playheadRef = useRef(playheadFrame)
-  const inRef       = useRef(setInPoint)
-  const outRef      = useRef(setOutPoint)
-  const splitRef    = useRef(splitClipAt)
-  const removeRef   = useRef(removeClip)
+  const inRef = useRef(setInPoint)
+  const outRef = useRef(setOutPoint)
+  const splitRef = useRef(splitClipAt)
+  const removeRef = useRef(removeClip)
   const selectedRef = useRef(selectedIds)
-  const setSelRef   = useRef(setSelected)
+  const setSelRef = useRef(setSelected)
   const setCurrentRef = useRef(setCurrentTime)
 
   /* Keep refs fresh each render */
   useEffect(() => {
-    stepRef.current     = stepShuttle
-    setRateRef.current  = setPlayRate
-    nudgeRef.current    = nudgeFrames
+    stepRef.current = stepShuttle
+    setRateRef.current = setPlayRate
+    nudgeRef.current = nudgeFrames
     playheadRef.current = playheadFrame
-    inRef.current       = setInPoint
-    outRef.current      = setOutPoint
-    splitRef.current    = splitClipAt
-    removeRef.current   = removeClip
+    inRef.current = setInPoint
+    outRef.current = setOutPoint
+    splitRef.current = splitClipAt
+    removeRef.current = removeClip
     selectedRef.current = selectedIds
-    setSelRef.current   = setSelected
+    setSelRef.current = setSelected
     setCurrentRef.current = setCurrentTime
   })
 
@@ -134,4 +134,3 @@ export function useTimelineKeyboard() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 }
-

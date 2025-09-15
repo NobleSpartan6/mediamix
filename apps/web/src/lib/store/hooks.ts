@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import useMotifStore from './index'
 // import { shallow } from 'zustand/shallow' // (unused)
-import type { MotifState, ClipSegment } from './types.js'  
+import type { MotifState, ClipSegment } from './types.js'
 
 // Hook for accessing file-related state
 export const useFileState = () => {
@@ -52,7 +52,18 @@ export const useBeatDetection = () => {
       setBeatDetectionProgress,
       setBeatDetectionStage,
     }),
-    [beatMarkers, isBeatDetectionRunning, beatDetectionError, beatDetectionProgress, beatDetectionStage, setBeatMarkers, setIsBeatDetectionRunning, setBeatDetectionError, setBeatDetectionProgress, setBeatDetectionStage],
+    [
+      beatMarkers,
+      isBeatDetectionRunning,
+      beatDetectionError,
+      beatDetectionProgress,
+      beatDetectionStage,
+      setBeatMarkers,
+      setIsBeatDetectionRunning,
+      setBeatDetectionError,
+      setBeatDetectionProgress,
+      setBeatDetectionStage,
+    ],
   )
 }
 
@@ -64,7 +75,7 @@ export const useTimeline = () => {
   const playheadPosition = useMotifStore((state: MotifState) => state.timeline.playheadPosition)
   const zoom = useMotifStore((state: MotifState) => state.timeline.zoom)
   const duration = useMotifStore((state: MotifState) => state.timeline.duration)
-  
+
   // Access actions
   const addClip = useMotifStore((state: MotifState) => state.addClip)
   const updateClip = useMotifStore((state: MotifState) => state.updateClip)
@@ -72,7 +83,7 @@ export const useTimeline = () => {
   const setSelectedClips = useMotifStore((state: MotifState) => state.setSelectedClips)
   const setPlayheadPosition = useMotifStore((state: MotifState) => state.setPlayheadPosition)
   const setZoom = useMotifStore((state: MotifState) => state.setZoom)
-  
+
   return {
     clips,
     selectedClipIds,
@@ -84,7 +95,7 @@ export const useTimeline = () => {
     removeClip,
     setSelectedClips,
     setPlayheadPosition,
-    setZoom
+    setZoom,
   }
 }
 
@@ -109,15 +120,15 @@ export const useExportStatus = () => {
 // Custom hook for selecting specific clips
 export const useSelectedClips = (): ClipSegment[] => {
   const { clips, selectedClipIds } = useTimeline()
-  
+
   const selectedClips = useCallback(() => {
     return clips.filter((clip: ClipSegment) => selectedClipIds.includes(clip.id))
   }, [clips, selectedClipIds])
-  
+
   return selectedClips()
 }
 
 // Hook for accessing the reset function
 export const useResetStore = () => {
   return useMotifStore((state: MotifState) => state.resetState)
-} 
+}

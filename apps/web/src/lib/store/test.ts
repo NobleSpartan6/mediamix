@@ -3,7 +3,9 @@ import useMotifStore from './index.js'
 
 // Simple function that uses the imported types and store
 const testStoreImport = (): void => {
-  const resetState = useMotifStore.getState().resetState
+  const { resetState } = useMotifStore.getState()
+  // Use resetState to avoid unused variable error
+  resetState()
 }
 
-export default testStoreImport 
+export default testStoreImport

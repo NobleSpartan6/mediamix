@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest'
 import * as Y from 'yjs'
 import { initYjsStore, useYjsStore } from '../../state/yjsStore'
 
-
 describe('yjs store sync', () => {
   it('applies document updates', () => {
     initYjsStore()

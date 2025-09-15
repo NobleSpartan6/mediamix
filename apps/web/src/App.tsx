@@ -15,7 +15,7 @@ import InspectorPanel from './features/inspector/InspectorPanel'
 import { useUILayoutStore } from './state/uiLayoutStore'
 import './index.css'
 
-export default function App() {
+const App = () => {
   const {
     showLibrary,
     showInspector,
@@ -26,7 +26,6 @@ export default function App() {
     setInspectorSize,
     setPreviewSize,
     setShowInspector,
-    setShowLibrary,
   } = useUILayoutStore()
 
   // Responsive collapse of inspector below 1200px
@@ -104,3 +103,5 @@ export default function App() {
     </AppShell>
   )
 }
+
+export default App

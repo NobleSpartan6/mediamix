@@ -53,17 +53,9 @@ export const ZoomSlider: React.FC<ZoomSliderProps> = ({ value, min = 20, max = 5
   return (
     <div className="flex items-center space-x-2 w-40">
       <span className="text-xs text-gray-400 w-8 text-right select-none">{Math.round(value)}</span>
-      {(
-        <Slider
-          value={sliderValue}
-          onValueCommit={handleValueCommit}
-          min={0}
-          max={100}
-          step={0.1}
-        />
-      )}
+      {<Slider value={sliderValue} onValueCommit={handleValueCommit} min={0} max={100} step={0.1} />}
     </div>
   )
 }
 
-ZoomSlider.displayName = 'ZoomSlider' 
+ZoomSlider.displayName = 'ZoomSlider'

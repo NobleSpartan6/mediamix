@@ -5,17 +5,12 @@ import React from 'react'
 import { useZoomScroll } from '../../features/timeline/hooks/useZoomScroll'
 
 // Simple component using the hook with a scrollable div
-function TestComponent() {
+const TestComponent = () => {
   const [zoom, setZoom] = React.useState(100)
   const ref = React.useRef<HTMLDivElement>(null)
   useZoomScroll(ref, zoom, setZoom, { minZoom: 50, maxZoom: 200, zoomStep: 0.01 })
   return (
-    <div
-      ref={ref}
-      data-testid="scroll"
-      data-zoom={zoom}
-      style={{ width: '200px', overflowX: 'scroll' }}
-    >
+    <div ref={ref} data-testid="scroll" data-zoom={zoom} style={{ width: '200px', overflowX: 'scroll' }}>
       <div style={{ width: '1000px', height: '20px' }} />
     </div>
   )
