@@ -8,8 +8,6 @@ import { Clip } from './Clip'
 
 /** Props for {@link TrackRow}. */
 interface TrackRowProps {
-  /** Zero-based lane index this row represents */
-  laneIndex: number
   /** Clips belonging to this track */
   clips: ClipType[]
   /** Current zoom level in pixels per second */
@@ -29,7 +27,7 @@ interface TrackRowProps {
  * @param type video or audio row styling
  */
 export const TrackRow: React.FC<TrackRowProps> = React.memo(
-  ({ laneIndex, clips, pixelsPerSecond, track, timelineRef }) => {
+  ({ clips, pixelsPerSecond, track, timelineRef }) => {
     const type = track.type
     const height = type === 'video' ? 48 : 32
 

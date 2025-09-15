@@ -177,16 +177,16 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
   addClip: (clipInput, opts) => {
     const id = generateId()
     const newClip: Clip = {
-      x: 0,
-      y: 0,
-      scale: 1,
-      rotation: 0,
-      volume: 1,
-      muted: false,
-      effects: [],
       ...clipInput,
       id,
       groupId: opts?.groupId,
+      x: clipInput.x ?? 0,
+      y: clipInput.y ?? 0,
+      scale: clipInput.scale ?? 1,
+      rotation: clipInput.rotation ?? 0,
+      volume: clipInput.volume ?? 1,
+      muted: clipInput.muted ?? false,
+      effects: clipInput.effects ?? [],
     }
     set((state) => {
       const clipsById = { ...state.clipsById, [id]: newClip }

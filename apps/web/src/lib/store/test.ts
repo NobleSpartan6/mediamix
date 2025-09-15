@@ -5,9 +5,7 @@ import useMotifStore from './index.js'
 const testStoreImport = (): void => {
   const { resetState } = useMotifStore.getState()
   // Use resetState to avoid unused variable error
-  if (resetState) {
-    // Test passed
-  }
+  resetState()
 }
 
 export default testStoreImport
