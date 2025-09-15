@@ -1,12 +1,10 @@
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 import Moveable from 'react-moveable'
-import type { OnDrag, OnResize } from 'react-moveable'
 
 import type { Clip as ClipType } from '../../../state/timelineStore'
 import { useTimelineStore, selectLaneClips, selectClipsArray, laneHasCollision } from '../../../state/timelineStore'
 import { useMediaStore } from '../../../state/mediaStore'
-import { useLaneClips } from '../hooks/useLaneClips'
 import { Clip } from './Clip'
 
 /** Props for {@link InteractiveClip}. */
@@ -56,7 +54,6 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
   // Snap-reference lists
   // ------------------------------------------------------------------------
 
-  const laneClips = useLaneClips(clip.lane)
   const clipsById = useTimelineStore((s) => s.clipsById)
   const allClips = React.useMemo(() => selectClipsArray({ clipsById } as any), [clipsById])
   const playheadTime = useTimelineStore((s) => s.currentTime)
@@ -137,7 +134,7 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
     laneRef.current = clip.lane
   }
 
-  const onDrag: OnDrag = (e) => {
+  const onDrag = React.useCallback((e: any) => {
     const { beforeTranslate } = e
     const [translateX, translateY] = beforeTranslate
 
@@ -173,9 +170,9 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
 
     // --- apply transform --------------------------------------------------
     applyTransform(newStart * pixelsPerSecond, translateYRef.current)
-  }
+  }, [pixelsPerSecond, snapping, findSnap, applyTransform])
 
-  const onDragEnd: OnDrag = () => {
+  const onDragEnd = React.useCallback(() => {
     // final start position (snap, clamp ≥0)
     let finalStart = snapTime !== null ? snapTime : origin.current.startSec + translateXRef.current / pixelsPerSecond
     finalStart = Math.max(0, finalStart)
@@ -269,9 +266,9 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
 
     if (collision) flashInvalid()
     setSnapTime(null)
-  }
+  }, [clip.id, clip.lane, clipTrackType, laneTypes, pixelsPerSecond, snapTime, origin, translateXRef, laneRef, updateClip, applyTransform, flashInvalid, setSnapTime])
 
-  const onResize: OnResize = (e) => {
+  const onResize = React.useCallback((e: any) => {
     const { width, direction, drag } = e
     const { beforeTranslate } = drag
     const [translateX] = beforeTranslate
@@ -308,9 +305,9 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
       }
       applyTransform(origin.current.startSec * pixelsPerSecond, translateYRef.current, newWidthPx)
     }
-  }
+  }, [origin, pixelsPerSecond, snapping, findSnap, setSnapTime, applyTransform, translateYRef, asset?.duration])
 
-  const onResizeEnd: OnResize = (e) => {
+  const onResizeEnd = React.useCallback((e: any) => {
     const { width, direction, drag } = e
     const { beforeTranslate } = drag
     const [translateX] = beforeTranslate
@@ -338,7 +335,7 @@ export const InteractiveClip: React.FC<InteractiveClipProps> = React.memo(({ cli
     }
     if (invalid) flashInvalid()
     setSnapTime(null)
-  }
+  }, [pixelsPerSecond, asset?.duration, origin, snapTime, updateClip, clip.id, flashInvalid, setSnapTime])
 
   // ------------------------------------------------------------------------
   // Render

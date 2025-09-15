@@ -31,7 +31,7 @@ export const segmentVideo = async (file: File, start: number, end: number): Prom
     // Ignore cleanup errors
   }
 
-  return output instanceof Uint8Array ? output : new Uint8Array(output)
+  return output as Uint8Array
 }
 
 import { useTimelineStore } from '../state/timelineStore'
@@ -165,5 +165,5 @@ export const encodeWithSegments = async (file: File, ranges: SegmentRange[]): Pr
     // Ignore cleanup errors
   }
 
-  return output instanceof Uint8Array ? output : new Uint8Array(output)
+  return output as Uint8Array
 }
