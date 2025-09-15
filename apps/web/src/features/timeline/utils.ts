@@ -19,11 +19,21 @@ export function insertAssetToTimeline(assetId: string, startSec?: number) {
   const baseLane = tracks.length
   const groupId = nanoid()
 
+  const clipDefaults = {
+    x: 0,
+    y: 0,
+    scale: 1,
+    rotation: 0,
+    volume: 1,
+    muted: false,
+    effects: [],
+  }
+
   if (audioOnly) {
-    addClip({ start, end, lane: baseLane, assetId }, { trackType: 'audio', groupId })
+    addClip({ start, end, lane: baseLane, assetId, ...clipDefaults }, { trackType: 'audio', groupId })
   } else {
-    addClip({ start, end, lane: baseLane, assetId }, { trackType: 'video', groupId })
-    addClip({ start, end, lane: baseLane + 1, assetId }, { trackType: 'audio', groupId })
+    addClip({ start, end, lane: baseLane, assetId, ...clipDefaults }, { trackType: 'video', groupId })
+    addClip({ start, end, lane: baseLane + 1, assetId, ...clipDefaults }, { trackType: 'audio', groupId })
   }
 
   useTimelineStore.setState((s) => ({

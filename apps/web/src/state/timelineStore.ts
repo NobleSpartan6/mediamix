@@ -1,7 +1,5 @@
 import { create } from 'zustand'
 
-import { nanoid } from '../utils/nanoid'
-
 import { generateId } from '../utils/id'
 
 export interface Clip {
@@ -95,9 +93,9 @@ const ensureTracks = (
   opts?: { type?: 'video' | 'audio'; groupId?: string },
 ): Track[] => {
   const next = tracks.map((t) => ({
-    locked: false,
-    muted: false,
     ...t,
+    locked: t.locked ?? false,
+    muted: t.muted ?? false,
   }))
   while (next.length <= lane) {
     const index = next.length

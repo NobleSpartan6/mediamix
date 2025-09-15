@@ -1,7 +1,5 @@
 import { create } from 'zustand'
 
-import { nanoid } from '../utils/nanoid'
-
 import { generateId } from '../utils/id'
 import { processMediaAsset } from '../lib/media-utils'
 
@@ -39,7 +37,7 @@ interface MediaState {
   addFolder: (name: string, parentId?: string | null) => string
 }
 
-export const useMediaStore = create<MediaState>((set, get) => ({
+export const useMediaStore = create<MediaState>((set) => ({
   assets: {},
   folders: { root: { id: 'root', name: 'All Media', parentId: null } },
 

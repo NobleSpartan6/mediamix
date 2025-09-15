@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { MotifState, FileInfo, ClipSegment, BeatMarker, MediaAsset } from './types'
+import type { MotifState, FileInfo, ClipSegment, BeatMarker } from './types'
 
 import { generateId } from '../../utils/id'
 import { nanoid } from '../../utils/nanoid'
@@ -108,8 +108,25 @@ const useMotifStore = create<MotifState>((set) => ({
     const baseLane = maxLane + 1
     const duration = assetInput.metadata.duration ?? 0
     const groupId = nanoid()
-    timeline.addClip({ start: 0, end: duration, lane: baseLane, assetId: id }, { trackType: 'video', groupId })
-    timeline.addClip({ start: 0, end: duration, lane: baseLane + 1, assetId: id }, { trackType: 'audio', groupId })
+    
+    const clipDefaults = {
+      x: 0,
+      y: 0,
+      scale: 1,
+      rotation: 0,
+      volume: 1,
+      muted: false,
+      effects: [],
+    }
+    
+    timeline.addClip(
+      { start: 0, end: duration, lane: baseLane, assetId: id, ...clipDefaults },
+      { trackType: 'video', groupId }
+    )
+    timeline.addClip(
+      { start: 0, end: duration, lane: baseLane + 1, assetId: id, ...clipDefaults },
+      { trackType: 'audio', groupId }
+    )
   },
 
   /** Replace all media assets */
